@@ -2260,24 +2260,34 @@ const email = `${cleanUsername}@nabd-app.com`;
             showSection('home');
         }
         
-        async function logout() {
-            if (currentFirebaseUser) {
-                await saveUserCart(currentFirebaseUser.uid, cart);
-                await saveUserOrders(currentFirebaseUser.uid, orders);
-                await auth.signOut();
-            }
-            currentUser = null;
-            currentFirebaseUser = null;
-            cart = [];
-            orders = [];
-            localStorage.removeItem('currentUser');
-            localStorage.removeItem('cart');
-            localStorage.removeItem('orders');
-            updateCartCount();
-            updateAccountButton();
-            showToast('تم تسجيل الخروج', 'success');
-            showSection('home');
-        }
+      async function logout() {
+    if (currentFirebaseUser) {
+        // حفظ البيانات قبل الخروج
+        await saveUserCart(currentFirebaseUser.uid, cart);
+        await saveUserOrders(currentFirebaseUser.uid, orders);
+        
+        // ✅ إيقاف الاستماع (إطفاء الراديو قبل الخروج من الغرفة)
+        database.ref(`users/${currentFirebaseUser.uid}/cart`).off();
+        
+        // تسجيل الخروج من Firebase Auth
+        await auth.signOut();
+    }
+    
+    // تنظيف البيانات المحلية
+    currentUser = null;
+    currentFirebaseUser = null;
+    cart = [];
+    orders = [];
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('cart');
+    localStorage.removeItem('orders');
+    
+    // تحديث الواجهة
+    updateCartCount();
+    updateAccountButton();
+    showToast('تم تسجيل الخروج', 'success');
+    showSection('home');
+}
         
         function updateAccountButton() {
             const container = document.getElementById('account-btn-container');
@@ -2518,49 +2528,54 @@ const email = `${cleanUsername}@nabd-app.com`;
             window.selectedColorFull = color;
         }
         
-        function addToCartFromFullDetail(productId) {
-            if (!window.selectedSizeFull) {
-                showToast(currentLang === 'ar' ? 'الرجاء اختيار المقاس' : 'Please select size', 'error');
-                return;
-            }
-            if (!window.selectedColorFull) {
-                showToast(currentLang === 'ar' ? 'الرجاء اختيار اللون' : 'Please select color', 'error');
-                return;
-            }
-            const qtyInput = document.getElementById('detail-quantity-full');
-            const qty = qtyInput ? parseInt(qtyInput.value) : 1;
-            const product = products.find(p => p.id === productId);
-            if (!product) return;
-            const sizeStock = product.sizes ? product.sizes[window.selectedSizeFull] : null;
-            if (!sizeStock || sizeStock.qty < qty) {
-                showToast(`${currentLang === 'ar' ? 'الكمية المطلوبة غير متوفرة. المتوفر:' : 'Requested quantity not available. Available:'} ${sizeStock?.qty || 0}`, 'error');
-                return;
-            }
-            const existing = cart.find(item => item.id === productId && item.size === window.selectedSizeFull && item.color === window.selectedColorFull);
-            if (existing) {
-                if (sizeStock.qty < existing.quantity + qty) {
-                    showToast(`${currentLang === 'ar' ? 'الكمية المطلوبة غير متوفرة' : 'Requested quantity not available'}`, 'error');
-                    return;
-                }
-                existing.quantity += qty;
-            } else {
-                cart.push({ 
-                    id: product.id, 
-                    name: product.name, 
-                    price: (product.sizes && product.sizes[window.selectedSizeFull]?.price) || product.price, 
-                    size: window.selectedSizeFull, 
-                    color: window.selectedColorFull, 
-                    quantity: qty, 
-                    image: (product.images && product.images[0]) || 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=400'
-                });
-                if (currentFirebaseUser) {
-                    saveUserCart(currentFirebaseUser.uid, cart);
-                }
-            }
-            localStorage.setItem('cart', JSON.stringify(cart));
-            updateCartCount();
-            showToast(currentLang === 'ar' ? 'تمت الإضافة إلى السلة' : 'Added to cart', 'success');
+       function addToCartFromFullDetail(productId) {
+    if (!window.selectedSizeFull) {
+        showToast(currentLang === 'ar' ? 'الرجاء اختيار المقاس' : 'Please select size', 'error');
+        return;
+    }
+    if (!window.selectedColorFull) {
+        showToast(currentLang === 'ar' ? 'الرجاء اختيار اللون' : 'Please select color', 'error');
+        return;
+    }
+    const qtyInput = document.getElementById('detail-quantity-full');
+    const qty = qtyInput ? parseInt(qtyInput.value) : 1;
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+    const sizeStock = product.sizes ? product.sizes[window.selectedSizeFull] : null;
+    if (!sizeStock || sizeStock.qty < qty) {
+        showToast(`${currentLang === 'ar' ? 'الكمية المطلوبة غير متوفرة. المتوفر:' : 'Requested quantity not available. Available:'} ${sizeStock?.qty || 0}`, 'error');
+        return;
+    }
+    const existing = cart.find(item => item.id === productId && item.size === window.selectedSizeFull && item.color === window.selectedColorFull);
+    if (existing) {
+        if (sizeStock.qty < existing.quantity + qty) {
+            showToast(`${currentLang === 'ar' ? 'الكمية المطلوبة غير متوفرة' : 'Requested quantity not available'}`, 'error');
+            return;
         }
+        existing.quantity += qty;
+    } else {
+        cart.push({ 
+            id: product.id, 
+            name: product.name, 
+            price: (product.sizes && product.sizes[window.selectedSizeFull]?.price) || product.price, 
+            size: window.selectedSizeFull, 
+            color: window.selectedColorFull, 
+            quantity: qty, 
+            image: (product.images && product.images[0]) || 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=400'
+        });
+    }
+    
+    // حفظ في localStorage
+    localStorage.setItem('cart', JSON.stringify(cart));
+    
+    // حفظ في Firebase فوراً إذا كان المستخدم مسجلاً
+    if (currentFirebaseUser) {
+        saveUserCart(currentFirebaseUser.uid, cart);
+    }
+    
+    updateCartCount();
+    showToast(currentLang === 'ar' ? 'تمت الإضافة إلى السلة' : 'Added to cart', 'success');
+}
         
         function goBackToProducts() { showSection('products'); }
         
@@ -2616,61 +2631,77 @@ const email = `${cleanUsername}@nabd-app.com`;
         }
         
         function updateCartQuantity(index, delta) {
-            if (!cart[index]) return;
-            const newQty = (cart[index].quantity || 0) + delta;
-            if (newQty >= 1) {
-                const product = products.find(p => p.id === cart[index].id);
-                const sizeStock = product?.sizes ? product.sizes[cart[index].size] : null;
-                if (sizeStock && sizeStock.qty >= newQty) {
-                    cart[index].quantity = newQty;
-                } else {
-                    showToast(`${currentLang === 'ar' ? 'الكمية المطلوبة غير متوفرة' : 'Requested quantity not available'}`, 'error');
-                    return;
-                }
-            } else if (newQty === 0) {
-                cart.splice(index, 1);
-            }
-            localStorage.setItem('cart', JSON.stringify(cart));
-            if (currentFirebaseUser) {
-                saveUserCart(currentFirebaseUser.uid, cart);
-            }
-            renderCart();
-            updateCartCount();
+    if (!cart[index]) return;
+    const newQty = (cart[index].quantity || 0) + delta;
+    if (newQty >= 1) {
+        const product = products.find(p => p.id === cart[index].id);
+        const sizeStock = product?.sizes ? product.sizes[cart[index].size] : null;
+        if (sizeStock && sizeStock.qty >= newQty) {
+            cart[index].quantity = newQty;
+        } else {
+            showToast(`${currentLang === 'ar' ? 'الكمية المطلوبة غير متوفرة' : 'Requested quantity not available'}`, 'error');
+            return;
         }
-        
-        function updateCartItem(index, qty) {
-            if (!cart[index]) return;
-            qty = parseInt(qty);
-            if (qty < 1) {
-                cart.splice(index, 1);
-            } else {
-                const product = products.find(p => p.id === cart[index].id);
-                const sizeStock = product?.sizes ? product.sizes[cart[index].size] : null;
-                if (sizeStock && sizeStock.qty >= qty) {
-                    cart[index].quantity = qty;
-                } else {
-                    showToast(`${currentLang === 'ar' ? 'الكمية المطلوبة غير متوفرة' : 'Requested quantity not available'}`, 'error');
-                    return;
-                }
-            }
-            localStorage.setItem('cart', JSON.stringify(cart));
-            if (currentFirebaseUser) {
-                saveUserCart(currentFirebaseUser.uid, cart);
-            }
-            renderCart();
-            updateCartCount();
+    } else if (newQty === 0) {
+        cart.splice(index, 1);
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    if (currentFirebaseUser) {
+        saveUserCart(currentFirebaseUser.uid, cart);
+    }
+    renderCart();
+    updateCartCount();
+}
+
+function updateCartItem(index, qty) {
+    if (!cart[index]) return;
+    qty = parseInt(qty);
+    if (qty < 1) {
+        cart.splice(index, 1);
+    } else {
+        const product = products.find(p => p.id === cart[index].id);
+        const sizeStock = product?.sizes ? product.sizes[cart[index].size] : null;
+        if (sizeStock && sizeStock.qty >= qty) {
+            cart[index].quantity = qty;
+        } else {
+            showToast(`${currentLang === 'ar' ? 'الكمية المطلوبة غير متوفرة' : 'Requested quantity not available'}`, 'error');
+            return;
         }
-        
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            localStorage.setItem('cart', JSON.stringify(cart));
-            if (currentFirebaseUser) {
-                saveUserCart(currentFirebaseUser.uid, cart);
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    if (currentFirebaseUser) {
+        saveUserCart(currentFirebaseUser.uid, cart);
+    }
+    renderCart();
+    updateCartCount();
+}
+
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    localStorage.setItem('cart', JSON.stringify(cart));
+    if (currentFirebaseUser) {
+        saveUserCart(currentFirebaseUser.uid, cart);
+    }
+    renderCart();
+    updateCartCount();
+}
+        // الاستماع لتحديثات السلة في الوقت الفعلي
+function listenForCartUpdates(userId) {
+    if (!userId) return;
+    database.ref(`users/${userId}/cart`).on('value', (snapshot) => {
+        const cloudCart = snapshot.val();
+        if (cloudCart && Array.isArray(cloudCart)) {
+            // مقارنة السلة المحلية مع السلة من السحابة
+            if (JSON.stringify(cart) !== JSON.stringify(cloudCart)) {
+                cart = cloudCart;
+                localStorage.setItem('cart', JSON.stringify(cart));
+                renderCart();
+                updateCartCount();
+                showToast('تم تحديث سلة التسوق', 'success');
             }
-            renderCart();
-            updateCartCount();
         }
-        
+    });
+}
         function goToCheckout() {
             if (!currentUser) {
                 showToast(currentLang === 'ar' ? 'يجب تسجيل الدخول أولاً' : 'Please login first', 'error');
