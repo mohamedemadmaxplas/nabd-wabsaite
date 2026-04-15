@@ -2010,20 +2010,30 @@
     }
     
     function updateUserUI() {
-        const loginArea = document.getElementById('loginBtnArea');
-        const avatarArea = document.getElementById('userAvatarArea');
+    const loginArea = document.getElementById('loginBtnArea');
+    const avatarArea = document.getElementById('userAvatarArea');
+    
+    if (currentUser) {
+        if (loginArea) loginArea.classList.add('hidden');
+        if (avatarArea) avatarArea.classList.remove('hidden');
         
-        if (currentUser) {
-            loginArea.classList.add('hidden');
-            avatarArea.classList.remove('hidden');
-            document.getElementById('avatarInitial').innerText = currentUser.name?.charAt(0).toUpperCase() || 'U';
-            document.getElementById('dropdownName').innerText = currentUser.name || '';
-            document.getElementById('dropdownEmail').innerText = currentUser.email || '';
-        } else {
-            loginArea.classList.remove('hidden');
-            avatarArea.classList.add('hidden');
+        const avatarInitial = document.getElementById('avatarInitial');
+        if (avatarInitial) {
+            avatarInitial.innerText = currentUser.name?.charAt(0).toUpperCase() || 'U';
         }
+        
+        // التحقق من وجود عناصر القائمة المنسدلة قبل استخدامها
+        const dropdownName = document.getElementById('dropdownName');
+        const dropdownEmail = document.getElementById('dropdownEmail');
+        
+        if (dropdownName) dropdownName.innerText = currentUser.name || '';
+        if (dropdownEmail) dropdownEmail.innerText = currentUser.email || '';
+        
+    } else {
+        if (loginArea) loginArea.classList.remove('hidden');
+        if (avatarArea) avatarArea.classList.add('hidden');
     }
+}
     
     // ==================== دوال الإدارة ====================
     
@@ -2700,10 +2710,18 @@
         }
     });
     
-    function toggleUserDropdown() {
-        document.getElementById('userDropdown').classList.toggle('hidden');
+   function toggleUserDropdown() {
+    const dropdown = document.getElementById('userDropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('hidden');
     }
-    
+}
+    function closeUserDropdown() {
+    const dropdown = document.getElementById('userDropdown');
+    if (dropdown) {
+        dropdown.classList.add('hidden');
+    }
+}
     document.getElementById('userAvatar')?.addEventListener('click', toggleUserDropdown);
     
 </script>
