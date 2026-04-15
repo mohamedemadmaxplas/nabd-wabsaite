@@ -2401,88 +2401,275 @@
     }
     
     // ==================== دوال البطاقات ونافذة التفاصيل ====================
-    
     function showStatDetails(type) {
-        let title = '';
-        let content = '';
+    let title = '';
+    let content = '';
+    
+    if (type === 'exams') {
+        title = '📋 إجمالي الامتحانات';
+        const userExams = currentUser ? exams.filter(e => e.creatorId === currentUser.uid) : exams;
+        if (userExams.length === 0) {
+            content = '<p class="text-gray-500">لا توجد امتحانات</p>';
+        } else {
+            content = `
+                <div class="space-y-2 text-right">
+                    ${userExams.map(exam => `
+                        <div class="border-b pb-2">
+                            <p class="font-bold">${exam.title}</p>
+                            <p class="text-sm text-gray-500">📚 ${exam.className || 'بدون صف'} | ${exam.questions?.length || 0} سؤال</p>
+                            <p class="text-xs text-gray-400">تم الإنشاء: ${new Date(exam.createdAt).toLocaleDateString('ar-EG')}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+    } else if (type === 'active') {
+        title = '✅ الامتحانات النشطة';
+        const activeExams = exams.filter(e => e.isActive !== false);
+        if (activeExams.length === 0) {
+            content = '<p class="text-gray-500">لا توجد امتحانات نشطة</p>';
+        } else {
+            content = `
+                <div class="space-y-2 text-right">
+                    ${activeExams.map(exam => `
+                        <div class="border-b pb-2">
+                            <p class="font-bold">${exam.title}</p>
+                            <p class="text-sm text-gray-500">📚 ${exam.className || 'بدون صف'} | بواسطة: ${exam.creatorName || 'مدرس'}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+    } else if (type === 'students') {
+        title = '👥 الطلاب والنتائج';
         
-        if (type === 'exams') {
-            title = '📋 إجمالي الامتحانات';
-            const userExams = currentUser ? exams.filter(e => e.creatorId === currentUser.uid) : exams;
-            if (userExams.length === 0) {
-                content = '<p class="text-gray-500">لا توجد امتحانات</p>';
-            } else {
-                content = `
-                    <div class="space-y-2 text-right">
-                        ${userExams.map(exam => `
-                            <div class="border-b pb-2">
-                                <p class="font-bold">${exam.title}</p>
-                                <p class="text-sm text-gray-500">📚 ${exam.className || 'بدون صف'} | ${exam.questions?.length || 0} سؤال</p>
-                                <p class="text-xs text-gray-400">تم الإنشاء: ${new Date(exam.createdAt).toLocaleDateString('ar-EG')}</p>
-                            </div>
-                        `).join('')}
+        // تجميع الفصول المتاحة من الامتحانات الخاصة بالمستخدم الحالي
+        const userExams = currentUser ? exams.filter(e => e.creatorId === currentUser.uid) : [];
+        const allClasses = [...new Set(userExams.map(e => e.className).filter(c => c))];
+        const hasExams = userExams.length > 0;
+        
+        if (!hasExams || allClasses.length === 0) {
+            content = '<p class="text-gray-500">لا توجد امتحانات حتى الآن</p>';
+        } else {
+            // تخزين البيانات في متغيرات مؤقتة للنافذة
+            window.studentsData = {
+                exams: userExams,
+                results: results.filter(r => r.userId === currentUser?.uid),
+                allClasses: allClasses
+            };
+            
+            content = `
+                <div class="text-right">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-semibold mb-2">📚 اختر الفصل الدراسي:</label>
+                        <select id="selectClass" class="w-full p-2 border rounded-lg" onchange="loadExamsForClass()">
+                            <option value="">-- اختر الفصل --</option>
+                            ${allClasses.map(c => `<option value="${c}">${c}</option>`).join('')}
+                        </select>
                     </div>
-                `;
-            }
-        } else if (type === 'active') {
-            title = '✅ الامتحانات النشطة';
-            const activeExams = exams.filter(e => e.isActive !== false);
-            if (activeExams.length === 0) {
-                content = '<p class="text-gray-500">لا توجد امتحانات نشطة</p>';
-            } else {
-                content = `
-                    <div class="space-y-2 text-right">
-                        ${activeExams.map(exam => `
-                            <div class="border-b pb-2">
-                                <p class="font-bold">${exam.title}</p>
-                                <p class="text-sm text-gray-500">📚 ${exam.className || 'بدون صف'} | بواسطة: ${exam.creatorName || 'مدرس'}</p>
-                            </div>
-                        `).join('')}
+                    
+                    <div id="examSelectDiv" class="mb-4" style="display:none;">
+                        <label class="block text-gray-700 font-semibold mb-2">📝 اختر الامتحان:</label>
+                        <select id="selectExam" class="w-full p-2 border rounded-lg" onchange="loadStudentsResults()">
+                            <option value="">-- اختر الامتحان --</option>
+                        </select>
                     </div>
-                `;
-            }
-        } else if (type === 'students') {
-            title = '👥 الطلاب';
-            const studentsList = [...new Set(results.map(r => ({ name: r.studentName, number: r.studentNumber, examTitle: r.examTitle })))];
-            if (studentsList.length === 0) {
-                content = '<p class="text-gray-500">لا يوجد طلاب حتى الآن</p>';
-            } else {
-                content = `
-                    <div class="space-y-2 text-right">
-                        ${studentsList.map(s => `
-                            <div class="border-b pb-2">
-                                <p class="font-bold">${s.name}</p>
-                                <p class="text-sm text-gray-500">رقم الجلوس: ${s.number || '-'} | امتحن: ${s.examTitle}</p>
-                            </div>
-                        `).join('')}
+                    
+                    <div id="studentsResultsDiv" style="display:none;">
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="font-bold text-indigo-600">📊 نتائج الطلاب</h4>
+                            <button onclick="printStudentsResults()" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition">
+                                <i class="fas fa-print ml-1"></i> طباعة PDF
+                            </button>
+                        </div>
+                        <div id="studentsList" class="space-y-2 max-h-96 overflow-y-auto"></div>
                     </div>
-                `;
-            }
-        } else if (type === 'completed') {
-            title = '📊 الامتحانات المكتملة';
-            const myResults = currentUser ? results.filter(r => r.userId === currentUser.uid) : results;
-            if (myResults.length === 0) {
-                content = '<p class="text-gray-500">لا توجد نتائج مكتملة</p>';
-            } else {
-                const sortedResults = [...myResults].sort((a, b) => b.percentage - a.percentage);
-                content = `
-                    <div class="space-y-2 text-right">
-                        ${sortedResults.map(r => `
-                            <div class="border-b pb-2">
-                                <p class="font-bold">${r.examTitle}</p>
-                                <p class="text-sm">الطالب: ${r.studentName} | الدرجة: ${r.score}/${r.totalScore} (${r.percentage.toFixed(1)}%)</p>
-                                <p class="text-xs text-gray-500">التاريخ: ${new Date(r.date).toLocaleDateString('ar-EG')}</p>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
+                </div>
+            `;
         }
         
-        document.getElementById('statDetailsTitle').innerText = title;
-        document.getElementById('statDetailsContent').innerHTML = content;
-        document.getElementById('statDetailsPopup').classList.add('show');
+        // تعريف الدوال المساعدة للنافذة
+        window.loadExamsForClass = function() {
+            const selectedClass = document.getElementById('selectClass').value;
+            const examSelectDiv = document.getElementById('examSelectDiv');
+            const selectExam = document.getElementById('selectExam');
+            const studentsDiv = document.getElementById('studentsResultsDiv');
+            
+            if (!selectedClass) {
+                examSelectDiv.style.display = 'none';
+                studentsDiv.style.display = 'none';
+                return;
+            }
+            
+            const classExams = window.studentsData.exams.filter(e => e.className === selectedClass);
+            
+            if (classExams.length === 0) {
+                examSelectDiv.style.display = 'none';
+                studentsDiv.style.display = 'none';
+                return;
+            }
+            
+            // ملء قائمة الامتحانات
+            selectExam.innerHTML = '<option value="">-- اختر الامتحان --</option>' + 
+                classExams.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
+            
+            examSelectDiv.style.display = 'block';
+            studentsDiv.style.display = 'none';
+        };
+        
+        window.loadStudentsResults = function() {
+            const selectedExamId = document.getElementById('selectExam').value;
+            const studentsDiv = document.getElementById('studentsResultsDiv');
+            const studentsList = document.getElementById('studentsList');
+            
+            if (!selectedExamId) {
+                studentsDiv.style.display = 'none';
+                return;
+            }
+            
+            const exam = window.studentsData.exams.find(e => e.id === selectedExamId);
+            const examResults = window.studentsData.results.filter(r => r.examId === selectedExamId);
+            
+            if (examResults.length === 0) {
+                studentsList.innerHTML = '<div class="text-center p-4 text-gray-500">📭 لا يوجد طلاب أدوا هذا الامتحان بعد</div>';
+            } else {
+                // ترتيب النتائج من الأعلى إلى الأقل
+                const sortedResults = [...examResults].sort((a, b) => b.percentage - a.percentage);
+                
+                studentsList.innerHTML = sortedResults.map((r, index) => `
+                    <div class="grade-card bg-white rounded-lg p-3 shadow-sm border-r-4 ${r.percentage >= 50 ? 'border-green-500' : 'border-red-500'}">
+                        <div class="flex justify-between items-center flex-wrap gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-gray-500">${index + 1}.</span>
+                                <span class="font-semibold">${r.studentName}</span>
+                                <span class="text-xs text-gray-400">(رقم الجلوس: ${r.studentNumber || '-'})</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm">
+                                    الدرجة: <strong class="${r.percentage >= 50 ? 'text-green-600' : 'text-red-600'}">${r.score}/${r.totalScore}</strong>
+                                </span>
+                                <span class="text-sm">
+                                    النسبة: <strong>${r.percentage.toFixed(1)}%</strong>
+                                </span>
+                                <button onclick="showStudentDetails('${r.studentName}', '${selectedExamId}')" 
+                                    class="bg-indigo-600 text-white px-2 py-1 rounded text-xs hover:bg-indigo-700 transition">
+                                    <i class="fas fa-eye"></i> تفاصيل
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            studentsDiv.style.display = 'block';
+        };
+        
+        // دالة طباعة نتائج الطلاب
+        window.printStudentsResults = function() {
+            const selectedExamId = document.getElementById('selectExam').value;
+            if (!selectedExamId) {
+                showToast('الرجاء اختيار امتحان أولاً');
+                return;
+            }
+            
+            const exam = window.studentsData.exams.find(e => e.id === selectedExamId);
+            const examResults = window.studentsData.results.filter(r => r.examId === selectedExamId);
+            const sortedResults = [...examResults].sort((a, b) => b.percentage - a.percentage);
+            
+            const printContent = `
+                <div style="direction: rtl; font-family: 'Cairo', sans-serif; padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h1 style="color: #4f46e5;">📊 نتائج الامتحان</h1>
+                        <h2>${exam.title}</h2>
+                        <p>📚 ${exam.className || 'بدون صف'}</p>
+                        <p>📅 التاريخ: ${new Date().toLocaleDateString('ar-EG')}</p>
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background-color: #4f46e5; color: white;">
+                                <th style="padding: 10px; border: 1px solid #ddd;">#</th>
+                                <th style="padding: 10px; border: 1px solid #ddd;">اسم الطالب</th>
+                                <th style="padding: 10px; border: 1px solid #ddd;">رقم الجلوس</th>
+                                <th style="padding: 10px; border: 1px solid #ddd;">الدرجة</th>
+                                <th style="padding: 10px; border: 1px solid #ddd;">النسبة</th>
+                                <th style="padding: 10px; border: 1px solid #ddd;">التقدير</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sortedResults.map((r, index) => `
+                                <tr style="border-bottom: 1px solid #ddd;">
+                                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${index + 1}</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">${r.studentName}</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">${r.studentNumber || '-'}</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${r.score}/${r.totalScore}</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${r.percentage.toFixed(1)}%</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center; color: ${r.percentage >= 50 ? 'green' : 'red'}; font-weight: bold;">
+                                        ${r.percentage >= 90 ? 'ممتاز' : r.percentage >= 75 ? 'جيد جداً' : r.percentage >= 50 ? 'مقبول' : 'ضعيف'}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #666;">
+                        <p>تم الإنشاء بواسطة Imtihan - Mohamed Emad Abd El-Atty</p>
+                    </div>
+                </div>
+            `;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>نتائج ${exam.title}</title>
+                    <meta charset="UTF-8">
+                    <style>
+                        @media print {
+                            body { margin: 0; padding: 20px; }
+                            button { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${printContent}
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button onclick="window.print()" style="padding: 10px 20px; background: #4f46e5; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            🖨️ طباعة
+                        </button>
+                        <button onclick="window.close()" style="padding: 10px 20px; background: #666; color: white; border: none; border-radius: 8px; cursor: pointer; margin-right: 10px;">
+                            إغلاق
+                        </button>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        };
+        
+    } else if (type === 'completed') {
+        title = '📊 الامتحانات المكتملة';
+        const myResults = currentUser ? results.filter(r => r.userId === currentUser.uid) : [];
+        if (myResults.length === 0) {
+            content = '<p class="text-gray-500">لا توجد نتائج مكتملة</p>';
+        } else {
+            const sortedResults = [...myResults].sort((a, b) => b.percentage - a.percentage);
+            content = `
+                <div class="space-y-2 text-right">
+                    ${sortedResults.map(r => `
+                        <div class="border-b pb-2">
+                            <p class="font-bold">${r.examTitle}</p>
+                            <p class="text-sm">الطالب: ${r.studentName} | الدرجة: ${r.score}/${r.totalScore} (${r.percentage.toFixed(1)}%)</p>
+                            <p class="text-xs text-gray-500">التاريخ: ${new Date(r.date).toLocaleDateString('ar-EG')}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
     }
+    
+    document.getElementById('statDetailsTitle').innerText = title;
+    document.getElementById('statDetailsContent').innerHTML = content;
+    document.getElementById('statDetailsPopup').classList.add('show');
+}
     
     function closeStatDetailsPopup() {
         document.getElementById('statDetailsPopup').classList.remove('show');
