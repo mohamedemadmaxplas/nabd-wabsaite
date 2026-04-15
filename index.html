@@ -5,107 +5,471 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Imtihan | منصة الامتحانات الإلكترونية</title>
     
+    <!-- الخطوط والمكتبات -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Cairo', sans-serif; direction: rtl; background: #f0f9ff; }
-        .hidden-page { display: none !important; }
-        .sidebar-open { transform: translateX(0) !important; }
-        .toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 24px; border-radius: 50px; z-index: 5000; opacity: 0; transition: 0.3s; pointer-events: none; }
-        .toast.show { opacity: 1; }
-        .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 3000; visibility: hidden; opacity: 0; transition: 0.2s; }
-        .popup.show { visibility: visible; opacity: 1; }
-        .popup-content { background: white; padding: 2rem; border-radius: 16px; max-width: 500px; width: 90%; text-align: center; max-height: 80vh; overflow-y: auto; }
-        .exam-card { background: white; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: 0.3s; }
-        .exam-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
-        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #8b5cf6); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; }
-        .user-dropdown { position: absolute; top: 50px; left: 0; background: white; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); min-width: 180px; z-index: 100; overflow: hidden; }
-        .user-dropdown a { display: block; padding: 10px 16px; cursor: pointer; }
-        .user-dropdown a:hover { background: #f3f4f6; }
-        .search-overlay { position: fixed; top: 70px; left: 0; right: 0; background: white; padding: 1rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); z-index: 1001; display: none; }
-        .search-overlay.show { display: block; }
-        .search-wrapper { max-width: 500px; margin: 0 auto; position: relative; }
-        .search-wrapper input { width: 100%; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 40px; }
-        .search-results { position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); margin-top: 8px; max-height: 300px; overflow-y: auto; display: none; }
-        .search-results.show { display: block; }
-        .search-result-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #e2e8f0; }
-        .search-result-item:hover { background: #f8fafc; }
-        .question-builder { background: #f8fafc; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; border: 1px solid #e2e8f0; }
-        .option-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; }
-        .option-row input { flex: 1; }
-        .shake { animation: shake 0.3s ease; }
-        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-3px)} 75%{transform:translateX(3px)} }
-        .sidebar { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: white; box-shadow: -2px 0 20px rgba(0,0,0,0.1); transition: right 0.3s; z-index: 2000; padding: 1.5rem; overflow-y: auto; }
-        .sidebar.open { right: 0; }
-        .overlay-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1500; display: none; }
-        .overlay-bg.show { display: block; }
-        .stat-card { background: white; border-radius: 12px; padding: 1rem; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .admin-btn { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; }
-        .link-box { background: #f1f5f9; padding: 10px; border-radius: 8px; word-break: break-all; font-size: 12px; direction: ltr; text-align: left; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+            direction: rtl;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            min-height: 100vh;
+        }
+        
+        .hidden-page {
+            display: none !important;
+        }
+        
+        .sidebar-open {
+            transform: translateX(0) !important;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            z-index: 5000;
+            opacity: 0;
+            transition: 0.3s;
+            pointer-events: none;
+            font-size: 14px;
+            z-index: 6000;
+        }
+        
+        .toast.show {
+            opacity: 1;
+        }
+        
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        
+        .popup.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .popup-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .exam-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(99,102,241,0.2);
+        }
+        
+        .exam-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .user-avatar:hover {
+            transform: scale(1.05);
+        }
+        
+        .user-dropdown {
+            position: absolute;
+            top: 50px;
+            left: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            min-width: 180px;
+            z-index: 100;
+            overflow: hidden;
+        }
+        
+        .user-dropdown a {
+            display: block;
+            padding: 10px 16px;
+            cursor: pointer;
+        }
+        
+        .user-dropdown a:hover {
+            background: #f3f4f6;
+        }
+        
+        .search-overlay {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            z-index: 1001;
+            display: none;
+        }
+        
+        .search-overlay.show {
+            display: block;
+        }
+        
+        .search-wrapper {
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .search-wrapper input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 40px;
+            font-size: 14px;
+        }
+        
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            margin-top: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .search-results.show {
+            display: block;
+        }
+        
+        .search-result-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .search-result-item:hover {
+            background: #f8fafc;
+        }
+        
+        .question-builder {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .option-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            align-items: center;
+        }
+        
+        .option-row input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        
+        .shake {
+            animation: shake 0.3s ease;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            75% { transform: translateX(3px); }
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 280px;
+            height: 100%;
+            background: white;
+            box-shadow: -2px 0 20px rgba(0,0,0,0.1);
+            transition: right 0.3s;
+            z-index: 2000;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        .sidebar.open {
+            right: 0;
+        }
+        
+        .overlay-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 1500;
+            display: none;
+        }
+        
+        .overlay-bg.show {
+            display: block;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card-blue {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+        
+        .stat-card-green {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .stat-card-purple {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+        }
+        
+        .stat-card-orange {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .link-box {
+            background: #f1f5f9;
+            padding: 10px;
+            border-radius: 8px;
+            word-break: break-all;
+            font-size: 12px;
+            direction: ltr;
+            text-align: left;
+        }
+        
+        .class-badge {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin: 4px;
+        }
+        
+        .grade-card {
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .footer {
+            background: #1e293b;
+            color: #94a3b8;
+            padding: 20px;
+            text-align: center;
+            margin-top: 40px;
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .footer a {
+            color: #a5b4fc;
+            text-decoration: none;
+        }
+        
+        .footer p {
+            margin: 5px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 260px;
+            }
+        }
     </style>
 </head>
 <body>
 
+<!-- ==================== عناصر مشتركة ==================== -->
+
 <div id="toast" class="toast"></div>
 <div class="overlay-bg" id="overlayBg"></div>
 
-<!-- Sidebar -->
+<!-- ==================== القائمة الجانبية (Sidebar) ==================== -->
+
 <div class="sidebar" id="sidebar">
+    
     <div class="flex justify-between items-center mb-8 pb-4 border-b">
-        <div class="flex items-center gap-2"><i class="fas fa-pen-alt text-indigo-600 text-2xl"></i><h2 class="text-2xl font-bold text-indigo-600">Imtihan</h2></div>
+        <div class="flex items-center gap-2">
+            <i class="fas fa-pen-alt text-indigo-600 text-2xl"></i>
+            <h2 class="text-2xl font-bold text-indigo-600">Imtihan</h2>
+        </div>
         <button onclick="closeSidebar()" class="text-gray-500 hover:text-red-500 text-2xl">&times;</button>
     </div>
+    
     <div class="space-y-2">
-        <button onclick="navigateTo('home')" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3"><i class="fas fa-home text-indigo-600 w-6"></i> الرئيسية</button>
-        <button onclick="navigateTo('createExam')" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3"><i class="fas fa-plus-circle text-indigo-600 w-6"></i> إنشاء امتحان</button>
-        <button onclick="navigateTo('examsList')" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3"><i class="fas fa-list text-indigo-600 w-6"></i> قائمة الامتحانات</button>
-        <button onclick="navigateTo('questionBank')" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3"><i class="fas fa-database text-indigo-600 w-6"></i> بنك الأسئلة</button>
-        <button onclick="navigateTo('analytics')" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3"><i class="fas fa-chart-line text-indigo-600 w-6"></i> التحليلات</button>
-        <button onclick="navigateTo('account')" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3"><i class="fas fa-user-circle text-indigo-600 w-6"></i> حسابي</button>
-        <button onclick="navigateTo('upgrade')" class="w-full text-right p-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white flex items-center gap-3"><i class="fas fa-gem w-6"></i> 🚀 رقي حسابك</button>
-        <button id="adminBtn" onclick="showAdminLogin()" style="display:none;" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3 text-indigo-600"><i class="fas fa-shield-alt w-6"></i> 👑 لوحة التحكم</button>
+        
+        <button onclick="navigateTo('home')" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3">
+            <i class="fas fa-home text-indigo-600 w-6"></i>
+            <span>الرئيسية</span>
+        </button>
+        
+        <button onclick="navigateTo('createExam')" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3">
+            <i class="fas fa-plus-circle text-indigo-600 w-6"></i>
+            <span>إنشاء امتحان</span>
+        </button>
+        
+        <button onclick="navigateTo('examsList')" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3">
+            <i class="fas fa-list text-indigo-600 w-6"></i>
+            <span>الامتحانات</span>
+        </button>
+        
+        <button onclick="navigateTo('questionBank')" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3">
+            <i class="fas fa-database text-indigo-600 w-6"></i>
+            <span>بنك الأسئلة</span>
+        </button>
+        
+        <button onclick="navigateTo('analytics')" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3">
+            <i class="fas fa-chart-line text-indigo-600 w-6"></i>
+            <span>التحليلات</span>
+        </button>
+        
+        <button onclick="navigateTo('account')" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3">
+            <i class="fas fa-user-circle text-indigo-600 w-6"></i>
+            <span>حسابي</span>
+        </button>
+        
+        <button onclick="navigateTo('upgrade')" class="w-full text-right p-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white flex items-center gap-3">
+            <i class="fas fa-gem w-6"></i>
+            <span>🚀 رقي حسابك</span>
+        </button>
+        
         <hr class="my-3">
-        <button onclick="logout()" class="w-full text-right p-3 rounded-xl hover:bg-red-50 flex items-center gap-3 text-red-600"><i class="fas fa-sign-out-alt w-6"></i> تسجيل خروج</button>
+        
+        <button onclick="logout()" class="w-full text-right p-3 rounded-xl hover:bg-red-50 flex items-center gap-3 text-red-600">
+            <i class="fas fa-sign-out-alt w-6"></i>
+            <span>تسجيل خروج</span>
+        </button>
+        
     </div>
+    
 </div>
 
-<!-- Header -->
+<!-- ==================== الهيدر (الشريط العلوي) ==================== -->
+
 <nav class="bg-white shadow-lg sticky top-0 z-40">
     <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        
         <div class="flex items-center gap-4">
-            <button onclick="toggleSidebar()" class="text-gray-600 hover:text-indigo-600 text-2xl"><i class="fas fa-bars"></i></button>
+            <button onclick="toggleSidebar()" class="text-gray-600 hover:text-indigo-600 text-2xl transition-transform hover:scale-110">
+                <i class="fas fa-bars"></i>
+            </button>
+            
             <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('home')">
                 <i class="fas fa-pen-alt text-indigo-600 text-xl"></i>
                 <span class="text-xl font-bold text-gray-800">Imtihan</span>
             </div>
         </div>
+        
         <div class="flex items-center gap-4">
-            <button id="searchBtn" class="text-gray-600 hover:text-indigo-600 text-xl"><i class="fas fa-search"></i></button>
+            
+            <button id="searchBtn" class="text-gray-600 hover:text-indigo-600 text-2xl transition-transform hover:scale-110">
+                <i class="fas fa-search"></i>
+            </button>
+            
             <div id="userArea" class="relative">
+                
                 <div id="loginBtnArea">
-                    <button onclick="navigateTo('account')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm">Sign Up</button>
+                    <button onclick="navigateTo('account')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 transition">
+                        Sign Up
+                    </button>
                 </div>
+                
                 <div id="userAvatarArea" class="hidden relative">
-                    <div id="userAvatar" class="user-avatar"><span id="avatarInitial">U</span></div>
-                    <div id="userDropdown" class="user-dropdown hidden">
-                        <div class="px-4 py-3 border-b bg-gray-50"><p id="dropdownName" class="font-semibold"></p><p id="dropdownEmail" class="text-xs text-gray-500"></p></div>
-                        <a onclick="navigateTo('account'); closeUserDropdown()"><i class="fas fa-user ml-2"></i> حسابي</a>
-                        <a onclick="logout()"><i class="fas fa-sign-out-alt ml-2 text-red-600"></i> <span class="text-red-600">تسجيل خروج</span></a>
+                    <div id="userAvatar" class="user-avatar" onclick="navigateTo('account')">
+                        <span id="avatarInitial">U</span>
                     </div>
                 </div>
+                
             </div>
+            
         </div>
+        
     </div>
 </nav>
 
-<!-- Search Overlay -->
+<!-- ==================== شريط البحث المنبثق ==================== -->
+
 <div class="search-overlay" id="searchOverlay">
     <div class="search-wrapper">
         <input type="text" id="searchInput" placeholder="🔍 بحث عن امتحان... أو اكتب 'adminmohamed' للوحة التحكم" autocomplete="off">
@@ -113,127 +477,386 @@
     </div>
 </div>
 
-<!-- Main Content -->
+<!-- ==================== المحتوى الرئيسي ==================== -->
+
 <div class="container mx-auto px-4 py-8">
 
-    <!-- الصفحة الرئيسية -->
+    <!-- ==================== الصفحة الرئيسية ==================== -->
+    
     <div id="homePage" class="page">
+        
         <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-xl p-6 mb-8 text-center text-white">
             <h1 class="text-3xl font-bold">📚 Imtihan</h1>
             <p class="mt-2">منصة الامتحانات الإلكترونية - أنشئ امتحانك وشاركه مع طلابك</p>
         </div>
+        
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="stat-card"><h3 class="text-gray-500">إجمالي الامتحانات</h3><p id="totalExams" class="text-2xl font-bold text-indigo-600">0</p></div>
-            <div class="stat-card"><h3 class="text-gray-500">الامتحانات النشطة</h3><p id="activeExams" class="text-2xl font-bold text-indigo-600">0</p></div>
-            <div class="stat-card"><h3 class="text-gray-500">عدد الطلاب</h3><p id="totalStudents" class="text-2xl font-bold text-indigo-600">0</p></div>
-            <div class="stat-card"><h3 class="text-gray-500">الامتحانات المكتملة</h3><p id="completedExams" class="text-2xl font-bold text-indigo-600">0</p></div>
+            
+            <div class="stat-card stat-card-blue" onclick="showStatDetails('exams')">
+                <i class="fas fa-file-alt text-3xl mb-2"></i>
+                <h3 class="text-sm opacity-90">إجمالي الامتحانات</h3>
+                <p id="totalExams" class="text-2xl font-bold">0</p>
+            </div>
+            
+            <div class="stat-card stat-card-green" onclick="showStatDetails('active')">
+                <i class="fas fa-check-circle text-3xl mb-2"></i>
+                <h3 class="text-sm opacity-90">الامتحانات النشطة</h3>
+                <p id="activeExams" class="text-2xl font-bold">0</p>
+            </div>
+            
+            <div class="stat-card stat-card-purple" onclick="showStatDetails('students')">
+                <i class="fas fa-users text-3xl mb-2"></i>
+                <h3 class="text-sm opacity-90">عدد الطلاب</h3>
+                <p id="totalStudents" class="text-2xl font-bold">0</p>
+            </div>
+            
+            <div class="stat-card stat-card-orange" onclick="showStatDetails('completed')">
+                <i class="fas fa-chart-line text-3xl mb-2"></i>
+                <h3 class="text-sm opacity-90">الامتحانات المكتملة</h3>
+                <p id="completedExams" class="text-2xl font-bold">0</p>
+            </div>
+            
         </div>
+        
         <h2 class="text-xl font-bold mb-4">📖 أحدث الامتحانات</h2>
         <div id="recentExamsList" class="space-y-3"></div>
+        
     </div>
 
-    <!-- صفحة إنشاء امتحان -->
+    <!-- ==================== صفحة إنشاء امتحان ==================== -->
+    
     <div id="createExamPage" class="page hidden-page">
+        
         <div class="bg-white rounded-2xl shadow-xl p-6">
             <h2 class="text-2xl font-bold mb-6">✏️ إنشاء امتحان جديد</h2>
-            <div id="examLimitWarning" class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 hidden"><p id="limitMsg" class="text-amber-700"></p></div>
+            
+            <div id="examLimitWarning" class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 hidden">
+                <p id="limitMsg" class="text-amber-700"></p>
+            </div>
+            
             <form id="examForm">
-                <div class="mb-4"><input type="text" id="examTitle" placeholder="عنوان الامتحان" class="w-full p-3 border rounded-lg" required></div>
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div><input type="number" id="examDuration" placeholder="المدة (دقائق)" class="w-full p-3 border rounded-lg" value="30"></div>
-                    <div><input type="number" id="examPassScore" placeholder="درجة النجاح (%)" value="50" class="w-full p-3 border rounded-lg"></div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">عنوان الامتحان</label>
+                    <input type="text" id="examTitle" placeholder="مثال: اختبار الرياضيات - الفصل الأول" class="w-full p-3 border rounded-lg" required>
                 </div>
-                <div id="questionsContainer" class="space-y-4 mb-4"></div>
-                <button type="button" onclick="addQuestion()" class="bg-green-500 text-white px-4 py-2 rounded-lg mb-4">+ إضافة سؤال</button>
-                <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold">💾 حفظ وإنشاء رابط الامتحان</button>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">اسم الصف الدراسي</label>
+                    <input type="text" id="examClass" placeholder="مثال: الصف الثالث الثانوي - شعبة علمي" class="w-full p-3 border rounded-lg" required>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">المدة (دقائق)</label>
+                        <input type="number" id="examDuration" placeholder="المدة" class="w-full p-3 border rounded-lg" value="30">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">درجة النجاح (%)</label>
+                        <input type="number" id="examPassScore" placeholder="درجة النجاح" value="50" class="w-full p-3 border rounded-lg">
+                    </div>
+                    
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">الأسئلة</label>
+                    <div id="questionsContainer" class="space-y-4 mb-4"></div>
+                    <button type="button" onclick="addQuestion()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition">
+                        + إضافة سؤال
+                    </button>
+                </div>
+                
+                <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition">
+                    💾 حفظ وإنشاء رابط الامتحان
+                </button>
+                
             </form>
         </div>
+        
     </div>
 
-    <!-- صفحة قائمة الامتحانات -->
+    <!-- ==================== صفحة قائمة الامتحانات ==================== -->
+    
     <div id="examsListPage" class="page hidden-page">
+        
         <div class="bg-white rounded-2xl shadow-xl p-6">
             <h2 class="text-2xl font-bold mb-6">📋 جميع الامتحانات</h2>
             <div id="allExamsList" class="space-y-3"></div>
         </div>
+        
     </div>
 
-    <!-- صفحة بنك الأسئلة -->
+    <!-- ==================== صفحة بنك الأسئلة ==================== -->
+    
     <div id="questionBankPage" class="page hidden-page">
+        
         <div class="bg-white rounded-2xl shadow-xl p-6">
             <h2 class="text-2xl font-bold mb-6">📚 بنك الأسئلة</h2>
-            <button onclick="openQuestionModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg mb-4">+ إضافة سؤال</button>
+            <button onclick="openQuestionModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg mb-4 hover:bg-indigo-700 transition">
+                + إضافة سؤال
+            </button>
             <div id="bankQuestionsList" class="space-y-3"></div>
         </div>
+        
     </div>
 
-    <!-- صفحة التحليلات -->
+    <!-- ==================== صفحة التحليلات ==================== -->
+    
     <div id="analyticsPage" class="page hidden-page">
+        
         <div class="bg-white rounded-2xl shadow-xl p-6">
             <h2 class="text-2xl font-bold mb-6">📊 التحليلات</h2>
             <canvas id="statsChart" height="200"></canvas>
+            
             <div class="grid grid-cols-2 gap-4 mt-6">
-                <div class="bg-gray-50 p-4 rounded-lg text-center"><p class="text-gray-500">متوسط الدرجات</p><p id="avgScore" class="text-2xl font-bold text-indigo-600">0%</p></div>
-                <div class="bg-gray-50 p-4 rounded-lg text-center"><p class="text-gray-500">نسبة النجاح</p><p id="passRate" class="text-2xl font-bold text-green-600">0%</p></div>
+                
+                <div class="bg-gray-50 p-4 rounded-lg text-center">
+                    <p class="text-gray-500">متوسط الدرجات</p>
+                    <p id="avgScore" class="text-2xl font-bold text-indigo-600">0%</p>
+                </div>
+                
+                <div class="bg-gray-50 p-4 rounded-lg text-center">
+                    <p class="text-gray-500">نسبة النجاح</p>
+                    <p id="passRate" class="text-2xl font-bold text-green-600">0%</p>
+                </div>
+                
             </div>
         </div>
+        
     </div>
 
-    <!-- صفحة الحساب -->
+    <!-- ==================== صفحة الحساب ==================== -->
+    
     <div id="accountPage" class="page hidden-page">
+        
         <div class="bg-white rounded-2xl shadow-xl p-6 max-w-md mx-auto" id="accountContent"></div>
+        
     </div>
 
-    <!-- صفحة الترقية -->
+    <!-- ==================== صفحة الترقية ==================== -->
+    
     <div id="upgradePage" class="page hidden-page">
+        
         <div class="bg-white rounded-2xl shadow-xl p-6">
             <h2 class="text-2xl font-bold mb-6">🚀 باقات الترقية</h2>
             <div id="plansList" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </div>
+        
     </div>
 
-    <!-- صفحة الإدارة -->
+    <!-- ==================== صفحة الإدارة (تظهر فقط عن طريق البحث) ==================== -->
+    
     <div id="adminPage" class="page hidden-page">
+        
         <div class="bg-white rounded-2xl shadow-xl p-6">
             <h2 class="text-2xl font-bold mb-6">👑 لوحة التحكم - Admin</h2>
+            
             <div class="flex gap-2 mb-4 flex-wrap">
-                <button onclick="showAdminTab('users')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">👥 المستخدمين</button>
-                <button onclick="showAdminTab('plans')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">📦 الباقات</button>
-                <button onclick="showAdminTab('reports')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">📊 التقارير</button>
+                <button onclick="showAdminTab('users')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">👥 المستخدمين</button>
+                <button onclick="showAdminTab('plans')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">📦 الباقات</button>
+                <button onclick="showAdminTab('reports')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">📊 التقارير</button>
+                <button onclick="showAdminTab('subscriptions')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">📅 اشتراكات العملاء</button>
             </div>
+            
             <div id="adminUsersTab"><div id="usersTable"></div></div>
-            <div id="adminPlansTab" class="hidden"><div id="adminPlansList"></div><button onclick="showAddPlanPopup()" class="bg-green-600 text-white px-4 py-2 rounded-lg mt-3">+ إضافة باقة</button></div>
-            <div id="adminReportsTab" class="hidden">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div class="bg-gray-100 p-4 rounded-lg text-center"><p class="text-gray-500">إجمالي المستخدمين</p><p id="adminTotalUsers" class="text-2xl font-bold text-indigo-600">0</p></div>
-                    <div class="bg-gray-100 p-4 rounded-lg text-center"><p class="text-gray-500">مستخدمين Pro</p><p id="adminProUsers" class="text-2xl font-bold text-indigo-600">0</p></div>
-                    <div class="bg-gray-100 p-4 rounded-lg text-center"><p class="text-gray-500">إجمالي الأرباح</p><p id="adminTotalProfit" class="text-2xl font-bold text-green-600">0</p></div>
-                    <div class="bg-gray-100 p-4 rounded-lg text-center"><p class="text-gray-500">زوار الموقع</p><p id="adminVisitors" class="text-2xl font-bold text-indigo-600">0</p></div>
-                </div>
-                <canvas id="profitChart" height="200"></canvas>
+            
+            <div id="adminPlansTab" class="hidden">
+                <div id="adminPlansList"></div>
+                <button onclick="showAddPlanPopup()" class="bg-green-600 text-white px-4 py-2 rounded-lg mt-3 hover:bg-green-700 transition">+ إضافة باقة</button>
             </div>
-            <button onclick="navigateTo('home')" class="mt-6 bg-gray-600 text-white px-4 py-2 rounded-lg">العودة للرئيسية</button>
+            
+            <div id="adminReportsTab" class="hidden">
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-center text-white">
+                        <p class="text-sm opacity-90">إجمالي المستخدمين</p>
+                        <p id="adminTotalUsers" class="text-2xl font-bold">0</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 text-center text-white">
+                        <p class="text-sm opacity-90">مستخدمين Pro</p>
+                        <p id="adminProUsers" class="text-2xl font-bold">0</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 text-center text-white">
+                        <p class="text-sm opacity-90">إجمالي الأرباح</p>
+                        <p id="adminTotalProfit" class="text-2xl font-bold">0</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 text-center text-white">
+                        <p class="text-sm opacity-90">زوار الموقع</p>
+                        <p id="adminVisitors" class="text-2xl font-bold">0</p>
+                    </div>
+                </div>
+                
+                <canvas id="profitChart" height="200"></canvas>
+                
+            </div>
+            
+            <div id="adminSubscriptionsTab" class="hidden">
+                <div id="subscriptionsList" class="space-y-3"></div>
+            </div>
+            
+            <button onclick="navigateTo('home')" class="mt-6 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">
+                العودة للرئيسية
+            </button>
+            
+        </div>
+        
+    </div>
+    
+</div>
+
+<!-- ==================== صفحة الطالب (لأداء الامتحان) ==================== -->
+
+<div id="studentExamContainer" class="hidden-page fixed inset-0 bg-gray-900 bg-opacity-95 z-50 overflow-y-auto">
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl p-6 max-w-4xl mx-auto" id="studentExamContent"></div>
+    </div>
+</div>
+
+<!-- ==================== نافذة تفاصيل الطالب ==================== -->
+
+<div id="studentDetailsPopup" class="popup">
+    <div class="popup-content" style="max-width: 700px; width: 90%;">
+        <h3 class="text-xl font-bold mb-4" id="detailsStudentName"></h3>
+        <div id="detailsContent"></div>
+        <button onclick="printStudentDetails()" class="bg-green-600 text-white px-4 py-2 rounded-lg mt-3 ml-2">
+            <i class="fas fa-print"></i> طباعة PDF
+        </button>
+        <button onclick="closeStudentDetailsPopup()" class="bg-gray-300 px-4 py-2 rounded-lg mt-3">
+            إغلاق
+        </button>
+    </div>
+</div>
+
+<!-- ==================== نافذة تفاصيل الاشتراك ==================== -->
+
+<div id="subscriptionDetailsPopup" class="popup">
+    <div class="popup-content" style="max-width: 500px;">
+        <h3 class="text-xl font-bold mb-4" id="subDetailsClientName"></h3>
+        <div id="subDetailsContent"></div>
+        <button onclick="closeSubscriptionDetailsPopup()" class="bg-gray-300 px-4 py-2 rounded-lg mt-3">
+            إغلاق
+        </button>
+    </div>
+</div>
+
+<!-- ==================== نافذة تفاصيل البطاقة ==================== -->
+
+<div id="statDetailsPopup" class="popup">
+    <div class="popup-content" style="max-width: 700px; width: 90%;">
+        <h3 class="text-xl font-bold mb-4" id="statDetailsTitle"></h3>
+        <div id="statDetailsContent"></div>
+        <button onclick="closeStatDetailsPopup()" class="bg-gray-300 px-4 py-2 rounded-lg mt-3">
+            إغلاق
+        </button>
+    </div>
+</div>
+
+<!-- ==================== نافذة إضافة سؤال ==================== -->
+
+<div id="questionModal" class="popup">
+    <div class="popup-content">
+        <h3 class="text-xl font-bold mb-4">إضافة سؤال</h3>
+        <input type="text" id="qText" placeholder="نص السؤال" class="w-full p-2 border rounded mb-3">
+        <select id="qType" class="w-full p-2 border rounded mb-3">
+            <option value="mcq">اختيار من متعدد</option>
+            <option value="truefalse">صح/خطأ</option>
+        </select>
+        <div id="qOptions"></div>
+        <input type="text" id="qCorrect" placeholder="الإجابة الصحيحة" class="w-full p-2 border rounded mb-3">
+        <button onclick="addToBank()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">إضافة</button>
+        <button onclick="closeQuestionModal()" class="bg-gray-300 px-4 py-2 rounded mt-2">إلغاء</button>
+    </div>
+</div>
+
+<!-- ==================== نافذة تسجيل الدخول تكنو شرك ==================== -->
+
+<div id="tecnoLoginPopup" class="popup">
+    <div class="popup-content">
+        <i class="fas fa-coins text-3xl text-indigo-600 mb-3"></i>
+        <h3 class="text-xl font-bold mb-4">تسجيل الدخول - تكنو شرك</h3>
+        <input type="text" id="tecnoUser" placeholder="اسم المستخدم" class="w-full p-2 border rounded mb-3">
+        <input type="password" id="tecnoPass" placeholder="كلمة المرور" class="w-full p-2 border rounded mb-3">
+        <a onclick="showForgotPasswordPopup()" class="text-indigo-600 cursor-pointer text-sm block mb-3 hover:underline">نسيت كلمة المرور؟</a>
+        <button onclick="tecnoLogin()" class="bg-indigo-600 text-white w-full py-2 rounded mb-2 hover:bg-indigo-700">تسجيل الدخول</button>
+        <button onclick="closeTecnoPopup()" class="bg-gray-300 w-full py-2 rounded hover:bg-gray-400">إلغاء</button>
+        <hr class="my-3">
+        <a onclick="closeTecnoPopup(); showRegisterPopup()" class="text-indigo-600 cursor-pointer hover:underline">إنشاء حساب جديد</a>
+    </div>
+</div>
+
+<!-- ==================== نافذة إنشاء حساب ==================== -->
+
+<div id="registerPopup" class="popup">
+    <div class="popup-content">
+        <h3 class="text-xl font-bold mb-4">إنشاء حساب - تكنو شرك</h3>
+        <input type="text" id="regName" placeholder="الاسم الكامل" class="w-full p-2 border rounded mb-3">
+        <input type="tel" id="regPhone" placeholder="رقم الهاتف" class="w-full p-2 border rounded mb-3">
+        <input type="text" id="regUsername" placeholder="اسم المستخدم" class="w-full p-2 border rounded mb-3">
+        <div id="usernameError" class="text-red-500 text-sm hidden mb-2">⚠️ اسم المستخدم موجود بالفعل</div>
+        <input type="password" id="regPassword" placeholder="كلمة المرور" class="w-full p-2 border rounded mb-3">
+        <input type="password" id="regConfirm" placeholder="تأكيد كلمة المرور" class="w-full p-2 border rounded mb-3">
+        <button onclick="registerTecno()" class="bg-indigo-600 text-white w-full py-2 rounded mb-2 hover:bg-indigo-700">إنشاء حساب</button>
+        <button onclick="closeRegisterPopup()" class="bg-gray-300 w-full py-2 rounded hover:bg-gray-400">إلغاء</button>
+    </div>
+</div>
+
+<!-- ==================== نافذة نسيت كلمة المرور ==================== -->
+
+<div id="forgotPasswordPopup" class="popup">
+    <div class="popup-content">
+        <i class="fas fa-key text-3xl text-indigo-600 mb-3"></i>
+        <h3 class="text-xl font-bold mb-4">استعادة كلمة المرور</h3>
+        <p class="text-gray-600 mb-4">الرجاء إدخال رقم الهاتف المسجل بهذا الحساب</p>
+        <input type="tel" id="forgotPhone" placeholder="رقم الهاتف" class="w-full p-2 border rounded mb-3">
+        <button onclick="verifyPhoneForReset()" class="bg-indigo-600 text-white w-full py-2 rounded mb-2 hover:bg-indigo-700">تحقق</button>
+        <button onclick="closeForgotPasswordPopup()" class="bg-gray-300 w-full py-2 rounded hover:bg-gray-400">إلغاء</button>
+    </div>
+</div>
+
+<!-- ==================== نافذة إعادة تعيين كلمة المرور ==================== -->
+
+<div id="resetPasswordPopup" class="popup">
+    <div class="popup-content">
+        <i class="fas fa-lock text-3xl text-indigo-600 mb-3"></i>
+        <h3 class="text-xl font-bold mb-4">إعادة تعيين كلمة المرور</h3>
+        <input type="password" id="newPassword" placeholder="كلمة المرور الجديدة" class="w-full p-2 border rounded mb-3">
+        <input type="password" id="confirmNewPassword" placeholder="تأكيد كلمة المرور الجديدة" class="w-full p-2 border rounded mb-3">
+        <button onclick="resetPassword()" class="bg-indigo-600 text-white w-full py-2 rounded mb-2 hover:bg-indigo-700">تغيير كلمة المرور</button>
+        <button onclick="closeResetPasswordPopup()" class="bg-gray-300 w-full py-2 rounded hover:bg-gray-400">إلغاء</button>
+    </div>
+</div>
+
+<!-- ==================== نافذة إضافة باقة ==================== -->
+
+<div id="addPlanPopup" class="popup">
+    <div class="popup-content">
+        <h3 class="text-xl font-bold mb-4">إضافة باقة</h3>
+        <input type="text" id="planName" placeholder="اسم الباقة" class="w-full p-2 border rounded mb-3">
+        <input type="number" id="planExams" placeholder="عدد الامتحانات" class="w-full p-2 border rounded mb-3">
+        <input type="number" id="planPrice" placeholder="السعر" class="w-full p-2 border rounded mb-3">
+        <textarea id="planFeatures" placeholder="المميزات (كل سطر ميزة)" rows="3" class="w-full p-2 border rounded mb-3"></textarea>
+        <button onclick="addPlan()" class="bg-indigo-600 text-white w-full py-2 rounded mb-2 hover:bg-indigo-700">إضافة</button>
+        <button onclick="closeAddPlanPopup()" class="bg-gray-300 w-full py-2 rounded hover:bg-gray-400">إلغاء</button>
+    </div>
+</div>
+
+<!-- ==================== نافذة تأكيد حذف ==================== -->
+
+<div id="deleteConfirmPopup" class="popup">
+    <div class="popup-content">
+        <h3 class="text-xl font-bold text-red-600 mb-4">تأكيد الحذف</h3>
+        <p>هل أنت متأكد من حذف هذا الامتحان؟</p>
+        <div class="flex gap-3 mt-4">
+            <button onclick="confirmDelete()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">حذف</button>
+            <button onclick="closeDeletePopup()" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">إلغاء</button>
         </div>
     </div>
 </div>
 
-<!-- Student Exam Container -->
-<div id="studentExamContainer" class="hidden-page fixed inset-0 bg-gray-900 bg-opacity-95 z-50 overflow-y-auto">
-    <div class="container mx-auto px-4 py-8"><div class="bg-white rounded-2xl p-6 max-w-4xl mx-auto" id="studentExamContent"></div></div>
-</div>
+<!-- ==================== نافذة كلمة سر الإدارة ==================== -->
 
-<!-- Popups -->
-<div id="questionModal" class="popup"><div class="popup-content"><h3 class="text-xl font-bold mb-4">إضافة سؤال</h3><input type="text" id="qText" placeholder="نص السؤال" class="w-full p-2 border rounded mb-3"><select id="qType" class="w-full p-2 border rounded mb-3"><option value="mcq">اختيار من متعدد</option><option value="truefalse">صح/خطأ</option></select><div id="qOptions"></div><input type="text" id="qCorrect" placeholder="الإجابة الصحيحة" class="w-full p-2 border rounded mb-3"><button onclick="addToBank()" class="bg-indigo-600 text-white px-4 py-2 rounded">إضافة</button><button onclick="closeQuestionModal()" class="bg-gray-300 px-4 py-2 rounded mt-2">إلغاء</button></div></div>
-
-<div id="tecnoLoginPopup" class="popup"><div class="popup-content"><i class="fas fa-coins text-3xl text-indigo-600 mb-3"></i><h3 class="text-xl font-bold mb-4">تسجيل الدخول - تكنو شرك</h3><input type="text" id="tecnoUser" placeholder="اسم المستخدم" class="w-full p-2 border rounded mb-3"><input type="password" id="tecnoPass" placeholder="كلمة المرور" class="w-full p-2 border rounded mb-3"><button onclick="tecnoLogin()" class="bg-indigo-600 text-white w-full py-2 rounded mb-2">تسجيل الدخول</button><button onclick="closeTecnoPopup()" class="bg-gray-300 w-full py-2 rounded">إلغاء</button><hr class="my-3"><a onclick="closeTecnoPopup(); showRegisterPopup()" class="text-indigo-600 cursor-pointer">إنشاء حساب جديد</a></div></div>
-
-<div id="registerPopup" class="popup"><div class="popup-content"><h3 class="text-xl font-bold mb-4">إنشاء حساب - تكنو شرك</h3><input type="text" id="regName" placeholder="الاسم الكامل" class="w-full p-2 border rounded mb-3"><input type="tel" id="regPhone" placeholder="رقم الهاتف" class="w-full p-2 border rounded mb-3"><input type="text" id="regUsername" placeholder="اسم المستخدم" class="w-full p-2 border rounded mb-3"><input type="password" id="regPassword" placeholder="كلمة المرور" class="w-full p-2 border rounded mb-3"><input type="password" id="regConfirm" placeholder="تأكيد كلمة المرور" class="w-full p-2 border rounded mb-3"><button onclick="registerTecno()" class="bg-indigo-600 text-white w-full py-2 rounded mb-2">إنشاء حساب</button><button onclick="closeRegisterPopup()" class="bg-gray-300 w-full py-2 rounded">إلغاء</button></div></div>
-
-<div id="addPlanPopup" class="popup"><div class="popup-content"><h3 class="text-xl font-bold mb-4">إضافة باقة</h3><input type="text" id="planName" placeholder="اسم الباقة" class="w-full p-2 border rounded mb-3"><input type="number" id="planExams" placeholder="عدد الامتحانات" class="w-full p-2 border rounded mb-3"><input type="number" id="planPrice" placeholder="السعر" class="w-full p-2 border rounded mb-3"><textarea id="planFeatures" placeholder="المميزات (كل سطر ميزة)" rows="3" class="w-full p-2 border rounded mb-3"></textarea><button onclick="addPlan()" class="bg-indigo-600 text-white w-full py-2 rounded">إضافة</button><button onclick="closeAddPlanPopup()" class="bg-gray-300 w-full py-2 rounded mt-2">إلغاء</button></div></div>
-
-<div id="deleteConfirmPopup" class="popup"><div class="popup-content"><h3 class="text-xl font-bold text-red-600 mb-4">تأكيد الحذف</h3><p>هل أنت متأكد من حذف هذا الامتحان؟</p><div class="flex gap-3 mt-4"><button onclick="confirmDelete()" class="bg-red-600 text-white px-4 py-2 rounded">حذف</button><button onclick="closeDeletePopup()" class="bg-gray-300 px-4 py-2 rounded">إلغاء</button></div></div></div>
-
-<!-- نافذة إدخال كلمة السر لصفحة الإدارة -->
 <div id="adminPasswordPopup" class="popup">
     <div class="popup-content">
         <i class="fas fa-shield-alt text-4xl text-indigo-600 mb-3"></i>
@@ -241,14 +864,25 @@
         <p class="text-gray-600 mb-4">الرجاء إدخال كلمة السر</p>
         <input type="password" id="adminPasswordInput" placeholder="كلمة السر" class="w-full p-3 border rounded-lg mb-4" autocomplete="off">
         <div class="flex gap-3">
-            <button onclick="checkAdminPassword()" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg">تأكيد</button>
-            <button onclick="closeAdminPasswordPopup()" class="flex-1 bg-gray-300 py-2 rounded-lg">إلغاء</button>
+            <button onclick="checkAdminPassword()" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">تأكيد</button>
+            <button onclick="closeAdminPasswordPopup()" class="flex-1 bg-gray-300 py-2 rounded-lg hover:bg-gray-400">إلغاء</button>
         </div>
     </div>
 </div>
 
+<!-- ==================== الفوتر (Footer) ==================== -->
+
+<footer class="footer">
+    <p>Developed by <strong class="text-indigo-400">Mohamed Emad Abd El-Atty</strong></p>
+    <p>📞 01144100018</p>
+    <p class="text-xs mt-2">© 2026 Imtihan - منصة الامتحانات الإلكترونية</p>
+</footer>
+
+<!-- ==================== جافا سكريبت ==================== -->
+
 <script>
-    // ==================== Firebase Config ====================
+    // ==================== إعدادات Firebase ====================
+    
     const firebaseConfig = {
         apiKey: "AIzaSyA0avNIZ0RDxSrZx0IvYmLJ_z_-TUfKVzw",
         authDomain: "mindful-marking-493119-d0.firebaseapp.com",
@@ -257,11 +891,13 @@
         messagingSenderId: "501314955450",
         appId: "1:501314955450:web:9cb078d957e3d8db71fa83"
     };
+    
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
-
-    // ==================== المتغيرات ====================
+    
+    // ==================== المتغيرات العامة ====================
+    
     let currentUser = null;
     let exams = [];
     let results = [];
@@ -269,37 +905,66 @@
     let plans = [];
     let allUsers = [];
     let profits = [];
+    let subscriptions = [];
     let deleteTarget = null;
     let chart = null;
     let profitChart = null;
     let studentTimer = null;
     let isAdminLoggedIn = false;
-
-    // الخطط الافتراضية
+    let resetTargetUser = null;
+    
+    // ==================== الخطط الافتراضية ====================
+    
     const defaultPlans = [
         { id: "free", name: "مجاني", examsCount: 8, price: 0, features: ["8 امتحان شهرياً", "تصحيح تلقائي"] },
         { id: "pro", name: "Pro", examsCount: 999, price: 100, features: ["امتحانات غير محدودة", "تقارير متقدمة", "دعم優先"] }
     ];
-
+    
     // ==================== دوال مساعدة ====================
+    
     function showToast(msg) {
         const toast = document.getElementById('toast');
         toast.textContent = msg;
         toast.classList.add('show');
         setTimeout(() => toast.classList.remove('show'), 3000);
     }
-
-    function genId() { return Math.random().toString(36).substring(2, 10).toUpperCase(); }
-
- 
-
-    // ==================== التنقل بين الصفحات ====================
+    
+    function genId() {
+        return Math.random().toString(36).substring(2, 10).toUpperCase();
+    }
+    
+    function copyToClipboard(text) {
+        if (!text) return;
+        navigator.clipboard.writeText(text).then(() => {
+            showToast('✅ تم نسخ الرابط بنجاح!');
+        }).catch(() => {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast('✅ تم نسخ الرابط بنجاح!');
+        });
+    }
+    
+    // ==================== دوال التنقل ====================
+    
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('overlayBg').classList.toggle('show');
+    }
+    
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('overlayBg').classList.remove('show');
+    }
+    
     function navigateTo(pageName) {
         document.querySelectorAll('.page').forEach(p => p.classList.add('hidden-page'));
         const target = document.getElementById(pageName + 'Page');
         if (target) target.classList.remove('hidden-page');
         closeSidebar();
-        closeUserDropdown();
         
         if (pageName === 'home') refreshHome();
         if (pageName === 'examsList') refreshExamsList();
@@ -307,208 +972,370 @@
         if (pageName === 'analytics') refreshAnalytics();
         if (pageName === 'account') refreshAccountPage();
         if (pageName === 'upgrade') refreshPlansPage();
-        if (pageName === 'createExam') { 
-            if(document.getElementById('questionsContainer').children.length === 0) addQuestion(); 
+        if (pageName === 'createExam') {
+            if (document.getElementById('questionsContainer').children.length === 0) addQuestion();
             refreshExamLimit();
         }
     }
-
+    
+    // ==================== دوال العرض والتحديث ====================
+    
     function refreshHome() {
         document.getElementById('totalExams').innerText = exams.length;
         document.getElementById('activeExams').innerText = exams.filter(e => e.isActive !== false).length;
+        
         const uniqueStudents = new Set(results.map(r => r.studentName));
         document.getElementById('totalStudents').innerText = uniqueStudents.size;
+        
         const myResults = currentUser ? results.filter(r => r.userId === currentUser.uid) : [];
         document.getElementById('completedExams').innerText = myResults.length;
         
         const recent = [...exams].reverse().slice(0, 5);
         const container = document.getElementById('recentExamsList');
-        if (recent.length === 0) container.innerHTML = '<div class="text-center p-6 bg-white rounded-xl shadow">لا توجد امتحانات</div>';
-        else container.innerHTML = recent.map(exam => `<div class="exam-card"><div class="flex justify-between items-center"><div><h3 class="font-bold">${exam.title}</h3><p class="text-sm text-gray-500">${exam.questions?.length || 0} سؤال</p></div><button onclick="startExam('${exam.id}')" class="bg-indigo-600 text-white px-3 py-1 rounded text-sm">بدء الامتحان</button></div></div>`).join('');
+        
+        if (recent.length === 0) {
+            container.innerHTML = '<div class="text-center p-6 bg-white rounded-xl shadow">لا توجد امتحانات</div>';
+        } else {
+            container.innerHTML = recent.map(exam => `
+                <div class="exam-card">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold">${exam.title}</h3>
+                            <p class="text-sm text-gray-500">${exam.className || 'بدون صف'} | ${exam.questions?.length || 0} سؤال</p>
+                        </div>
+                        <button onclick="startExam('${exam.id}')" class="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700 transition">
+                            بدء الامتحان
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
     }
-
+    
     function refreshExamsList() {
         const container = document.getElementById('allExamsList');
-        if (exams.length === 0) container.innerHTML = '<div class="text-center p-6 bg-white rounded-xl shadow">لا توجد امتحانات</div>';
-        else container.innerHTML = exams.map(exam => `
+        
+        if (exams.length === 0) {
+            container.innerHTML = '<div class="text-center p-6 bg-white rounded-xl shadow">لا توجد امتحانات</div>';
+            return;
+        }
+        
+        const userExams = currentUser ? exams.filter(e => e.creatorId === currentUser.uid) : [];
+        
+        if (userExams.length === 0 && currentUser) {
+            container.innerHTML = '<div class="text-center p-6 bg-white rounded-xl shadow">لا توجد امتحانات. قم بإنشاء امتحان جديد</div>';
+            return;
+        }
+        
+        const examsToShow = currentUser ? userExams : exams;
+        
+        container.innerHTML = examsToShow.map(exam => `
             <div class="exam-card">
                 <div class="flex justify-between items-start flex-wrap gap-3">
-                    <div><h3 class="font-bold">${exam.title}</h3><p class="text-sm text-gray-500">${exam.questions?.length || 0} سؤال | ${exam.duration || 30} دقيقة</p><div class="link-box mt-2"><i class="fas fa-link text-gray-400 ml-1"></i> ${window.location.origin}${window.location.pathname}#exam=${exam.id}</div></div>
-                    <div class="flex gap-2"><button onclick="copyToClipboard('${window.location.origin}${window.location.pathname}#exam=${exam.id}')" class="bg-indigo-600 text-white px-3 py-1 rounded text-sm"><i class="fas fa-copy"></i> نسخ</button>${currentUser && currentUser.uid === exam.creatorId ? `<button onclick="deleteExam('${exam.id}')" class="bg-red-500 text-white px-3 py-1 rounded text-sm"><i class="fas fa-trash"></i> حذف</button>` : ''}</div>
+                    <div>
+                        <h3 class="font-bold">${exam.title}</h3>
+                        <p class="text-sm text-gray-500">
+                            <span class="class-badge">📚 ${exam.className || 'بدون صف'}</span>
+                            ${exam.questions?.length || 0} سؤال | ${exam.duration || 30} دقيقة
+                        </p>
+                        <div class="link-box mt-2">
+                            <i class="fas fa-link text-gray-400 ml-1"></i> 
+                            ${window.location.origin}${window.location.pathname}?exam=${exam.id}
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="copyToClipboard('${window.location.origin}${window.location.pathname}?exam=${exam.id}')" 
+                            class="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700 transition">
+                            <i class="fas fa-copy"></i> نسخ الرابط
+                        </button>
+                        ${currentUser && currentUser.uid === exam.creatorId ? `
+                            <button onclick="deleteExam('${exam.id}')" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition">
+                                <i class="fas fa-trash"></i> حذف
+                            </button>
+                        ` : ''}
+                    </div>
                 </div>
             </div>
         `).join('');
     }
-
+    
     function refreshQuestionBank() {
         const container = document.getElementById('bankQuestionsList');
-        if (!currentUser) { container.innerHTML = '<div class="text-center p-6 bg-white rounded-xl shadow">الرجاء تسجيل الدخول أولاً</div>'; return; }
-        if (questions.length === 0) container.innerHTML = '<div class="text-center p-6 bg-white rounded-xl shadow">لا توجد أسئلة. أضف سؤالاً الآن!</div>';
-        else container.innerHTML = questions.map(q => `<div class="bg-white rounded-xl p-4 shadow flex justify-between items-center"><div><p class="font-semibold">${q.text}</p><p class="text-sm text-gray-500">${q.type === 'mcq' ? 'اختيار من متعدد' : 'صح/خطأ'}</p></div><button onclick="deleteQuestion('${q.id}')" class="text-red-500">حذف</button></div>`).join('');
+        
+        if (!currentUser) {
+            container.innerHTML = '<div class="text-center p-6 bg-white rounded-xl shadow">الرجاء تسجيل الدخول أولاً</div>';
+            return;
+        }
+        
+        if (questions.length === 0) {
+            container.innerHTML = '<div class="text-center p-6 bg-white rounded-xl shadow">لا توجد أسئلة. أضف سؤالاً الآن!</div>';
+        } else {
+            container.innerHTML = questions.map(q => `
+                <div class="bg-white rounded-xl p-4 shadow flex justify-between items-center">
+                    <div>
+                        <p class="font-semibold">${q.text}</p>
+                        <p class="text-sm text-gray-500">${q.type === 'mcq' ? 'اختيار من متعدد' : 'صح/خطأ'}</p>
+                    </div>
+                    <button onclick="deleteQuestion('${q.id}')" class="text-red-500 hover:text-red-700 transition">
+                        <i class="fas fa-trash"></i> حذف
+                    </button>
+                </div>
+            `).join('');
+        }
     }
-
+    
     function refreshAnalytics() {
         const myResults = currentUser ? results.filter(r => r.userId === currentUser.uid) : [];
         const percentages = myResults.map(r => r.percentage);
-        const avg = percentages.length ? (percentages.reduce((a,b)=>a+b,0)/percentages.length).toFixed(1) : 0;
+        const avg = percentages.length ? (percentages.reduce((a, b) => a + b, 0) / percentages.length).toFixed(1) : 0;
         const passCount = percentages.filter(p => p >= 50).length;
-        const passRate = percentages.length ? ((passCount/percentages.length)*100).toFixed(1) : 0;
+        const passRate = percentages.length ? ((passCount / percentages.length) * 100).toFixed(1) : 0;
+        
         document.getElementById('avgScore').innerText = avg + '%';
         document.getElementById('passRate').innerText = passRate + '%';
         
         const ctx = document.getElementById('statsChart').getContext('2d');
         if (chart) chart.destroy();
-        chart = new Chart(ctx, { type: 'bar', data: { labels: ['الدرجات'], datasets: [{ label: 'الدرجات (%)', data: percentages.length ? percentages : [0], backgroundColor: '#6366f1', borderRadius: 8 }] } });
+        chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['الدرجات'],
+                datasets: [{
+                    label: 'الدرجات (%)',
+                    data: percentages.length ? percentages : [0],
+                    backgroundColor: '#6366f1',
+                    borderRadius: 8
+                }]
+            }
+        });
     }
-
+    
     function refreshAccountPage() {
         const container = document.getElementById('accountContent');
+        
         if (currentUser) {
             const plan = plans.find(p => p.id === currentUser.plan) || plans[0];
-            container.innerHTML = `<div class="text-center"><div class="w-24 h-24 mx-auto bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white text-3xl font-bold mb-4">${currentUser.name?.charAt(0) || 'U'}</div><h3 class="text-xl font-bold">${currentUser.name || ''}</h3><p class="text-gray-500 mb-4">${currentUser.email || ''}</p><div class="bg-gray-50 p-4 rounded-lg mb-4"><p>الباقة: <strong>${plan.name}</strong></p><p id="accountRemaining">الامتحانات المتبقية: --</p></div><button onclick="navigateTo('upgrade')" class="w-full bg-amber-500 text-white py-2 rounded-lg mb-2">🚀 ترقية</button><button onclick="logout()" class="w-full bg-red-500 text-white py-2 rounded-lg">تسجيل خروج</button></div>`;
+            container.innerHTML = `
+                <div class="text-center">
+                    <div class="w-24 h-24 mx-auto bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white text-3xl font-bold mb-4">
+                        ${currentUser.name?.charAt(0) || 'U'}
+                    </div>
+                    <h3 class="text-xl font-bold">${currentUser.name || ''}</h3>
+                    <p class="text-gray-500 mb-4">${currentUser.email || ''}</p>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <p>الباقة: <strong class="text-indigo-600">${plan.name}</strong></p>
+                        <p id="accountRemaining">الامتحانات المتبقية: --</p>
+                        <p id="accountExpiry">تاريخ التجديد: --</p>
+                    </div>
+                    <button onclick="navigateTo('upgrade')" class="w-full bg-amber-500 text-white py-2 rounded-lg mb-2 hover:bg-amber-600 transition">
+                        🚀 ترقية الحساب
+                    </button>
+                    <button onclick="logout()" class="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition">
+                        تسجيل خروج
+                    </button>
+                </div>
+            `;
             updateRemainingExams();
         } else {
-            container.innerHTML = `<div class="text-center"><i class="fas fa-user-circle text-6xl text-indigo-600 mb-4"></i><h2 class="text-2xl font-bold mb-4">مرحباً بك</h2><div id="googleBtn"></div><div class="relative my-6"><div class="border-t border-gray-300"></div><span class="absolute top-[-12px] left-1/2 transform -translate-x-1/2 bg-white px-2 text-gray-500">أو</span></div><button onclick="showTecnoPopup()" class="w-full bg-emerald-600 text-white py-2 rounded-lg mb-3"><i class="fas fa-coins"></i> تكنو شرك</button><p>ليس لديك حساب؟ <a onclick="showRegisterPopup()" class="text-indigo-600 cursor-pointer">إنشاء حساب</a></p></div>`;
+            container.innerHTML = `
+                <div class="text-center">
+                    <i class="fas fa-user-circle text-6xl text-indigo-600 mb-4"></i>
+                    <h2 class="text-2xl font-bold mb-4">مرحباً بك</h2>
+                    <div id="googleBtn"></div>
+                    <div class="relative my-6">
+                        <div class="border-t border-gray-300"></div>
+                        <span class="absolute top-[-12px] left-1/2 transform -translate-x-1/2 bg-white px-2 text-gray-500">أو</span>
+                    </div>
+                    <button onclick="showTecnoPopup()" class="w-full bg-emerald-600 text-white py-2 rounded-lg mb-3 hover:bg-emerald-700 transition">
+                        <i class="fas fa-coins"></i> تكنو شرك
+                    </button>
+                    <p>ليس لديك حساب؟ <a onclick="showRegisterPopup()" class="text-indigo-600 cursor-pointer hover:underline">إنشاء حساب</a></p>
+                </div>
+            `;
+            
             if (typeof google !== 'undefined') {
-                google.accounts.id.initialize({ client_id: "501314955450-r7tcdfbocl0vpa6f9s0clac43215tmuf.apps.googleusercontent.com", callback: handleGoogleLogin });
-                google.accounts.id.renderButton(document.getElementById("googleBtn"), { theme: "outline", size: "large", width: "100%" });
+                google.accounts.id.initialize({
+                    client_id: "501314955450-r7tcdfbocl0vpa6f9s0clac43215tmuf.apps.googleusercontent.com",
+                    callback: handleGoogleLogin
+                });
+                google.accounts.id.renderButton(document.getElementById("googleBtn"), {
+                    theme: "outline",
+                    size: "large",
+                    width: "100%"
+                });
             }
         }
     }
-
+    
     function refreshPlansPage() {
         const container = document.getElementById('plansList');
-        container.innerHTML = plans.filter(p => p.id !== 'free').map(plan => `<div class="bg-white rounded-xl shadow-lg p-6 text-center border-2 hover:border-indigo-400 transition"><div class="w-16 h-16 mx-auto bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center mb-4"><i class="fas fa-gem text-white text-2xl"></i></div><h3 class="text-2xl font-bold text-indigo-600">${plan.name}</h3><p class="text-3xl font-bold my-2">${plan.price} ج</p><p>${plan.examsCount} امتحان شهرياً</p><ul class="text-sm text-gray-500 mt-3">${plan.features.map(f => `<li><i class="fas fa-check text-green-500 ml-1"></i> ${f}</li>`).join('')}</ul><button onclick="requestUpgrade('${plan.id}')" class="mt-4 bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition"><i class="fab fa-whatsapp ml-1"></i> اطلب الترقية</button></div>`).join('');
+        container.innerHTML = plans.filter(p => p.id !== 'free').map(plan => `
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center border-2 hover:border-indigo-400 transition">
+                <div class="w-16 h-16 mx-auto bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-gem text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-indigo-600">${plan.name}</h3>
+                <p class="text-3xl font-bold my-2">${plan.price} ج</p>
+                <p>${plan.examsCount} امتحان شهرياً</p>
+                <ul class="text-sm text-gray-500 mt-3">
+                    ${plan.features.map(f => `<li><i class="fas fa-check text-green-500 ml-1"></i> ${f}</li>`).join('')}
+                </ul>
+                <button onclick="requestUpgrade('${plan.id}')" class="mt-4 bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition">
+                    <i class="fab fa-whatsapp ml-1"></i> اطلب الترقية
+                </button>
+            </div>
+        `).join('');
     }
-
+    
     async function refreshExamLimit() {
-    if (!currentUser) return;
-    
-    // تأكد من تحميل الخطط أولاً
-    if (plans.length === 0) {
-        await loadPlans();
+        if (!currentUser) return;
+        
+        if (plans.length === 0) await loadPlans();
+        
+        const plan = plans.find(p => p.id === currentUser.plan) || plans[0];
+        if (!plan) return;
+        
+        const now = new Date();
+        const startMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+        const used = results.filter(r => r.userId === currentUser.uid && new Date(r.date).getTime() >= startMonth).length;
+        const remaining = Math.max(0, plan.examsCount - used);
+        
+        const userSub = subscriptions.find(s => s.userId === currentUser.uid);
+        let expiryText = 'غير محدد';
+        if (userSub && userSub.expiryDate) {
+            expiryText = new Date(userSub.expiryDate).toLocaleDateString('ar-EG');
+        }
+        
+        const warning = document.getElementById('examLimitWarning');
+        const limitMsg = document.getElementById('limitMsg');
+        const accountRemaining = document.getElementById('accountRemaining');
+        const accountExpiry = document.getElementById('accountExpiry');
+        
+        if (remaining <= 0 && warning) {
+            warning.classList.remove('hidden');
+            if (limitMsg) limitMsg.innerText = `⚠️ لقد استنفذت حدك الشهري (${plan.examsCount} امتحان). قم بالترقية لإنشاء المزيد.`;
+        } else if (warning) {
+            warning.classList.add('hidden');
+        }
+        
+        if (accountRemaining) accountRemaining.innerText = `الامتحانات المتبقية: ${remaining} من ${plan.examsCount}`;
+        if (accountExpiry) accountExpiry.innerText = `تاريخ التجديد: ${expiryText}`;
     }
     
-    const plan = plans.find(p => p.id === currentUser.plan) || plans[0];
-    if (!plan) return;
-    
-    const now = new Date();
-    const startMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-    const used = results.filter(r => r.userId === currentUser.uid && new Date(r.date).getTime() >= startMonth).length;
-    const remaining = Math.max(0, plan.examsCount - used);
-    
-    const warning = document.getElementById('examLimitWarning');
-    const limitMsg = document.getElementById('limitMsg');
-    if (remaining <= 0 && warning) {
-        warning.classList.remove('hidden');
-        if (limitMsg) limitMsg.innerText = `⚠️ لقد استنفذت حدك الشهري (${plan.examsCount} امتحان). قم بالترقية لإنشاء المزيد.`;
-    } else if (warning) {
-        warning.classList.add('hidden');
+    function updateRemainingExams() {
+        refreshExamLimit();
     }
     
-    const accRemaining = document.getElementById('accountRemaining');
-    if (accRemaining) accRemaining.innerText = `الامتحانات المتبقية: ${remaining} من ${plan.examsCount}`;
-}
-
-    function updateRemainingExams() { refreshExamLimit(); }
-
-    // ==================== إنشاء الامتحان مع الرابط ====================
+    // ==================== دوال إنشاء الامتحان ====================
+    
     function addQuestion() {
         const container = document.getElementById('questionsContainer');
         const id = Date.now();
         const div = document.createElement('div');
         div.className = 'question-builder';
         div.setAttribute('data-id', id);
-        div.innerHTML = `<div class="flex justify-between items-center mb-2"><strong>سؤال جديد</strong><button type="button" onclick="this.closest('.question-builder').remove()" class="text-red-500">✖</button></div>
+        div.innerHTML = `
+            <div class="flex justify-between items-center mb-2">
+                <strong>سؤال جديد</strong>
+                <button type="button" onclick="this.closest('.question-builder').remove()" class="text-red-500 hover:text-red-700">✖</button>
+            </div>
             <input type="text" placeholder="نص السؤال" class="q-text w-full p-2 border rounded mb-2">
-            <select class="q-type w-full p-2 border rounded mb-2" onchange="updateType(this)"><option value="mcq">اختيار من متعدد</option><option value="truefalse">صح/خطأ</option></select>
+            <select class="q-type w-full p-2 border rounded mb-2" onchange="updateType(this)">
+                <option value="mcq">اختيار من متعدد</option>
+                <option value="truefalse">صح/خطأ</option>
+            </select>
             <div class="options-area"></div>
-            <input type="number" placeholder="درجة السؤال" class="q-score w-full p-2 border rounded mt-2" value="10">`;
+            <input type="number" placeholder="درجة السؤال" class="q-score w-full p-2 border rounded mt-2" value="10">
+        `;
         container.appendChild(div);
         updateType(div.querySelector('.q-type'));
     }
-
-    function updateType(select) {
-    const div = select.closest('.question-builder');
-    const area = div.querySelector('.options-area');
-    const type = select.value;
-    const randomId = 'q_' + Date.now() + '_' + Math.random();
-    div.setAttribute('data-id', randomId);
     
-    if (type === 'mcq') {
-        area.innerHTML = `
-            <div class="option-row">
-                <input type="text" placeholder="الخيار 1" class="flex-1 p-2 border rounded">
-                <input type="radio" name="correct-${randomId}" value="0">
-            </div>
-            <div class="option-row">
-                <input type="text" placeholder="الخيار 2" class="flex-1 p-2 border rounded">
-                <input type="radio" name="correct-${randomId}" value="1">
-            </div>
-            <button type="button" onclick="addOption(this)" class="text-green-600 text-sm mt-1">+ إضافة خيار</button>
-        `;
-    } else {
-        area.innerHTML = `
-            <div class="option-row">
-                <input type="text" value="صح" readonly class="flex-1 p-2 border rounded bg-gray-100">
-                <input type="radio" name="correct-${randomId}" value="صح">
-            </div>
-            <div class="option-row">
-                <input type="text" value="خطأ" readonly class="flex-1 p-2 border rounded bg-gray-100">
-                <input type="radio" name="correct-${randomId}" value="خطأ">
-            </div>
-        `;
+    function updateType(select) {
+        const div = select.closest('.question-builder');
+        const area = div.querySelector('.options-area');
+        const type = select.value;
+        const randomId = 'q_' + Date.now() + '_' + Math.random();
+        div.setAttribute('data-id', randomId);
+        
+        if (type === 'mcq') {
+            area.innerHTML = `
+                <div class="option-row">
+                    <input type="text" placeholder="الخيار 1" class="flex-1 p-2 border rounded">
+                    <input type="radio" name="correct-${randomId}" value="0">
+                </div>
+                <div class="option-row">
+                    <input type="text" placeholder="الخيار 2" class="flex-1 p-2 border rounded">
+                    <input type="radio" name="correct-${randomId}" value="1">
+                </div>
+                <button type="button" onclick="addOption(this)" class="text-green-600 text-sm mt-1 hover:text-green-700">
+                    + إضافة خيار
+                </button>
+            `;
+        } else {
+            area.innerHTML = `
+                <div class="option-row">
+                    <input type="text" value="صح" readonly class="flex-1 p-2 border rounded bg-gray-100">
+                    <input type="radio" name="correct-${randomId}" value="صح">
+                </div>
+                <div class="option-row">
+                    <input type="text" value="خطأ" readonly class="flex-1 p-2 border rounded bg-gray-100">
+                    <input type="radio" name="correct-${randomId}" value="خطأ">
+                </div>
+            `;
+        }
     }
-}
-
+    
     function addOption(btn) {
         const area = btn.closest('.options-area');
         const div = btn.closest('.question-builder');
         const count = area.querySelectorAll('.option-row').length;
         const row = document.createElement('div');
         row.className = 'option-row';
-        row.innerHTML = `<input type="text" placeholder="الخيار ${count+1}" class="flex-1 p-2 border rounded"><input type="radio" name="correct-${div.dataset.id}" value="${count}">`;
+        row.innerHTML = `
+            <input type="text" placeholder="الخيار ${count + 1}" class="flex-1 p-2 border rounded">
+            <input type="radio" name="correct-${div.dataset.id}" value="${count}">
+        `;
         area.insertBefore(row, btn);
     }
-
-   function collectQuestions() {
-    const qs = [];
-    document.querySelectorAll('#questionsContainer .question-builder').forEach((div, index) => {
-        const text = div.querySelector('.q-text')?.value;
-        const type = div.querySelector('.q-type')?.value;
-        const score = parseInt(div.querySelector('.q-score')?.value) || 10;
-        let correct = '';
-        let options = [];
-        
-        if (type === 'mcq') {
-            const rows = div.querySelectorAll('.option-row');
-            rows.forEach((row, i) => {
-                const opt = row.querySelector('input[type="text"]')?.value;
-                if (opt && opt.trim()) options.push(opt.trim());
-                const radio = row.querySelector('input[type="radio"]');
-                if (radio && radio.checked) correct = opt;
-            });
-        } else if (type === 'truefalse') {
-            const radio = div.querySelector('input[type="radio"]:checked');
-            correct = radio ? radio.value : '';
-            options = ['صح', 'خطأ'];
-        }
-        
-        if (text && text.trim() && correct) {
-            qs.push({ 
-                id: Date.now() + index, 
-                text: text.trim(), 
-                type: type, 
-                options: options, 
-                correct: correct, 
-                score: score 
-            });
-        }
-    });
-    console.log('تم جمع الأسئلة:', qs.length); // للتأكد
-    return qs;
-}
-    // دالة إنشاء الامتحان الرئيسية مع الرابط
+    
+    function collectQuestions() {
+        const qs = [];
+        document.querySelectorAll('#questionsContainer .question-builder').forEach((div, index) => {
+            const text = div.querySelector('.q-text')?.value;
+            const type = div.querySelector('.q-type')?.value;
+            const score = parseInt(div.querySelector('.q-score')?.value) || 10;
+            let correct = '';
+            let options = [];
+            
+            if (type === 'mcq') {
+                const rows = div.querySelectorAll('.option-row');
+                rows.forEach((row, i) => {
+                    const opt = row.querySelector('input[type="text"]')?.value;
+                    if (opt && opt.trim()) options.push(opt.trim());
+                    const radio = row.querySelector('input[type="radio"]');
+                    if (radio && radio.checked) correct = opt;
+                });
+            } else if (type === 'truefalse') {
+                const radio = div.querySelector('input[type="radio"]:checked');
+                correct = radio ? radio.value : '';
+                options = ['صح', 'خطأ'];
+            }
+            
+            if (text && text.trim() && correct) {
+                qs.push({
+                    id: Date.now() + index,
+                    text: text.trim(),
+                    type: type,
+                    options: options,
+                    correct: correct,
+                    score: score
+                });
+            }
+        });
+        return qs;
+    }
+    
     async function createNewExam() {
         if (!currentUser) {
             showToast('❌ الرجاء تسجيل الدخول أولاً');
@@ -517,11 +1344,17 @@
         }
         
         const title = document.getElementById('examTitle')?.value.trim();
+        const className = document.getElementById('examClass')?.value.trim();
         const duration = parseInt(document.getElementById('examDuration')?.value) || 30;
         const passScore = parseInt(document.getElementById('examPassScore')?.value) || 50;
         
         if (!title) {
             showToast('❌ الرجاء إدخال عنوان الامتحان');
+            return false;
+        }
+        
+        if (!className) {
+            showToast('❌ الرجاء إدخال اسم الصف الدراسي');
             return false;
         }
         
@@ -533,12 +1366,13 @@
         
         const totalScore = questionsList.reduce((sum, q) => sum + (q.score || 10), 0);
         const examId = 'EXAM_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8).toUpperCase();
-        const baseUrl = window.location.href.split('#')[0];
-        const examLink = baseUrl + '#exam=' + examId;
+        const baseUrl = window.location.href.split('?')[0];
+        const examLink = baseUrl + '?exam=' + examId;
         
         const examData = {
             id: examId,
             title: title,
+            className: className,
             duration: duration,
             passScore: passScore,
             totalScore: totalScore,
@@ -554,11 +1388,10 @@
             await db.ref(`exams/${examId}`).set(examData);
             exams.push(examData);
             
-            // عرض نافذة الرابط
-            showExamLinkPopup(examLink, title);
+            showExamLinkPopup(examLink, title, className);
             
-            // تنظيف النموذج
             document.getElementById('examTitle').value = '';
+            document.getElementById('examClass').value = '';
             document.getElementById('questionsContainer').innerHTML = '';
             addQuestion();
             
@@ -571,244 +1404,593 @@
             return false;
         }
     }
-
-    // أضف هذه الدالة خارج دالة createNewExam
-function showExamLinkPopup(link, title) {
-    // إزالة أي نافذة موجودة
-    const oldModal = document.getElementById('examLinkModal');
-    if (oldModal) oldModal.remove();
     
-    const modalHtml = `
-        <div id="examLinkModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 text-center">
-                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-check text-green-500 text-3xl"></i>
+    function showExamLinkPopup(link, title, className) {
+        const oldModal = document.getElementById('examLinkModal');
+        if (oldModal) oldModal.remove();
+        
+        const modalHtml = `
+            <div id="examLinkModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-check text-green-500 text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">✅ تم إنشاء الامتحان بنجاح!</h3>
+                    <p class="text-gray-600 mb-1">${title}</p>
+                    <p class="text-indigo-600 text-sm mb-4">📚 ${className}</p>
+                    <div class="bg-gray-100 p-3 rounded-lg mb-4">
+                        <p class="text-xs text-gray-500 mb-1">🔗 رابط الامتحان:</p>
+                        <p class="text-sm break-all font-mono">${link}</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="copyToClipboard('${link}'); closeExamLinkModal()" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
+                            <i class="fas fa-copy ml-1"></i> نسخ الرابط
+                        </button>
+                        <button onclick="closeExamLinkModal()" class="flex-1 bg-gray-200 py-2 rounded-lg hover:bg-gray-300">
+                            إغلاق
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-3">يمكنك مشاركة هذا الرابط مع طلابك</p>
                 </div>
-                <h3 class="text-xl font-bold mb-2">✅ تم إنشاء الامتحان بنجاح!</h3>
-                <p class="text-gray-600 mb-4" id="examTitleDisplay">${title}</p>
-                <div class="bg-gray-100 p-3 rounded-lg mb-4">
-                    <p class="text-xs text-gray-500 mb-1">🔗 رابط الامتحان:</p>
-                    <p class="text-sm break-all font-mono" id="examLinkDisplay">${link}</p>
-                </div>
-                <div class="flex gap-3">
-                    <button onclick="copyExamLinkAndClose()" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
-                        <i class="fas fa-copy ml-1"></i> نسخ الرابط
-                    </button>
-                    <button onclick="closeExamLinkModal()" class="flex-1 bg-gray-200 py-2 rounded-lg hover:bg-gray-300">
-                        إغلاق
-                    </button>
-                </div>
-                <p class="text-xs text-gray-400 mt-3">يمكنك مشاركة هذا الرابط مع طلابك</p>
             </div>
-        </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-}
-
-function copyToClipboard(text) { 
-    if (!text) return;
-    navigator.clipboard.writeText(text).then(() => {
-        showToast('✅ تم نسخ الرابط بنجاح!');
-    }).catch(() => {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-        showToast('✅ تم نسخ الرابط بنجاح!');
-    });
-}
-
-function closeExamLinkModal() {
-    const modal = document.getElementById('examLinkModal');
-    if (modal) modal.remove();
-}
-
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+    
     function closeExamLinkModal() {
         const modal = document.getElementById('examLinkModal');
         if (modal) modal.remove();
     }
-
-    // ربط الحدث
-    const examFormElement = document.getElementById('examForm');
-    if (examFormElement) {
-        const oldForm = examFormElement.cloneNode(true);
-        examFormElement.parentNode.replaceChild(oldForm, examFormElement);
-        oldForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await createNewExam();
-        });
-    }
-
-    // ==================== الامتحانات ====================
+    
+    // ==================== دوال الامتحانات للطلاب ====================
+    
     function startExam(examId) {
         const exam = exams.find(e => e.id === examId);
         if (!exam) return;
-        if (exam.isActive === false) { showToast('الامتحان متوقف حالياً'); return; }
+        if (exam.isActive === false) {
+            showToast('الامتحان متوقف حالياً');
+            return;
+        }
         sessionStorage.setItem('currentExam', JSON.stringify(exam));
         showStudentExam(exam);
     }
-
+    
     function showStudentExam(exam) {
         document.getElementById('studentExamContainer').classList.remove('hidden-page');
         const container = document.getElementById('studentExamContent');
-        container.innerHTML = `<div class="text-center p-8"><i class="fas fa-user-graduate text-6xl text-indigo-600 mb-4"></i><h2 class="text-2xl font-bold mb-4">${exam.title}</h2><input type="text" id="studentName" placeholder="الاسم الكامل" class="w-full max-w-md p-3 border rounded mx-auto mb-3"><input type="text" id="studentNumber" placeholder="رقم الطالب" class="w-full max-w-md p-3 border rounded mx-auto mb-6"><button onclick="renderExam('${exam.id}')" class="bg-indigo-600 text-white px-6 py-2 rounded">بدء الامتحان</button></div>`;
+        container.innerHTML = `
+            <div class="text-center p-8">
+                <i class="fas fa-user-graduate text-6xl text-indigo-600 mb-4"></i>
+                <h2 class="text-2xl font-bold mb-2">${exam.title}</h2>
+                <p class="text-indigo-600 mb-4">📚 ${exam.className || 'بدون صف'}</p>
+                <p class="text-gray-600 mb-6">الرجاء إدخال بياناتك لبدء الامتحان</p>
+                <input type="text" id="studentName" placeholder="الاسم الكامل" class="w-full max-w-md p-3 border rounded-lg mb-3 mx-auto">
+                <input type="text" id="studentNumber" placeholder="رقم الجلوس" class="w-full max-w-md p-3 border rounded-lg mb-6 mx-auto">
+                <button onclick="renderExam('${exam.id}')" class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition">
+                    بدء الامتحان
+                </button>
+            </div>
+        `;
     }
-
+    
     function renderExam(examId) {
         const exam = exams.find(e => e.id === examId);
         if (!exam) return;
+        
         const studentName = document.getElementById('studentName')?.value.trim();
-        if (!studentName) { alert('أدخل اسمك'); return; }
+        if (!studentName) {
+            alert('أدخل اسمك');
+            return;
+        }
+        
         const studentNumber = document.getElementById('studentNumber')?.value.trim() || 'غير محدد';
         sessionStorage.setItem('studentName', studentName);
         sessionStorage.setItem('studentNumber', studentNumber);
         
         let qHtml = '';
         exam.questions.forEach((q, idx) => {
-            if (q.type === 'mcq') qHtml += `<div class="border rounded-lg p-4 mb-4 bg-gray-50"><p class="font-bold mb-2">${idx+1}. ${q.text} (${q.score} درجة)</p>${q.options.map(opt => `<label class="flex items-center gap-2 py-1"><input type="radio" name="q${idx}" value="${opt}"> ${opt}</label>`).join('')}</div>`;
-            else qHtml += `<div class="border rounded-lg p-4 mb-4 bg-gray-50"><p class="font-bold mb-2">${idx+1}. ${q.text} (${q.score} درجة)</p><label class="flex items-center gap-2"><input type="radio" name="q${idx}" value="true"> صح</label><label class="flex items-center gap-2"><input type="radio" name="q${idx}" value="false"> خطأ</label></div>`;
+            if (q.type === 'mcq') {
+                qHtml += `
+                    <div class="border rounded-lg p-4 mb-4 bg-gray-50">
+                        <p class="font-bold mb-2">${idx + 1}. ${q.text} <span class="text-indigo-600">(${q.score} درجة)</span></p>
+                        ${q.options.map(opt => `
+                            <label class="flex items-center gap-2 py-1 cursor-pointer hover:bg-gray-100 p-1 rounded">
+                                <input type="radio" name="q${idx}" value="${opt}">
+                                <span>${opt}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                qHtml += `
+                    <div class="border rounded-lg p-4 mb-4 bg-gray-50">
+                        <p class="font-bold mb-2">${idx + 1}. ${q.text} <span class="text-indigo-600">(${q.score} درجة)</span></p>
+                        <label class="flex items-center gap-2 py-1 cursor-pointer hover:bg-gray-100 p-1 rounded">
+                            <input type="radio" name="q${idx}" value="true"> صح
+                        </label>
+                        <label class="flex items-center gap-2 py-1 cursor-pointer hover:bg-gray-100 p-1 rounded">
+                            <input type="radio" name="q${idx}" value="false"> خطأ
+                        </label>
+                    </div>
+                `;
+            }
         });
         
         const container = document.getElementById('studentExamContent');
-        container.innerHTML = `<div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold">${exam.title}</h2><div class="bg-gray-100 p-3 rounded text-center"><div class="text-sm">الوقت المتبقي</div><div id="timerDisplay" class="text-2xl font-bold text-indigo-600">${exam.duration}:00</div></div></div><form id="examForm2" onsubmit="submitStudentExam(event, '${exam.id}')">${qHtml}<button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg mt-4">إرسال الإجابات</button></form>`;
+        container.innerHTML = `
+            <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
+                <h2 class="text-xl font-bold">${exam.title}</h2>
+                <div class="bg-gray-100 p-3 rounded text-center">
+                    <div class="text-sm text-gray-500">الوقت المتبقي</div>
+                    <div id="timerDisplay" class="text-2xl font-bold text-indigo-600">${exam.duration}:00</div>
+                </div>
+            </div>
+            <form id="examForm2" onsubmit="submitStudentExam(event, '${exam.id}')">
+                ${qHtml}
+                <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg mt-4 hover:bg-green-700 transition">
+                    <i class="fas fa-paper-plane ml-2"></i> إرسال الإجابات
+                </button>
+            </form>
+            <footer class="mt-6 pt-4 border-t text-center text-gray-400 text-sm">
+                <p>Developed by Mohamed Emad Abd El-Atty | 01144100018</p>
+            </footer>
+        `;
         
         let timeLeft = exam.duration * 60;
         if (studentTimer) clearInterval(studentTimer);
         studentTimer = setInterval(() => {
-            if (timeLeft <= 0) { clearInterval(studentTimer); submitStudentExam(null, exam.id); }
-            else { timeLeft--; const mins = Math.floor(timeLeft/60), secs = timeLeft%60; document.getElementById('timerDisplay').innerHTML = `${mins}:${secs.toString().padStart(2,'0')}`; }
+            if (timeLeft <= 0) {
+                clearInterval(studentTimer);
+                submitStudentExam(null, exam.id);
+            } else {
+                timeLeft--;
+                const mins = Math.floor(timeLeft / 60);
+                const secs = timeLeft % 60;
+                document.getElementById('timerDisplay').innerHTML = `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
         }, 1000);
     }
-
-   async function submitStudentExam(event, examId) {
-    if (event) event.preventDefault();
-    if (studentTimer) clearInterval(studentTimer);
     
-    const exam = exams.find(e => e.id === examId);
-    if (!exam) return;
-    
-    const studentName = sessionStorage.getItem('studentName');
-    const studentNumber = sessionStorage.getItem('studentNumber');
-    let total = 0;
-    
-    exam.questions.forEach((q, idx) => {
-        const selected = document.querySelector(`input[name="q${idx}"]:checked`);
-        const qScore = q.score || 10; // قيمة افتراضية إذا لم تكن موجودة
-        if (selected && selected.value === q.correct) total += qScore;
-    });
-    
-    const totalPossible = exam.totalScore || exam.questions.reduce((sum, q) => sum + (q.score || 10), 0);
-    const percentage = totalPossible > 0 ? (total / totalPossible) * 100 : 0;
-    const passed = percentage >= (exam.passScore || 50);
-    const grade = percentage >= 90 ? 'ممتاز' : percentage >= 75 ? 'جيد جداً' : percentage >= 50 ? 'مقبول' : 'ضعيف';
-    
-    const result = { 
-        id: genId(), 
-        studentName, 
-        studentNumber, 
-        examId: exam.id, 
-        examTitle: exam.title, 
-        score: total, 
-        totalScore: totalPossible, 
-        percentage: percentage, 
-        passed: passed, 
-        grade: grade, 
-        userId: exam.creatorId, 
-        date: new Date().toISOString() 
-    };
-    
-    await db.ref(`results/${result.id}`).set(result);
-    results.push(result);
-    
-    const container = document.getElementById('studentExamContent');
-    if (container) {
-        container.innerHTML = `<div class="text-center p-8">
-            <i class="fas fa-check-circle text-green-500 text-6xl mb-4"></i>
-            <h2 class="text-2xl font-bold mb-4">تم الإرسال!</h2>
-            <div class="bg-gray-100 p-6 rounded">
-                <p>الدرجة: ${total}/${totalPossible}</p>
-                <p>النسبة: ${percentage.toFixed(1)}%</p>
-                <p class="text-lg font-bold ${passed ? 'text-green-600' : 'text-red-600'}">${passed ? '✅ ناجح' : '❌ راسب'}</p>
+    async function submitStudentExam(event, examId) {
+        if (event) event.preventDefault();
+        if (studentTimer) clearInterval(studentTimer);
+        
+        const exam = exams.find(e => e.id === examId);
+        if (!exam) return;
+        
+        const studentName = sessionStorage.getItem('studentName');
+        const studentNumber = sessionStorage.getItem('studentNumber');
+        let total = 0;
+        let answers = [];
+        
+        exam.questions.forEach((q, idx) => {
+            const selected = document.querySelector(`input[name="q${idx}"]:checked`);
+            const qScore = q.score || 10;
+            const isCorrect = selected && selected.value === q.correct;
+            if (isCorrect) total += qScore;
+            answers.push({
+                question: q.text,
+                userAnswer: selected ? selected.value : 'لم يجب',
+                correctAnswer: q.correct,
+                isCorrect: isCorrect,
+                score: qScore
+            });
+        });
+        
+        const totalPossible = exam.totalScore || exam.questions.reduce((sum, q) => sum + (q.score || 10), 0);
+        const percentage = totalPossible > 0 ? (total / totalPossible) * 100 : 0;
+        const passed = percentage >= (exam.passScore || 50);
+        const grade = percentage >= 90 ? 'ممتاز' : percentage >= 75 ? 'جيد جداً' : percentage >= 50 ? 'مقبول' : 'ضعيف';
+        
+        const result = {
+            id: genId(),
+            studentName: studentName,
+            studentNumber: studentNumber,
+            examId: exam.id,
+            examTitle: exam.title,
+            examClass: exam.className,
+            score: total,
+            totalScore: totalPossible,
+            percentage: percentage,
+            passed: passed,
+            grade: grade,
+            answers: answers,
+            userId: exam.creatorId,
+            date: new Date().toISOString()
+        };
+        
+        await db.ref(`results/${result.id}`).set(result);
+        results.push(result);
+        
+        const container = document.getElementById('studentExamContent');
+        container.innerHTML = `
+            <div class="text-center p-8">
+                <i class="fas fa-check-circle text-green-500 text-6xl mb-4"></i>
+                <h2 class="text-2xl font-bold mb-4">تم إرسال الامتحان بنجاح!</h2>
+                <div class="bg-gray-100 p-6 rounded max-w-md mx-auto">
+                    <p class="text-lg">الدرجة: <strong class="text-indigo-600">${total}/${totalPossible}</strong></p>
+                    <p class="text-lg">النسبة: <strong>${percentage.toFixed(1)}%</strong></p>
+                    <p class="text-lg">التقدير: <strong class="${passed ? 'text-green-600' : 'text-red-600'}">${grade}</strong></p>
+                </div>
+                <button onclick="closeStudentExam()" class="mt-6 bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition">
+                    إغلاق
+                </button>
             </div>
-            <button onclick="closeStudentExam()" class="mt-6 bg-indigo-600 text-white px-6 py-2 rounded">إغلاق</button>
-        </div>`;
+            <footer class="mt-6 pt-4 border-t text-center text-gray-400 text-sm">
+                <p>Developed by Mohamed Emad Abd El-Atty | 01144100018</p>
+            </footer>
+        `;
+        
+        if (currentUser && currentUser.uid === exam.creatorId) refreshHome();
     }
     
-    if (currentUser && currentUser.uid === exam.creatorId) refreshHome();
-}
-
     function closeStudentExam() {
         document.getElementById('studentExamContainer').classList.add('hidden-page');
         if (studentTimer) clearInterval(studentTimer);
         sessionStorage.clear();
-        window.location.hash = '';
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('exam')) {
+            const newUrl = window.location.pathname;
+            window.history.pushState({}, '', newUrl);
+        }
     }
-
+    
+    // ==================== دوال حذف الامتحان ====================
+    
     async function deleteExam(id) {
         deleteTarget = id;
         document.getElementById('deleteConfirmPopup').classList.add('show');
     }
+    
     async function confirmDelete() {
-        if (deleteTarget) { await db.ref(`exams/${deleteTarget}`).remove(); exams = exams.filter(e => e.id !== deleteTarget); refreshExamsList(); refreshHome(); showToast('تم الحذف'); }
+        if (deleteTarget) {
+            await db.ref(`exams/${deleteTarget}`).remove();
+            exams = exams.filter(e => e.id !== deleteTarget);
+            refreshExamsList();
+            refreshHome();
+            showToast('تم حذف الامتحان');
+        }
         closeDeletePopup();
     }
-    function closeDeletePopup() { document.getElementById('deleteConfirmPopup').classList.remove('show'); deleteTarget = null; }
-
-    // ==================== بنك الأسئلة ====================
-    function openQuestionModal() { document.getElementById('questionModal').classList.add('show'); updateQOptions(); }
-    function closeQuestionModal() { document.getElementById('questionModal').classList.remove('show'); }
-    function updateQOptions() { const type = document.getElementById('qType').value; const container = document.getElementById('qOptions'); if (type === 'mcq') container.innerHTML = `<input type="text" id="opt1" placeholder="الخيار 1" class="w-full p-2 border rounded mb-2"><input type="text" id="opt2" placeholder="الخيار 2" class="w-full p-2 border rounded mb-2>`; else container.innerHTML = ''; }
+    
+    function closeDeletePopup() {
+        document.getElementById('deleteConfirmPopup').classList.remove('show');
+        deleteTarget = null;
+    }
+    
+    // ==================== دوال بنك الأسئلة ====================
+    
+    function openQuestionModal() {
+        document.getElementById('questionModal').classList.add('show');
+        updateQOptions();
+    }
+    
+    function closeQuestionModal() {
+        document.getElementById('questionModal').classList.remove('show');
+    }
+    
+    function updateQOptions() {
+        const type = document.getElementById('qType').value;
+        const container = document.getElementById('qOptions');
+        if (type === 'mcq') {
+            container.innerHTML = `
+                <input type="text" id="opt1" placeholder="الخيار 1" class="w-full p-2 border rounded mb-2">
+                <input type="text" id="opt2" placeholder="الخيار 2" class="w-full p-2 border rounded mb-2">
+            `;
+        } else {
+            container.innerHTML = '';
+        }
+    }
+    
     document.getElementById('qType')?.addEventListener('change', updateQOptions);
+    
     async function addToBank() {
-        if (!currentUser) { showToast('سجل الدخول أولاً'); closeQuestionModal(); navigateTo('account'); return; }
+        if (!currentUser) {
+            showToast('سجل الدخول أولاً');
+            closeQuestionModal();
+            navigateTo('account');
+            return;
+        }
+        
         const text = document.getElementById('qText').value;
         const type = document.getElementById('qType').value;
         const correct = document.getElementById('qCorrect').value;
-        if (!text || !correct) { showToast('املأ الحقول'); return; }
+        
+        if (!text || !correct) {
+            showToast('املأ جميع الحقول');
+            return;
+        }
+        
         let options = [];
-        if (type === 'mcq') options = [document.getElementById('opt1')?.value, document.getElementById('opt2')?.value].filter(o=>o);
+        if (type === 'mcq') {
+            options = [document.getElementById('opt1')?.value, document.getElementById('opt2')?.value].filter(o => o);
+        }
+        
         const qid = genId();
-        await db.ref(`users/${currentUser.uid}/questions/${qid}`).set({ id: qid, text, type, correct, options });
+        await db.ref(`users/${currentUser.uid}/questions/${qid}`).set({
+            id: qid,
+            text: text,
+            type: type,
+            correct: correct,
+            options: options
+        });
         await loadQuestions();
         closeQuestionModal();
-        showToast('تمت الإضافة');
+        showToast('تمت إضافة السؤال');
     }
-    async function deleteQuestion(id) { await db.ref(`users/${currentUser.uid}/questions/${id}`).remove(); await loadQuestions(); refreshQuestionBank(); showToast('تم الحذف'); }
-
-    // ==================== تسجيل الدخول ====================
+    
+    async function deleteQuestion(id) {
+        await db.ref(`users/${currentUser.uid}/questions/${id}`).remove();
+        await loadQuestions();
+        refreshQuestionBank();
+        showToast('تم حذف السؤال');
+    }
+    
+    // ==================== دوال تسجيل الدخول ====================
+    
     async function handleGoogleLogin(response) {
         try {
             const cred = firebase.auth.GoogleAuthProvider.credential(response.credential);
             const result = await auth.signInWithCredential(cred);
             const user = result.user;
             const snap = await db.ref(`users/${user.uid}`).once('value');
-            if (!snap.val()) await db.ref(`users/${user.uid}`).set({ name: user.displayName, email: user.email, plan: 'free', createdAt: new Date().toISOString() });
-            currentUser = { uid: user.uid, ...(snap.val() || { name: user.displayName, email: user.email, plan: 'free' }) };
+            
+            if (!snap.val()) {
+                const newUser = {
+                    name: user.displayName,
+                    email: user.email,
+                    phone: '',
+                    plan: 'free',
+                    createdAt: new Date().toISOString()
+                };
+                await db.ref(`users/${user.uid}`).set(newUser);
+                await activateFreePlan(user.uid);
+            }
+            
+            currentUser = { uid: user.uid, ...(snap.val() || newUser) };
             updateUserUI();
             showToast(`مرحباً ${currentUser.name}`);
             await loadAllData();
             navigateTo('home');
-        } catch(e) { showToast('خطأ في التسجيل'); }
+        } catch (e) {
+            showToast('خطأ في التسجيل');
+        }
     }
-
-    function showTecnoPopup() { document.getElementById('tecnoLoginPopup').classList.add('show'); }
-    function closeTecnoPopup() { document.getElementById('tecnoLoginPopup').classList.remove('show'); }
-    function showRegisterPopup() { document.getElementById('registerPopup').classList.add('show'); }
-    function closeRegisterPopup() { document.getElementById('registerPopup').classList.remove('show'); }
-
+    
+    async function activateFreePlan(userId) {
+        const subscription = {
+            userId: userId,
+            planId: 'free',
+            planName: 'مجاني',
+            examsLimit: 8,
+            startDate: new Date().toISOString(),
+            expiryDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),
+            isActive: true,
+            renewedCount: 0
+        };
+        await db.ref(`subscriptions/${userId}`).set(subscription);
+        subscriptions.push(subscription);
+    }
+    
+    function showTecnoPopup() {
+        document.getElementById('tecnoLoginPopup').classList.add('show');
+    }
+    
+    function closeTecnoPopup() {
+        document.getElementById('tecnoLoginPopup').classList.remove('show');
+        document.getElementById('tecnoUser').value = '';
+        document.getElementById('tecnoPass').value = '';
+    }
+    
+    function showRegisterPopup() {
+        document.getElementById('registerPopup').classList.add('show');
+        document.getElementById('usernameError').classList.add('hidden');
+    }
+    
+    function closeRegisterPopup() {
+        document.getElementById('registerPopup').classList.remove('show');
+        document.getElementById('regName').value = '';
+        document.getElementById('regPhone').value = '';
+        document.getElementById('regUsername').value = '';
+        document.getElementById('regPassword').value = '';
+        document.getElementById('regConfirm').value = '';
+    }
+    
+    async function checkUsernameExists(username) {
+        const snap = await db.ref('users').once('value');
+        if (!snap.val()) return false;
+        for (let id in snap.val()) {
+            if (snap.val()[id].username === username) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    async function registerTecno() {
+        const name = document.getElementById('regName').value.trim();
+        const phone = document.getElementById('regPhone').value.trim();
+        let username = document.getElementById('regUsername').value.trim();
+        const pass = document.getElementById('regPassword').value;
+        const confirm = document.getElementById('regConfirm').value;
+        
+        if (!name || !phone || !username || !pass) {
+            showToast('املأ جميع الحقول');
+            return;
+        }
+        
+        if (pass !== confirm) {
+            showToast('كلمة المرور غير متطابقة');
+            return;
+        }
+        
+        if (!username.includes('@tecno.shark')) {
+            username = username.split('@')[0] + '@tecno.shark';
+        }
+        
+        const usernameExists = await checkUsernameExists(username);
+        if (usernameExists) {
+            document.getElementById('usernameError').classList.remove('hidden');
+            showToast('اسم المستخدم موجود بالفعل');
+            return;
+        }
+        
+        document.getElementById('usernameError').classList.add('hidden');
+        
+        const email = username.split('@')[0] + '@examhub.com';
+        
+        try {
+            const userCred = await auth.createUserWithEmailAndPassword(email, pass);
+            const newUser = {
+                name: name,
+                phone: phone,
+                username: username,
+                email: email,
+                password: pass,
+                plan: 'free',
+                createdAt: new Date().toISOString()
+            };
+            await db.ref(`users/${userCred.user.uid}`).set(newUser);
+            await activateFreePlan(userCred.user.uid);
+            currentUser = { uid: userCred.user.uid, ...newUser };
+            closeRegisterPopup();
+            updateUserUI();
+            showToast('تم إنشاء الحساب بنجاح');
+            await loadAllData();
+            navigateTo('home');
+        } catch (error) {
+            showToast('حدث خطأ في إنشاء الحساب');
+        }
+    }
+    
+    // ==================== دوال نسيت كلمة المرور ====================
+    
+    function showForgotPasswordPopup() {
+        closeTecnoPopup();
+        document.getElementById('forgotPasswordPopup').classList.add('show');
+        document.getElementById('forgotPhone').value = '';
+    }
+    
+    function closeForgotPasswordPopup() {
+        document.getElementById('forgotPasswordPopup').classList.remove('show');
+    }
+    
+    async function verifyPhoneForReset() {
+        const phone = document.getElementById('forgotPhone').value.trim();
+        if (!phone) {
+            showToast('الرجاء إدخال رقم الهاتف');
+            return;
+        }
+        
+        const snap = await db.ref('users').once('value');
+        let foundUser = null;
+        let foundUid = null;
+        
+        if (snap.val()) {
+            for (let uid in snap.val()) {
+                if (snap.val()[uid].phone === phone) {
+                    foundUser = snap.val()[uid];
+                    foundUid = uid;
+                    break;
+                }
+            }
+        }
+        
+        if (!foundUser) {
+            showToast('لا يوجد حساب بهذا الرقم');
+            return;
+        }
+        
+        resetTargetUser = { uid: foundUid, ...foundUser };
+        closeForgotPasswordPopup();
+        document.getElementById('resetPasswordPopup').classList.add('show');
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmNewPassword').value = '';
+    }
+    
+    function closeResetPasswordPopup() {
+        document.getElementById('resetPasswordPopup').classList.remove('show');
+        resetTargetUser = null;
+    }
+    
+    async function resetPassword() {
+        const newPass = document.getElementById('newPassword').value;
+        const confirmPass = document.getElementById('confirmNewPassword').value;
+        
+        if (!newPass || !confirmPass) {
+            showToast('الرجاء إدخال كلمة المرور');
+            return;
+        }
+        
+        if (newPass !== confirmPass) {
+            showToast('كلمة المرور غير متطابقة');
+            return;
+        }
+        
+        if (newPass.length < 6) {
+            showToast('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+            return;
+        }
+        
+        if (!resetTargetUser) {
+            showToast('حدث خطأ، حاول مرة أخرى');
+            return;
+        }
+        
+        try {
+            await db.ref(`users/${resetTargetUser.uid}/password`).set(newPass);
+            
+            const email = resetTargetUser.email;
+            try {
+                await auth.signInWithEmailAndPassword(email, newPass);
+            } catch {
+                // قد يكون المستخدم غير مسجل في Auth
+            }
+            
+            closeResetPasswordPopup();
+            showToast('تم تغيير كلمة المرور بنجاح');
+        } catch (error) {
+            showToast('حدث خطأ في تغيير كلمة المرور');
+        }
+    }
+    
     async function tecnoLogin() {
         const username = document.getElementById('tecnoUser').value.trim();
         const password = document.getElementById('tecnoPass').value;
-        if (!username || !password) { showToast('أدخل البيانات'); return; }
+        
+        if (!username || !password) {
+            showToast('أدخل البيانات');
+            return;
+        }
+        
         let clean = username.includes('@') ? username : username + '@tecno.shark';
         const snap = await db.ref('users').once('value');
-        let found = null, foundId = null;
-        for (let id in snap.val()) { if (snap.val()[id].username === clean) { found = snap.val()[id]; foundId = id; break; } }
-        if (!found || found.password !== password) { showToast('بيانات غير صحيحة'); return; }
+        let found = null;
+        let foundId = null;
+        
+        if (snap.val()) {
+            for (let id in snap.val()) {
+                if (snap.val()[id].username === clean) {
+                    found = snap.val()[id];
+                    foundId = id;
+                    break;
+                }
+            }
+        }
+        
+        if (!found || found.password !== password) {
+            showToast('بيانات غير صحيحة');
+            return;
+        }
+        
         const email = clean.split('@')[0] + '@examhub.com';
-        try { await auth.signInWithEmailAndPassword(email, password); } catch { await auth.createUserWithEmailAndPassword(email, password); }
+        try {
+            await auth.signInWithEmailAndPassword(email, password);
+        } catch {
+            await auth.createUserWithEmailAndPassword(email, password);
+        }
+        
         currentUser = { uid: auth.currentUser.uid, ...found };
         await db.ref(`users/${currentUser.uid}`).set(currentUser);
         closeTecnoPopup();
@@ -817,162 +1999,274 @@ function closeExamLinkModal() {
         await loadAllData();
         navigateTo('home');
     }
-
-    async function registerTecno() {
-        const name = document.getElementById('regName').value;
-        const phone = document.getElementById('regPhone').value;
-        let username = document.getElementById('regUsername').value;
-        const pass = document.getElementById('regPassword').value;
-        const confirm = document.getElementById('regConfirm').value;
-        if (!name || !phone || !username || !pass) { showToast('املأ الحقول'); return; }
-        if (pass !== confirm) { showToast('كلمة المرور غير متطابقة'); return; }
-        if (!username.includes('@tecno.shark')) username = username.split('@')[0] + '@tecno.shark';
-        const email = username.split('@')[0] + '@examhub.com';
-        const userCred = await auth.createUserWithEmailAndPassword(email, pass);
-        const newUser = { name, phone, username, email, password: pass, plan: 'free', createdAt: new Date().toISOString() };
-        await db.ref(`users/${userCred.user.uid}`).set(newUser);
-        currentUser = { uid: userCred.user.uid, ...newUser };
-        closeRegisterPopup();
+    
+    async function logout() {
+        await auth.signOut();
+        currentUser = null;
         updateUserUI();
-        showToast('تم إنشاء الحساب');
-        await loadAllData();
+        showToast('تم تسجيل الخروج');
         navigateTo('home');
+        await loadAllData();
     }
-
-    async function logout() { await auth.signOut(); currentUser = null; updateUserUI(); showToast('تم تسجيل الخروج'); navigateTo('home'); await loadAllData(); }
-
+    
     function updateUserUI() {
         const loginArea = document.getElementById('loginBtnArea');
         const avatarArea = document.getElementById('userAvatarArea');
+        
         if (currentUser) {
             loginArea.classList.add('hidden');
             avatarArea.classList.remove('hidden');
             document.getElementById('avatarInitial').innerText = currentUser.name?.charAt(0).toUpperCase() || 'U';
             document.getElementById('dropdownName').innerText = currentUser.name || '';
             document.getElementById('dropdownEmail').innerText = currentUser.email || '';
-            if (isAdminLoggedIn) document.getElementById('adminBtn').style.display = 'block';
-            else document.getElementById('adminBtn').style.display = 'none';
         } else {
             loginArea.classList.remove('hidden');
             avatarArea.classList.add('hidden');
-            if (isAdminLoggedIn) document.getElementById('adminBtn').style.display = 'block';
-            else document.getElementById('adminBtn').style.display = 'none';
         }
     }
     
-    function toggleUserDropdown() { document.getElementById('userDropdown').classList.toggle('hidden'); }
-    function closeUserDropdown() { document.getElementById('userDropdown').classList.add('hidden'); }
-    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlayBg').classList.toggle('show'); }
-    function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlayBg').classList.remove('show'); }
-
-    // ==================== صفحة الإدارة (تعمل حتى بدون تسجيل دخول) ====================
+    // ==================== دوال الإدارة ====================
+    
     function showAdminLogin() {
         document.getElementById('adminPasswordPopup').classList.add('show');
         document.getElementById('adminPasswordInput').value = '';
     }
-
+    
     function closeAdminPasswordPopup() {
         document.getElementById('adminPasswordPopup').classList.remove('show');
     }
-
+    
     function checkAdminPassword() {
         const password = document.getElementById('adminPasswordInput').value;
         if (password === "011441000") {
             isAdminLoggedIn = true;
             closeAdminPasswordPopup();
             showToast('✅ مرحباً بك في لوحة التحكم');
-            document.getElementById('adminBtn').style.display = 'block';
             loadAdminData();
             navigateTo('admin');
         } else {
             showToast('❌ كلمة السر غير صحيحة');
         }
     }
-
-   async function loadAdminData() {
-    try {
-        const usersSnap = await db.ref('users').once('value');
-        allUsers = usersSnap.val() ? Object.entries(usersSnap.val()).map(([id, d]) => ({ id, ...d })) : [];
-        
-        const profitsSnap = await db.ref('profits').once('value');
-        profits = profitsSnap.val() ? Object.values(profitsSnap.val()) : [];
-        
-        let visitors = parseInt(localStorage.getItem('visitors') || '0');
-        if (!sessionStorage.getItem('visited')) {
-            visitors++;
-            localStorage.setItem('visitors', visitors);
-            sessionStorage.setItem('visited', 'true');
+    
+    async function loadAdminData() {
+        try {
+            const usersSnap = await db.ref('users').once('value');
+            allUsers = usersSnap.val() ? Object.entries(usersSnap.val()).map(([id, d]) => ({ id, ...d })) : [];
+            
+            const profitsSnap = await db.ref('profits').once('value');
+            profits = profitsSnap.val() ? Object.values(profitsSnap.val()) : [];
+            
+            const subsSnap = await db.ref('subscriptions').once('value');
+            subscriptions = subsSnap.val() ? Object.values(subsSnap.val()) : [];
+            
+            let visitors = parseInt(localStorage.getItem('visitors') || '0');
+            if (!sessionStorage.getItem('visited')) {
+                visitors++;
+                localStorage.setItem('visitors', visitors);
+                sessionStorage.setItem('visited', 'true');
+            }
+            
+            renderUsersTable();
+            renderAdminPlans();
+            renderSubscriptionsList();
+            
+            const reportsTab = document.getElementById('adminReportsTab');
+            if (reportsTab && reportsTab.style.display !== 'none') {
+                renderAdminReports(visitors);
+            }
+        } catch (error) {
+            console.error('خطأ في تحميل بيانات الإدارة:', error);
+            showToast('حدث خطأ في تحميل البيانات');
         }
-        
-        renderUsersTable();
-        renderAdminPlans();
-        
-        const reportsTab = document.getElementById('adminReportsTab');
-        if (reportsTab && reportsTab.style.display !== 'none') {
-            renderAdminReports(visitors);
-        }
-    } catch (error) {
-        console.error('خطأ في تحميل بيانات الإدارة:', error);
-        showToast('حدث خطأ في تحميل البيانات');
     }
-}
-
+    
     function renderUsersTable() {
         const container = document.getElementById('usersTable');
         if (!container) return;
+        
         container.innerHTML = `
             <div class="overflow-x-auto">
                 <table class="w-full">
-                    <thead class="bg-gray-100"><tr><th class="p-3 text-right">الاسم</th><th class="p-3 text-right">البريد</th><th class="p-3 text-right">الهاتف</th><th class="p-3 text-right">الباقة</th><th class="p-3 text-right">الترقية</th></tr></thead>
-                    <tbody>${allUsers.map(u => `<tr><td class="p-3">${u.name || '-'}</td><td class="p-3">${u.email || '-'}</td><td class="p-3">${u.phone || '-'}</td><td class="p-3">${u.plan || 'free'}</td><td class="p-3"><select onchange="upgradeUser('${u.id}', this.value)" class="p-2 border rounded"><option value="">اختر</option>${plans.filter(p => p.id !== 'free').map(p => `<option value="${p.id}">${p.name}</option>`).join('')}</select></td></tr>`).join('')}</tbody>
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="p-3 text-right">الاسم</th>
+                            <th class="p-3 text-right">البريد</th>
+                            <th class="p-3 text-right">الهاتف</th>
+                            <th class="p-3 text-right">الباقة</th>
+                            <th class="p-3 text-right">الترقية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${allUsers.map(u => `
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="p-3">${u.name || '-'}</td>
+                                <td class="p-3">${u.email || '-'}</td>
+                                <td class="p-3">${u.phone || '-'}</td>
+                                <td class="p-3">
+                                    <span class="px-2 py-1 rounded-full text-xs ${u.plan === 'free' ? 'bg-gray-200' : 'bg-green-200 text-green-800'}">
+                                        ${u.plan === 'free' ? 'مجاني' : (u.planName || u.plan || 'Pro')}
+                                    </span>
+                                </td>
+                                <td class="p-3">
+                                    <select onchange="upgradeUser('${u.id}', this.value)" class="p-2 border rounded">
+                                        <option value="">اختر الباقة</option>
+                                        ${plans.filter(p => p.id !== 'free').map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
+                                    </select>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
                 </table>
             </div>
         `;
     }
-
+    
     async function upgradeUser(uid, planId) {
         if (!planId) return;
         const plan = plans.find(p => p.id === planId);
+        if (!plan) return;
+        
         await db.ref(`users/${uid}/plan`).set(planId);
-        await db.ref(`profits`).push({ userId: uid, amount: plan.price, plan: plan.name, date: new Date().toISOString() });
-        showToast('تمت الترقية');
+        await db.ref(`users/${uid}/planName`).set(plan.name);
+        
+        const newExpiry = new Date();
+        newExpiry.setMonth(newExpiry.getMonth() + 1);
+        
+        const subscription = {
+            userId: uid,
+            planId: planId,
+            planName: plan.name,
+            examsLimit: plan.examsCount,
+            startDate: new Date().toISOString(),
+            expiryDate: newExpiry.toISOString(),
+            isActive: true,
+            renewedCount: (subscriptions.find(s => s.userId === uid)?.renewedCount || 0) + 1
+        };
+        
+        await db.ref(`subscriptions/${uid}`).set(subscription);
+        await db.ref(`profits`).push({
+            userId: uid,
+            amount: plan.price,
+            plan: plan.name,
+            date: new Date().toISOString()
+        });
+        
+        showToast(`تم ترقية المستخدم إلى باقة ${plan.name}`);
         loadAdminData();
     }
-
-   function renderAdminPlans() {
-    const container = document.getElementById('adminPlansList');
-    if (!container) {
-        console.log('الحاوية adminPlansList غير موجودة');
-        return;
-    }
     
-    if (!plans || plans.length === 0) {
-        container.innerHTML = '<div class="text-center p-4 text-gray-500">لا توجد باقات</div>';
-        return;
-    }
-    
-    container.innerHTML = plans.map(p => `
-        <div class="flex justify-between items-center border-b py-3">
-            <div>
-                <span class="font-bold">${p.name || 'بدون اسم'}</span> - 
-                ${p.examsCount || 0} امتحان - 
-                ${p.price || 0} ج
-                ${p.features ? `<div class="text-xs text-gray-500">${p.features.join(', ')}</div>` : ''}
+    function renderAdminPlans() {
+        const container = document.getElementById('adminPlansList');
+        if (!container) return;
+        
+        if (!plans || plans.length === 0) {
+            container.innerHTML = '<div class="text-center p-4 text-gray-500">لا توجد باقات</div>';
+            return;
+        }
+        
+        container.innerHTML = plans.map(p => `
+            <div class="flex justify-between items-center border-b py-3">
+                <div>
+                    <span class="font-bold">${p.name || 'بدون اسم'}</span> - 
+                    ${p.examsCount || 0} امتحان - 
+                    ${p.price || 0} ج
+                    ${p.features ? `<div class="text-xs text-gray-500">${p.features.join(', ')}</div>` : ''}
+                </div>
+                <button onclick="deletePlanAdmin('${p.id}')" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600" ${p.id === 'free' ? 'disabled' : ''}>
+                    حذف
+                </button>
             </div>
-            <button onclick="deletePlanAdmin('${p.id}')" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600" ${p.id === 'free' ? 'disabled' : ''}>
-                حذف
-            </button>
-        </div>
-    `).join('');
-}
-
+        `).join('');
+    }
+    
     async function deletePlanAdmin(id) {
         await db.ref(`plans/${id}`).remove();
         plans = plans.filter(p => p.id !== id);
         renderAdminPlans();
-        showToast('تم الحذف');
+        refreshPlansPage();
+        showToast('تم حذف الباقة');
     }
-
+    
+    function renderSubscriptionsList() {
+        const container = document.getElementById('subscriptionsList');
+        if (!container) return;
+        
+        if (!subscriptions || subscriptions.length === 0) {
+            container.innerHTML = '<div class="text-center p-4 text-gray-500">لا توجد اشتراكات</div>';
+            return;
+        }
+        
+        container.innerHTML = subscriptions.map(sub => {
+            const user = allUsers.find(u => u.id === sub.userId);
+            const remaining = calculateRemainingExams(sub.userId);
+            const expiryDate = new Date(sub.expiryDate).toLocaleDateString('ar-EG');
+            
+            return `
+                <div class="bg-white rounded-xl p-4 shadow flex justify-between items-center flex-wrap gap-3">
+                    <div>
+                        <p class="font-bold">${user?.name || 'مستخدم غير معروف'}</p>
+                        <p class="text-sm text-gray-500">📧 ${user?.email || '-'}</p>
+                        <p class="text-sm">📦 الباقة: <strong class="text-indigo-600">${sub.planName || sub.planId}</strong></p>
+                        <p class="text-sm">📊 الامتحانات المتبقية: <strong>${remaining}</strong> من ${sub.examsLimit}</p>
+                        <p class="text-sm">📅 تاريخ التجديد: ${expiryDate}</p>
+                        <p class="text-sm">🔄 تم التجديد: ${sub.renewedCount || 0} مرة</p>
+                    </div>
+                    <button onclick="showSubscriptionDetails('${sub.userId}')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 transition">
+                        تفاصيل
+                    </button>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    function calculateRemainingExams(userId) {
+        const sub = subscriptions.find(s => s.userId === userId);
+        if (!sub) return 0;
+        
+        const now = new Date();
+        const startMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+        const userResults = results.filter(r => r.userId === userId && new Date(r.date).getTime() >= startMonth);
+        const used = userResults.length;
+        
+        return Math.max(0, sub.examsLimit - used);
+    }
+    
+    function showSubscriptionDetails(userId) {
+        const sub = subscriptions.find(s => s.userId === userId);
+        const user = allUsers.find(u => u.id === userId);
+        
+        if (!sub || !user) return;
+        
+        const remaining = calculateRemainingExams(userId);
+        const expiryDate = new Date(sub.expiryDate).toLocaleDateString('ar-EG');
+        const startDate = new Date(sub.startDate).toLocaleDateString('ar-EG');
+        
+        document.getElementById('subDetailsClientName').innerHTML = `${user.name} <span class="text-sm text-gray-500">(${user.email})</span>`;
+        document.getElementById('subDetailsContent').innerHTML = `
+            <div class="text-right space-y-3">
+                <div class="bg-gray-50 p-3 rounded-lg">
+                    <p><strong>📦 الباقة:</strong> ${sub.planName || sub.planId}</p>
+                    <p><strong>📊 عدد الامتحانات المسموحة:</strong> ${sub.examsLimit} امتحان شهرياً</p>
+                    <p><strong>✅ الامتحانات المتبقية:</strong> ${remaining}</p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-lg">
+                    <p><strong>📅 تاريخ بدء الاشتراك:</strong> ${startDate}</p>
+                    <p><strong>📅 تاريخ انتهاء الاشتراك:</strong> ${expiryDate}</p>
+                    <p><strong>🔄 عدد مرات التجديد:</strong> ${sub.renewedCount || 0}</p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-lg">
+                    <p><strong>💰 إجمالي المدفوع:</strong> ${(sub.renewedCount || 0) * (plans.find(p => p.id === sub.planId)?.price || 0)} ج</p>
+                </div>
+            </div>
+        `;
+        document.getElementById('subscriptionDetailsPopup').classList.add('show');
+    }
+    
+    function closeSubscriptionDetailsPopup() {
+        document.getElementById('subscriptionDetailsPopup').classList.remove('show');
+    }
+    
     function renderAdminReports(visitors) {
         const proUsers = allUsers.filter(u => u.plan !== 'free' && u.plan);
         const totalProfit = profits.reduce((sum, p) => sum + (p.amount || 0), 0);
@@ -993,189 +2287,425 @@ function closeExamLinkModal() {
             if (profitChart) profitChart.destroy();
             profitChart = new Chart(ctx, {
                 type: 'line',
-                data: { labels: Object.keys(profitByMonth), datasets: [{ label: 'الأرباح (ج)', data: Object.values(profitByMonth), borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', fill: true }] }
+                data: {
+                    labels: Object.keys(profitByMonth),
+                    datasets: [{
+                        label: 'الأرباح (ج)',
+                        data: Object.values(profitByMonth),
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99,102,241,0.1)',
+                        fill: true
+                    }]
+                }
             });
         }
     }
-
-   function showAddPlanPopup() { 
-    // تنظيف الحقول قبل العرض
-    document.getElementById('planName').value = '';
-    document.getElementById('planExams').value = '';
-    document.getElementById('planPrice').value = '';
-    document.getElementById('planFeatures').value = '';
-    document.getElementById('addPlanPopup').classList.add('show'); 
-}
-
-function closeAddPlanPopup() { 
-    document.getElementById('addPlanPopup').classList.remove('show'); 
-}
     
-   // استبدل دالة addPlan بهذه النسخة المصححة
-async function addPlan() {
-    try {
-        const name = document.getElementById('planName')?.value.trim();
-        const examsCount = parseInt(document.getElementById('planExams')?.value);
-        const price = parseInt(document.getElementById('planPrice')?.value);
-        const featuresText = document.getElementById('planFeatures')?.value;
-        
-        // التحقق من صحة البيانات
-        if (!name) {
-            showToast('❌ الرجاء إدخال اسم الباقة');
-            return;
-        }
-        
-        if (isNaN(examsCount) || examsCount <= 0) {
-            showToast('❌ الرجاء إدخال عدد صحيح للامتحانات');
-            return;
-        }
-        
-        if (isNaN(price) || price < 0) {
-            showToast('❌ الرجاء إدخال سعر صحيح');
-            return;
-        }
-        
-        // معالجة المميزات
-        let features = [];
-        if (featuresText && featuresText.trim()) {
-            features = featuresText.split('\n').filter(f => f.trim().length > 0);
-        } else {
-            features = [`${examsCount} امتحان شهرياً`];
-        }
-        
-        // إنشاء ID فريد
-        const newPlanId = 'plan_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
-        
-        const newPlan = { 
-            id: newPlanId, 
-            name: name, 
-            examsCount: examsCount, 
-            period: 'month', 
-            price: price, 
-            features: features,
-            createdAt: new Date().toISOString()
-        };
-        
-        console.log('جاري إضافة الباقة:', newPlan);
-        
-        // حفظ في Firebase
-        await db.ref(`plans/${newPlanId}`).set(newPlan);
-        
-        // إضافة إلى المصفوفة المحلية
-        plans.push(newPlan);
-        
-        // إعادة تحميل وعرض الباقات
-        renderAdminPlans();
-        refreshPlansPage();
-        
-        // إغلاق النافذة وتفريغ الحقول
-        closeAddPlanPopup();
-        
-        // تنظيف الحقول
+    function showAddPlanPopup() {
         document.getElementById('planName').value = '';
         document.getElementById('planExams').value = '';
         document.getElementById('planPrice').value = '';
         document.getElementById('planFeatures').value = '';
-        
-        showToast('✅ تم إضافة الباقة بنجاح!');
-        
-    } catch (error) {
-        console.error('خطأ في إضافة الباقة:', error);
-        showToast('❌ حدث خطأ في إضافة الباقة');
+        document.getElementById('addPlanPopup').classList.add('show');
     }
-}
-
+    
+    function closeAddPlanPopup() {
+        document.getElementById('addPlanPopup').classList.remove('show');
+    }
+    
+    async function addPlan() {
+        try {
+            const name = document.getElementById('planName')?.value.trim();
+            const examsCount = parseInt(document.getElementById('planExams')?.value);
+            const price = parseInt(document.getElementById('planPrice')?.value);
+            const featuresText = document.getElementById('planFeatures')?.value;
+            
+            if (!name) {
+                showToast('❌ الرجاء إدخال اسم الباقة');
+                return;
+            }
+            
+            if (isNaN(examsCount) || examsCount <= 0) {
+                showToast('❌ الرجاء إدخال عدد صحيح للامتحانات');
+                return;
+            }
+            
+            if (isNaN(price) || price < 0) {
+                showToast('❌ الرجاء إدخال سعر صحيح');
+                return;
+            }
+            
+            let features = [];
+            if (featuresText && featuresText.trim()) {
+                features = featuresText.split('\n').filter(f => f.trim().length > 0);
+            } else {
+                features = [`${examsCount} امتحان شهرياً`];
+            }
+            
+            const newPlanId = 'plan_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+            const newPlan = {
+                id: newPlanId,
+                name: name,
+                examsCount: examsCount,
+                period: 'month',
+                price: price,
+                features: features,
+                createdAt: new Date().toISOString()
+            };
+            
+            await db.ref(`plans/${newPlanId}`).set(newPlan);
+            plans.push(newPlan);
+            renderAdminPlans();
+            refreshPlansPage();
+            closeAddPlanPopup();
+            showToast('✅ تم إضافة الباقة بنجاح!');
+            
+        } catch (error) {
+            console.error('خطأ في إضافة الباقة:', error);
+            showToast('❌ حدث خطأ في إضافة الباقة');
+        }
+    }
+    
     function showAdminTab(tab) {
         const usersTab = document.getElementById('adminUsersTab');
         const plansTab = document.getElementById('adminPlansTab');
         const reportsTab = document.getElementById('adminReportsTab');
+        const subsTab = document.getElementById('adminSubscriptionsTab');
+        
         if (usersTab) usersTab.style.display = tab === 'users' ? 'block' : 'none';
         if (plansTab) plansTab.style.display = tab === 'plans' ? 'block' : 'none';
         if (reportsTab) reportsTab.style.display = tab === 'reports' ? 'block' : 'none';
-        if (tab === 'reports') loadAdminData();
-    }
-
-    function requestUpgrade(planId) { 
-        const plan = plans.find(p => p.id === planId); 
-        if (plan && currentUser) window.open(`https://wa.me/201026463211?text=${encodeURIComponent(`🚀 طلب ترقية حساب\n\nالاسم: ${currentUser.name}\nالبريد: ${currentUser.email}\nالباقة المطلوبة: ${plan.name}\nالسعر: ${plan.price} ج`)}`, '_blank');
-        else if (plan) window.open(`https://wa.me/201026463211?text=${encodeURIComponent(`🚀 طلب ترقية حساب\nالباقة المطلوبة: ${plan.name}\nالسعر: ${plan.price} ج`)}`, '_blank');
-    }
-
-    // ==================== تحميل البيانات ====================
-    async function loadExams() { const s = await db.ref('exams').once('value'); exams = s.val() ? Object.values(s.val()) : []; refreshHome(); refreshExamsList(); }
-    async function loadResults() { const s = await db.ref('results').once('value'); results = s.val() ? Object.values(s.val()) : []; refreshHome(); refreshAnalytics(); }
-    async function loadQuestions() { if(currentUser) { const s = await db.ref(`users/${currentUser.uid}/questions`).once('value'); questions = s.val() ? Object.values(s.val()) : []; refreshQuestionBank(); } }
-    async function loadPlans() { const s = await db.ref('plans').once('value'); if(s.val()) plans = Object.values(s.val()); else { plans = defaultPlans; for(let p of plans) await db.ref(`plans/${p.id}`).set(p); } refreshPlansPage(); }
-    async function loadAllData() { await loadExams(); await loadResults(); await loadPlans(); if(currentUser) await loadQuestions(); refreshExamLimit(); }
-
-    // ==================== البحث مع كلمة adminmohamed ====================
-    document.getElementById('searchBtn')?.addEventListener('click',()=>{ 
-        document.getElementById('searchOverlay').classList.toggle('show'); 
-        if(document.getElementById('searchOverlay').classList.contains('show')) document.getElementById('searchInput').focus(); 
-    });
-    
-    document.addEventListener('click',(e)=>{ 
-        const ov=document.getElementById('searchOverlay'); 
-        if(ov && !ov.contains(e.target) && e.target!==document.getElementById('searchBtn') && !document.getElementById('searchBtn')?.contains(e.target)) ov.classList.remove('show'); 
-    });
-    
-    document.getElementById('searchInput')?.addEventListener('input',(e)=>{ 
-        const term=e.target.value.toLowerCase(); 
-        const resDiv=document.getElementById('searchResults'); 
+        if (subsTab) subsTab.style.display = tab === 'subscriptions' ? 'block' : 'none';
         
-        // كلمة adminmohamed لفتح صفحة الإدارة
-        if(term === 'adminmohamed'){ 
+        if (tab === 'reports') loadAdminData();
+        if (tab === 'subscriptions') renderSubscriptionsList();
+    }
+    
+    function requestUpgrade(planId) {
+        const plan = plans.find(p => p.id === planId);
+        if (plan && currentUser) {
+            window.open(`https://wa.me/201026463211?text=${encodeURIComponent(`🚀 طلب ترقية حساب\n\nالاسم: ${currentUser.name}\nالبريد: ${currentUser.email}\nالباقة المطلوبة: ${plan.name}\nالسعر: ${plan.price} ج`)}`, '_blank');
+        } else if (plan) {
+            window.open(`https://wa.me/201026463211?text=${encodeURIComponent(`🚀 طلب ترقية حساب\nالباقة المطلوبة: ${plan.name}\nالسعر: ${plan.price} ج`)}`, '_blank');
+        }
+    }
+    
+    // ==================== دوال البطاقات ونافذة التفاصيل ====================
+    
+    function showStatDetails(type) {
+        let title = '';
+        let content = '';
+        
+        if (type === 'exams') {
+            title = '📋 إجمالي الامتحانات';
+            const userExams = currentUser ? exams.filter(e => e.creatorId === currentUser.uid) : exams;
+            if (userExams.length === 0) {
+                content = '<p class="text-gray-500">لا توجد امتحانات</p>';
+            } else {
+                content = `
+                    <div class="space-y-2 text-right">
+                        ${userExams.map(exam => `
+                            <div class="border-b pb-2">
+                                <p class="font-bold">${exam.title}</p>
+                                <p class="text-sm text-gray-500">📚 ${exam.className || 'بدون صف'} | ${exam.questions?.length || 0} سؤال</p>
+                                <p class="text-xs text-gray-400">تم الإنشاء: ${new Date(exam.createdAt).toLocaleDateString('ar-EG')}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        } else if (type === 'active') {
+            title = '✅ الامتحانات النشطة';
+            const activeExams = exams.filter(e => e.isActive !== false);
+            if (activeExams.length === 0) {
+                content = '<p class="text-gray-500">لا توجد امتحانات نشطة</p>';
+            } else {
+                content = `
+                    <div class="space-y-2 text-right">
+                        ${activeExams.map(exam => `
+                            <div class="border-b pb-2">
+                                <p class="font-bold">${exam.title}</p>
+                                <p class="text-sm text-gray-500">📚 ${exam.className || 'بدون صف'} | بواسطة: ${exam.creatorName || 'مدرس'}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        } else if (type === 'students') {
+            title = '👥 الطلاب';
+            const studentsList = [...new Set(results.map(r => ({ name: r.studentName, number: r.studentNumber, examTitle: r.examTitle })))];
+            if (studentsList.length === 0) {
+                content = '<p class="text-gray-500">لا يوجد طلاب حتى الآن</p>';
+            } else {
+                content = `
+                    <div class="space-y-2 text-right">
+                        ${studentsList.map(s => `
+                            <div class="border-b pb-2">
+                                <p class="font-bold">${s.name}</p>
+                                <p class="text-sm text-gray-500">رقم الجلوس: ${s.number || '-'} | امتحن: ${s.examTitle}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        } else if (type === 'completed') {
+            title = '📊 الامتحانات المكتملة';
+            const myResults = currentUser ? results.filter(r => r.userId === currentUser.uid) : results;
+            if (myResults.length === 0) {
+                content = '<p class="text-gray-500">لا توجد نتائج مكتملة</p>';
+            } else {
+                const sortedResults = [...myResults].sort((a, b) => b.percentage - a.percentage);
+                content = `
+                    <div class="space-y-2 text-right">
+                        ${sortedResults.map(r => `
+                            <div class="border-b pb-2">
+                                <p class="font-bold">${r.examTitle}</p>
+                                <p class="text-sm">الطالب: ${r.studentName} | الدرجة: ${r.score}/${r.totalScore} (${r.percentage.toFixed(1)}%)</p>
+                                <p class="text-xs text-gray-500">التاريخ: ${new Date(r.date).toLocaleDateString('ar-EG')}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        }
+        
+        document.getElementById('statDetailsTitle').innerText = title;
+        document.getElementById('statDetailsContent').innerHTML = content;
+        document.getElementById('statDetailsPopup').classList.add('show');
+    }
+    
+    function closeStatDetailsPopup() {
+        document.getElementById('statDetailsPopup').classList.remove('show');
+    }
+    
+    // ==================== دوال تفاصيل الطالب ====================
+    
+    function showStudentDetails(studentName, examId) {
+        const studentResults = results.filter(r => r.studentName === studentName && r.examId === examId);
+        if (studentResults.length === 0) return;
+        
+        const result = studentResults[0];
+        document.getElementById('detailsStudentName').innerHTML = `${studentName} <span class="text-sm text-gray-500">(رقم الجلوس: ${result.studentNumber || '-'})</span>`;
+        
+        let wrongAnswersHtml = '';
+        if (result.answers) {
+            const wrongAnswers = result.answers.filter(a => !a.isCorrect);
+            if (wrongAnswers.length === 0) {
+                wrongAnswersHtml = '<p class="text-green-600">✅ جميع الإجابات صحيحة! أحسنت</p>';
+            } else {
+                wrongAnswersHtml = wrongAnswers.map(a => `
+                    <div class="border-b pb-2 mb-2">
+                        <p class="font-semibold">${a.question}</p>
+                        <p class="text-red-600">❌ إجابتك: ${a.userAnswer || 'لم يجب'}</p>
+                        <p class="text-green-600">✓ الإجابة الصحيحة: ${a.correctAnswer}</p>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        document.getElementById('detailsContent').innerHTML = `
+            <div class="text-right">
+                <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                    <p><strong>📝 الامتحان:</strong> ${result.examTitle}</p>
+                    <p><strong>📚 الصف:</strong> ${result.examClass || 'غير محدد'}</p>
+                    <p><strong>📅 التاريخ:</strong> ${new Date(result.date).toLocaleDateString('ar-EG')}</p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                    <p><strong>🎯 الدرجة:</strong> ${result.score}/${result.totalScore}</p>
+                    <p><strong>📊 النسبة:</strong> ${result.percentage.toFixed(1)}%</p>
+                    <p><strong>⭐ التقدير:</strong> <span class="${result.passed ? 'text-green-600' : 'text-red-600'} font-bold">${result.grade}</span></p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-lg">
+                    <p class="font-bold mb-2">❌ الأخطاء:</p>
+                    ${wrongAnswersHtml}
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('studentDetailsPopup').classList.add('show');
+    }
+    
+    function closeStudentDetailsPopup() {
+        document.getElementById('studentDetailsPopup').classList.remove('show');
+    }
+    
+    function printStudentDetails() {
+        const element = document.getElementById('detailsContent');
+        const opt = {
+            margin: [10, 10, 10, 10],
+            filename: 'نتيجة_الطالب.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+    
+    // ==================== تحميل البيانات ====================
+    
+    async function loadExams() {
+        const s = await db.ref('exams').once('value');
+        exams = s.val() ? Object.values(s.val()) : [];
+        refreshHome();
+        refreshExamsList();
+    }
+    
+    async function loadResults() {
+        const s = await db.ref('results').once('value');
+        results = s.val() ? Object.values(s.val()) : [];
+        refreshHome();
+        refreshAnalytics();
+    }
+    
+    async function loadQuestions() {
+        if (currentUser) {
+            const s = await db.ref(`users/${currentUser.uid}/questions`).once('value');
+            questions = s.val() ? Object.values(s.val()) : [];
+            refreshQuestionBank();
+        }
+    }
+    
+    async function loadPlans() {
+        const s = await db.ref('plans').once('value');
+        if (s.val()) {
+            plans = Object.values(s.val());
+        } else {
+            plans = defaultPlans;
+            for (let p of plans) {
+                await db.ref(`plans/${p.id}`).set(p);
+            }
+        }
+        refreshPlansPage();
+    }
+    
+    async function loadSubscriptions() {
+        const s = await db.ref('subscriptions').once('value');
+        subscriptions = s.val() ? Object.values(s.val()) : [];
+    }
+    
+    async function loadAllData() {
+        await loadExams();
+        await loadResults();
+        await loadPlans();
+        await loadSubscriptions();
+        if (currentUser) await loadQuestions();
+        refreshExamLimit();
+    }
+    
+    // ==================== البحث ====================
+    
+    document.getElementById('searchBtn')?.addEventListener('click', () => {
+        document.getElementById('searchOverlay').classList.toggle('show');
+        if (document.getElementById('searchOverlay').classList.contains('show')) {
+            document.getElementById('searchInput').focus();
+        }
+    });
+    
+    document.addEventListener('click', (e) => {
+        const ov = document.getElementById('searchOverlay');
+        if (ov && !ov.contains(e.target) && e.target !== document.getElementById('searchBtn') && !document.getElementById('searchBtn')?.contains(e.target)) {
+            ov.classList.remove('show');
+        }
+    });
+    
+    document.getElementById('searchInput')?.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const resDiv = document.getElementById('searchResults');
+        
+        if (term === 'adminmohamed') {
             document.getElementById('searchOverlay').classList.remove('show');
             document.getElementById('searchInput').value = '';
             showAdminLogin();
-            return; 
+            return;
         }
         
-        const matches=exams.filter(ex=>ex.title.toLowerCase().includes(term)); 
-        if(matches.length){ 
-            resDiv.innerHTML=matches.map(ex=>`<div class="search-result-item" onclick="searchGoToExam('${ex.id}')">📚 ${ex.title}</div>`).join(''); 
-            resDiv.classList.add('show'); 
-        } else if(term.length > 0) { 
-            resDiv.innerHTML='<div class="search-result-item">لا توجد نتائج</div>'; 
-            resDiv.classList.add('show'); 
-        } else { 
-            resDiv.classList.remove('show'); 
-        } 
-    });
-    
-    function searchGoToExam(id){ 
-        document.getElementById('searchOverlay').classList.remove('show'); 
-        navigateTo('examsList'); 
-        setTimeout(()=>startExam(id),100); 
-    }
-
-    // ==================== بدء التشغيل ====================
-    auth.onAuthStateChanged(async (user) => {
-        if(user){ 
-            const snap=await db.ref(`users/${user.uid}`).once('value'); 
-            currentUser=snap.val()?{uid:user.uid,...snap.val()}:{uid:user.uid,name:user.displayName||user.email.split('@')[0],email:user.email,plan:'free'}; 
-            if(!snap.val()) await db.ref(`users/${user.uid}`).set(currentUser); 
-        } else currentUser=null;
-        updateUserUI();
-        await loadAllData();
-        if(window.location.hash && window.location.hash.startsWith('#exam=')){ 
-            const id=window.location.hash.substring(6); 
-            const ex=exams.find(e=>e.id===id); 
-            if(ex) setTimeout(()=>startExam(id),500); 
+        const matches = exams.filter(ex => ex.title.toLowerCase().includes(term));
+        if (matches.length) {
+            resDiv.innerHTML = matches.map(ex => `
+                <div class="search-result-item" onclick="searchGoToExam('${ex.id}')">
+                    📚 ${ex.title} <span class="text-xs text-gray-500">(${ex.className || 'بدون صف'})</span>
+                </div>
+            `).join('');
+            resDiv.classList.add('show');
+        } else if (term.length > 0) {
+            resDiv.innerHTML = '<div class="search-result-item">لا توجد نتائج</div>';
+            resDiv.classList.add('show');
+        } else {
+            resDiv.classList.remove('show');
         }
     });
     
-    window.addEventListener('hashchange',()=>{ 
-        if(window.location.hash.startsWith('#exam=')){ 
-            const id=window.location.hash.substring(6); 
-            const ex=exams.find(e=>e.id===id); 
-            if(ex) startExam(id); 
-        } 
+    function searchGoToExam(id) {
+        document.getElementById('searchOverlay').classList.remove('show');
+        navigateTo('examsList');
+        setTimeout(() => startExam(id), 100);
+    }
+    
+    // ==================== ربط حدث إنشاء الامتحان ====================
+    
+    const examFormElement = document.getElementById('examForm');
+    if (examFormElement) {
+        const oldForm = examFormElement.cloneNode(true);
+        examFormElement.parentNode.replaceChild(oldForm, examFormElement);
+        oldForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await createNewExam();
+        });
+    }
+    
+    // ==================== بدء التشغيل ====================
+    
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            const snap = await db.ref(`users/${user.uid}`).once('value');
+            if (snap.val()) {
+                currentUser = { uid: user.uid, ...snap.val() };
+            } else {
+                currentUser = {
+                    uid: user.uid,
+                    name: user.displayName || user.email.split('@')[0],
+                    email: user.email,
+                    plan: 'free'
+                };
+                await db.ref(`users/${user.uid}`).set(currentUser);
+                await activateFreePlan(user.uid);
+            }
+        } else {
+            currentUser = null;
+        }
+        
+        updateUserUI();
+        await loadAllData();
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const examId = urlParams.get('exam');
+        if (examId) {
+            const exam = exams.find(e => e.id === examId);
+            if (exam) setTimeout(() => startExam(examId), 500);
+        }
     });
     
-    document.getElementById('overlayBg')?.addEventListener('click',closeSidebar);
-    document.addEventListener('click',(e)=>{ if(!e.target.closest('.user-avatar') && !e.target.closest('#userDropdown')) closeUserDropdown(); });
-    setTimeout(()=>{ if(document.getElementById('questionsContainer')?.children.length===0) addQuestion(); },500);
+    window.addEventListener('load', () => {
+        if (document.getElementById('questionsContainer')?.children.length === 0) {
+            addQuestion();
+        }
+    });
+    
+    document.getElementById('overlayBg')?.addEventListener('click', closeSidebar);
+    
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.user-avatar') && !e.target.closest('#userDropdown')) {
+            const dropdown = document.getElementById('userDropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+    });
+    
+    function toggleUserDropdown() {
+        document.getElementById('userDropdown').classList.toggle('hidden');
+    }
+    
+    document.getElementById('userAvatar')?.addEventListener('click', toggleUserDropdown);
+    
 </script>
 </body>
 </html>
