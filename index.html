@@ -1185,9 +1185,12 @@
     }
     
     async function refreshExamLimit() {
-        if (!currentUser) return;
-        
-        if (plans.length === 0) await loadPlans();
+    if (!currentUser) return;
+    
+    try {
+        if (plans.length === 0) {
+            await loadPlans();
+        }
         
         const plan = plans.find(p => p.id === currentUser.plan) || plans[0];
         if (!plan) return;
@@ -1217,7 +1220,10 @@
         
         if (accountRemaining) accountRemaining.innerText = `الامتحانات المتبقية: ${remaining} من ${plan.examsCount}`;
         if (accountExpiry) accountExpiry.innerText = `تاريخ التجديد: ${expiryText}`;
+    } catch (error) {
+        console.error('خطأ في تحديث حد الامتحانات:', error);
     }
+}
     
     function updateRemainingExams() {
         refreshExamLimit();
@@ -1806,60 +1812,73 @@
     }
     
     async function registerTecno() {
-        const name = document.getElementById('regName').value.trim();
-        const phone = document.getElementById('regPhone').value.trim();
-        let username = document.getElementById('regUsername').value.trim();
-        const pass = document.getElementById('regPassword').value;
-        const confirm = document.getElementById('regConfirm').value;
-        
-        if (!name || !phone || !username || !pass) {
-            showToast('املأ جميع الحقول');
-            return;
-        }
-        
-        if (pass !== confirm) {
-            showToast('كلمة المرور غير متطابقة');
-            return;
-        }
-        
-        if (!username.includes('@tecno.shark')) {
-            username = username.split('@')[0] + '@tecno.shark';
-        }
-        
-        const usernameExists = await checkUsernameExists(username);
-        if (usernameExists) {
-            document.getElementById('usernameError').classList.remove('hidden');
-            showToast('اسم المستخدم موجود بالفعل');
-            return;
-        }
-        
-        document.getElementById('usernameError').classList.add('hidden');
-        
-        const email = username.split('@')[0] + '@examhub.com';
-        
-        try {
-            const userCred = await auth.createUserWithEmailAndPassword(email, pass);
-            const newUser = {
-                name: name,
-                phone: phone,
-                username: username,
-                email: email,
-                password: pass,
-                plan: 'free',
-                createdAt: new Date().toISOString()
-            };
-            await db.ref(`users/${userCred.user.uid}`).set(newUser);
-            await activateFreePlan(userCred.user.uid);
-            currentUser = { uid: userCred.user.uid, ...newUser };
-            closeRegisterPopup();
-            updateUserUI();
-            showToast('تم إنشاء الحساب بنجاح');
-            await loadAllData();
-            navigateTo('home');
-        } catch (error) {
-            showToast('حدث خطأ في إنشاء الحساب');
-        }
+    const name = document.getElementById('regName').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    let username = document.getElementById('regUsername').value.trim();
+    const pass = document.getElementById('regPassword').value;
+    const confirm = document.getElementById('regConfirm').value;
+    
+    if (!name || !phone || !username || !pass) {
+        showToast('املأ جميع الحقول');
+        return;
     }
+    
+    if (pass !== confirm) {
+        showToast('كلمة المرور غير متطابقة');
+        return;
+    }
+    
+    if (!username.includes('@tecno.shark')) {
+        username = username.split('@')[0] + '@tecno.shark';
+    }
+    
+    const usernameExists = await checkUsernameExists(username);
+    if (usernameExists) {
+        document.getElementById('usernameError').classList.remove('hidden');
+        showToast('اسم المستخدم موجود بالفعل');
+        return;
+    }
+    
+    document.getElementById('usernameError').classList.add('hidden');
+    
+    const email = username.split('@')[0] + '@examhub.com';
+    
+    try {
+        // أولاً: إنشاء حساب في Authentication
+        const userCred = await auth.createUserWithEmailAndPassword(email, pass);
+        const firebaseUser = userCred.user;
+        
+        // ثانياً: حفظ بيانات المستخدم في Realtime Database
+        const newUser = {
+            name: name,
+            phone: phone,
+            username: username,
+            email: email,
+            password: pass,
+            plan: 'free',
+            createdAt: new Date().toISOString()
+        };
+        
+        await db.ref(`users/${firebaseUser.uid}`).set(newUser);
+        await activateFreePlan(firebaseUser.uid);
+        
+        // ثالثاً: تعيين المستخدم الحالي
+        currentUser = { uid: firebaseUser.uid, ...newUser };
+        
+        // رابعاً: إغلاق النوافذ وتحديث الواجهة
+        closeRegisterPopup();
+        updateUserUI();
+        showToast('تم إنشاء الحساب بنجاح');
+        
+        // خامساً: تحميل البيانات
+        await loadAllData();
+        navigateTo('home');
+        
+    } catch (error) {
+        console.error('خطأ في إنشاء الحساب:', error);
+        showToast('حدث خطأ في إنشاء الحساب: ' + error.message);
+    }
+}
     
     // ==================== دوال نسيت كلمة المرور ====================
     
@@ -2745,11 +2764,16 @@
     }
     
     async function loadResults() {
+    try {
         const s = await db.ref('results').once('value');
         results = s.val() ? Object.values(s.val()) : [];
         refreshHome();
         refreshAnalytics();
+    } catch (error) {
+        console.error('خطأ في تحميل النتائج:', error);
+        results = [];
     }
+}
     
     async function loadQuestions() {
         if (currentUser) {
@@ -2773,18 +2797,30 @@
     }
     
     async function loadSubscriptions() {
+    try {
         const s = await db.ref('subscriptions').once('value');
         subscriptions = s.val() ? Object.values(s.val()) : [];
+    } catch (error) {
+        console.error('خطأ في تحميل الاشتراكات:', error);
+        subscriptions = [];
     }
+}
     
     async function loadAllData() {
+    try {
         await loadExams();
         await loadResults();
         await loadPlans();
         await loadSubscriptions();
-        if (currentUser) await loadQuestions();
-        refreshExamLimit();
+        if (currentUser) {
+            await loadQuestions();
+            refreshExamLimit();
+        }
+    } catch (error) {
+        console.error('خطأ في تحميل البيانات:', error);
+        // لا تظهر رسالة خطأ للمستخدم في حالة عدم وجود بيانات
     }
+}
     
     // ==================== البحث ====================
     
