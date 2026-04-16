@@ -1647,17 +1647,15 @@ async function submitStudentExam(event, examId) {
     const exam = exams.find(e => e.id === examId);
     if (!exam) return;
     
-    // التحقق مرة أخرى إذا كان هذا المتصفح قد أدى الامتحان
-    const hasTaken = await hasBrowserTakenExam(examId);
-    if (hasTaken) {
-        showAlreadyCompletedScreen();
+    // التحقق إذا كان الطالب قد أدى هذا الامتحان مسبقاً
+    const studentKey = `exam_${examId}_completed`;
+    if (sessionStorage.getItem(studentKey) === 'true') {
+        showSubmissionMessage('لقد قمت بالفعل بإرسال إجابات هذا الامتحان من قبل', false);
         return;
     }
     
-    const studentName = document.getElementById('studentName')?.value.trim();
-    const studentNumber = document.getElementById('studentNumber')?.value.trim() || 'غير محدد';
-    const browserId = getBrowserId();
-    
+    const studentName = sessionStorage.getItem('studentName');
+    const studentNumber = sessionStorage.getItem('studentNumber');
     let total = 0;
     let answers = [];
     
@@ -1684,7 +1682,6 @@ async function submitStudentExam(event, examId) {
         id: genId(),
         studentName: studentName,
         studentNumber: studentNumber,
-        browserId: browserId,  // حفظ معرف المتصفح
         examId: exam.id,
         examTitle: exam.title,
         examClass: exam.className,
@@ -1701,15 +1698,106 @@ async function submitStudentExam(event, examId) {
     await db.ref(`results/${result.id}`).set(result);
     results.push(result);
     
-    // تسجيل أن هذا المتصفح أدى هذا الامتحان
-    markExamAsCompleted(exam.id);
+    // حفظ أن هذا الطالب أدى هذا الامتحان
+    sessionStorage.setItem(studentKey, 'true');
     
-    // عرض رسالة الإكمال
-    showCompletionMessage();
+    // عرض شاشة النتيجة مع علامة الصح الخضراء
+    showResultScreen(exam, total, totalPossible, percentage, grade, passed);
     
     if (currentUser && currentUser.uid === exam.creatorId) refreshHome();
 }
+function showResultScreen(exam, total, totalPossible, percentage, grade, passed) {
+    // إخفاء كل محتوى الموقع الأصلي
+    const mainContainer = document.querySelector('.container');
+    const sidebar = document.getElementById('sidebar');
+    const header = document.querySelector('nav');
+    const footer = document.querySelector('.footer');
     
+    if (mainContainer) mainContainer.style.display = 'none';
+    if (sidebar) sidebar.style.display = 'none';
+    if (header) header.style.display = 'none';
+    if (footer) footer.style.display = 'none';
+    
+    // إخفاء أي عناصر منبثقة
+    const overlays = document.querySelectorAll('.popup');
+    overlays.forEach(overlay => overlay.classList.remove('show'));
+    
+    // إخفاء الامتحان
+    const examContainer = document.getElementById('studentExamContainer');
+    if (examContainer) examContainer.classList.add('hidden-page');
+    
+    // إنشاء شاشة النتيجة
+    const resultDiv = document.createElement('div');
+    resultDiv.id = 'resultScreen';
+    resultDiv.className = 'fixed inset-0 bg-gradient-to-br from-green-600 to-teal-700 flex items-center justify-center z-50';
+    resultDiv.innerHTML = `
+        <div class="text-center p-8 max-w-md mx-auto">
+            <div class="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center mb-6 animate-bounce">
+                <i class="fas fa-check-circle text-green-600 text-5xl"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-white mb-4">✅ تم إرسال الامتحان بنجاح!</h2>
+            <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-6 mb-6">
+                <p class="text-white text-lg mb-2">📝 ${exam.title}</p>
+                <p class="text-white text-md mb-4">📚 ${exam.className || 'بدون صف'}</p>
+                <div class="border-t border-white/30 my-4"></div>
+                ${exam.showResult !== false ? `
+                    <div class="space-y-2">
+                        <p class="text-white text-lg">الدرجة: <strong class="text-yellow-300">${total}/${totalPossible}</strong></p>
+                        <p class="text-white text-lg">النسبة: <strong class="text-yellow-300">${percentage.toFixed(1)}%</strong></p>
+                        <p class="text-white text-lg">التقدير: <strong class="${passed ? 'text-green-300' : 'text-red-300'}">${grade}</strong></p>
+                    </div>
+                ` : `
+                    <p class="text-white text-lg">📝 يرجى انتظار إجابتك لدى المعلم</p>
+                    <p class="text-indigo-200 text-sm mt-2">سيتم مراجعة إجاباتك وإعلامك بالنتيجة قريباً</p>
+                `}
+            </div>
+            <div class="text-white/80 text-sm">
+                <i class="fas fa-envelope ml-1"></i> يمكنك التواصل مع المعلم لمتابعة نتيجتك
+            </div>
+            <button onclick="closeResultScreen()" class="mt-6 bg-white text-green-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-100 transition">
+                إغلاق
+            </button>
+        </div>
+    `;
+    
+    // إزالة أي شاشة سابقة
+    const oldScreen = document.getElementById('resultScreen');
+    if (oldScreen) oldScreen.remove();
+    
+    document.body.appendChild(resultDiv);
+    
+    // منع التمرير خلف الشاشة
+    document.body.style.overflow = 'hidden';
+}
+
+function closeResultScreen() {
+    const resultScreen = document.getElementById('resultScreen');
+    if (resultScreen) resultScreen.remove();
+    
+    // إظهار الموقع مرة أخرى
+    const mainContainer = document.querySelector('.container');
+    const sidebar = document.getElementById('sidebar');
+    const header = document.querySelector('nav');
+    const footer = document.querySelector('.footer');
+    
+    if (mainContainer) mainContainer.style.display = '';
+    if (sidebar) sidebar.style.display = '';
+    if (header) header.style.display = '';
+    if (footer) footer.style.display = '';
+    
+    document.body.style.overflow = '';
+    document.body.style.background = '';
+    
+    // إزالة أي أثر للامتحان
+    sessionStorage.clear();
+    
+    // إزالة الـ hash من الرابط
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('exam')) {
+        const newUrl = window.location.pathname;
+        window.history.pushState({}, '', newUrl);
+    }
+}
 function closeStudentExam() {
     // إخفاء الامتحان
     document.getElementById('studentExamContainer').classList.add('hidden-page');
