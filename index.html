@@ -1560,17 +1560,18 @@ function refreshQuestionBank() {
         sessionStorage.setItem('currentExam', JSON.stringify(exam));
         showStudentExam(exam);
     }
-    function showStudentExam(exam) {
-    // إضافة تأثير الضبابية على الصفحة الرئيسية
-    const mainContent = document.querySelector('.container');
-    const sidebar = document.getElementById('sidebar');
-    const header = document.querySelector('nav');
-    const footer = document.querySelector('.footer');
+    async function showStudentExam(exam) {
+    // التحقق إذا كان هذا المتصفح قد أدى هذا الامتحان مسبقاً
+    const hasTaken = await hasBrowserTakenExam(exam.id);
     
-    if (mainContent) mainContent.classList.add('blur-background');
-    if (sidebar) sidebar.classList.add('blur-background');
-    if (header) header.classList.add('blur-background');
-    if (footer) footer.classList.add('blur-background');
+    if (hasTaken) {
+        // إذا كان قد أدى الامتحان من قبل، اعرض شاشة "تم الإكمال"
+        showAlreadyCompletedScreen();
+        return;
+    }
+    
+    // تفعيل وضع الامتحان
+    enableExamMode();
     
     document.getElementById('studentExamContainer').classList.remove('hidden-page');
     const container = document.getElementById('studentExamContent');
@@ -1593,12 +1594,7 @@ function renderExam(examId) {
     const exam = exams.find(e => e.id === examId);
     if (!exam) return;
     
-    // التحقق إذا كان الطالب قد أدى هذا الامتحان مسبقاً
-    const studentKey = `exam_${examId}_completed`;
-    if (sessionStorage.getItem(studentKey) === 'true') {
-        showSubmissionMessage('لقد قمت بالفعل بإرسال إجابات هذا الامتحان من قبل', false);
-        return;
-    }
+    // لا نحتاج للتحقق هنا لأن showStudentExam قام بالتحقق بالفعل
     
     const studentName = document.getElementById('studentName')?.value.trim();
     if (!studentName) {
@@ -1679,15 +1675,17 @@ async function submitStudentExam(event, examId) {
     const exam = exams.find(e => e.id === examId);
     if (!exam) return;
     
-    // التحقق إذا كان الطالب قد أدى هذا الامتحان مسبقاً
-    const studentKey = `exam_${examId}_completed`;
-    if (sessionStorage.getItem(studentKey) === 'true') {
-        showCompletionMessage();
+    // التحقق مرة أخرى إذا كان هذا المتصفح قد أدى الامتحان
+    const hasTaken = await hasBrowserTakenExam(examId);
+    if (hasTaken) {
+        showAlreadyCompletedScreen();
         return;
     }
     
-    const studentName = sessionStorage.getItem('studentName');
-    const studentNumber = sessionStorage.getItem('studentNumber');
+    const studentName = document.getElementById('studentName')?.value.trim();
+    const studentNumber = document.getElementById('studentNumber')?.value.trim() || 'غير محدد';
+    const browserId = getBrowserId();
+    
     let total = 0;
     let answers = [];
     
@@ -1714,6 +1712,7 @@ async function submitStudentExam(event, examId) {
         id: genId(),
         studentName: studentName,
         studentNumber: studentNumber,
+        browserId: browserId,  // حفظ معرف المتصفح
         examId: exam.id,
         examTitle: exam.title,
         examClass: exam.className,
@@ -1730,10 +1729,10 @@ async function submitStudentExam(event, examId) {
     await db.ref(`results/${result.id}`).set(result);
     results.push(result);
     
-    // حفظ أن هذا الطالب أدى هذا الامتحان
-    sessionStorage.setItem(studentKey, 'true');
+    // تسجيل أن هذا المتصفح أدى هذا الامتحان
+    markExamAsCompleted(exam.id);
     
-    // عرض رسالة الإكمال (بدون العودة للموقع)
+    // عرض رسالة الإكمال
     showCompletionMessage();
     
     if (currentUser && currentUser.uid === exam.creatorId) refreshHome();
@@ -3210,6 +3209,159 @@ function showSubmissionMessage(message, isSuccess = true) {
             </button>
         </div>
     `;
+}
+// الحصول على معرف فريد للمتصفح (أو إنشاء واحد جديد)
+function getBrowserId() {
+    let browserId = localStorage.getItem('browser_id');
+    if (!browserId) {
+        // إنشاء معرف فريد جديد
+        browserId = 'BROWSER_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15) + '_' + navigator.userAgent.length;
+        localStorage.setItem('browser_id', browserId);
+    }
+    return browserId;
+}
+
+// الحصول على مفتاح فريد للطالب (معرف المتصفح + معرف الامتحان)
+function getStudentExamKey(examId) {
+    const browserId = getBrowserId();
+    return `exam_${examId}_${browserId}`;
+}
+
+// التحقق إذا كان هذا المتصفح قد أدى هذا الامتحان مسبقاً
+async function hasBrowserTakenExam(examId) {
+    // 1. التحقق من localStorage أولاً (سريع)
+    const examKey = getStudentExamKey(examId);
+    if (localStorage.getItem(examKey) === 'true') {
+        return true;
+    }
+    
+    // 2. التحقق من قاعدة البيانات (للتأكد من عدم التلاعب)
+    const browserId = getBrowserId();
+    const resultsSnapshot = await db.ref('results').once('value');
+    if (resultsSnapshot.val()) {
+        const allResults = Object.values(resultsSnapshot.val());
+        const existingResult = allResults.find(r => 
+            r.browserId === browserId && 
+            r.examId === examId
+        );
+        if (existingResult) {
+            // تخزين في localStorage لمنع إعادة المحاولة
+            localStorage.setItem(examKey, 'true');
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+// تسجيل أن هذا المتصفح أدى الامتحان
+function markExamAsCompleted(examId) {
+    const examKey = getStudentExamKey(examId);
+    localStorage.setItem(examKey, 'true');
+}
+
+// عرض شاشة "تم إكمال الامتحان" للطلاب الذين حاولوا إعادة الامتحان
+function showAlreadyCompletedScreen() {
+    // إخفاء كل محتوى الموقع الأصلي
+    const mainContainer = document.querySelector('.container');
+    const sidebar = document.getElementById('sidebar');
+    const header = document.querySelector('nav');
+    const footer = document.querySelector('.footer');
+    
+    if (mainContainer) mainContainer.style.display = 'none';
+    if (sidebar) sidebar.style.display = 'none';
+    if (header) header.style.display = 'none';
+    if (footer) footer.style.display = 'none';
+    
+    // إخفاء أي عناصر منبثقة
+    const overlays = document.querySelectorAll('.popup.show');
+    overlays.forEach(overlay => overlay.classList.remove('show'));
+    
+    // إخفاء الامتحان إذا كان مفتوحاً
+    const examContainer = document.getElementById('studentExamContainer');
+    if (examContainer) examContainer.classList.add('hidden-page');
+    
+    // إنشاء شاشة "تم الإكمال"
+    const messageDiv = document.createElement('div');
+    messageDiv.id = 'completionMessage';
+    messageDiv.className = 'fixed inset-0 bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center z-50';
+    messageDiv.innerHTML = `
+        <div class="text-center p-8 max-w-md mx-auto">
+            <div class="w-24 h-24 mx-auto bg-green-500 rounded-full flex items-center justify-center mb-6 animate-bounce">
+                <i class="fas fa-check-circle text-white text-5xl"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-white mb-4">✅ تم إكمال الامتحان بنجاح!</h2>
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-6">
+                <p class="text-white text-lg mb-2">📝 يرجى انتظار إجابتك لدى المعلم</p>
+                <p class="text-indigo-200 text-sm">لقد قمت بالفعل بإكمال هذا الامتحان من هذا المتصفح</p>
+            </div>
+            <div class="text-indigo-200 text-sm">
+                <i class="fas fa-envelope ml-1"></i> يمكنك التواصل مع المعلم لمتابعة نتيجتك
+            </div>
+        </div>
+    `;
+    
+    // إزالة أي رسالة سابقة
+    const oldMessage = document.getElementById('completionMessage');
+    if (oldMessage) oldMessage.remove();
+    
+    document.body.appendChild(messageDiv);
+    
+    // منع التمرير خلف الرسالة
+    document.body.style.overflow = 'hidden';
+    document.body.style.background = '#1e1b4b';
+}
+
+// إظهار رسالة الإكمال العادية (بعد الإرسال)
+function showCompletionMessage() {
+    // إخفاء كل محتوى الموقع الأصلي
+    const mainContainer = document.querySelector('.container');
+    const sidebar = document.getElementById('sidebar');
+    const header = document.querySelector('nav');
+    const footer = document.querySelector('.footer');
+    
+    if (mainContainer) mainContainer.style.display = 'none';
+    if (sidebar) sidebar.style.display = 'none';
+    if (header) header.style.display = 'none';
+    if (footer) footer.style.display = 'none';
+    
+    // إخفاء أي عناصر منبثقة
+    const overlays = document.querySelectorAll('.popup.show');
+    overlays.forEach(overlay => overlay.classList.remove('show'));
+    
+    // إخفاء الامتحان إذا كان مفتوحاً
+    const examContainer = document.getElementById('studentExamContainer');
+    if (examContainer) examContainer.classList.add('hidden-page');
+    
+    // إنشاء رسالة التأكيد
+    const messageDiv = document.createElement('div');
+    messageDiv.id = 'completionMessage';
+    messageDiv.className = 'fixed inset-0 bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center z-50';
+    messageDiv.innerHTML = `
+        <div class="text-center p-8 max-w-md mx-auto">
+            <div class="w-24 h-24 mx-auto bg-green-500 rounded-full flex items-center justify-center mb-6 animate-bounce">
+                <i class="fas fa-check-circle text-white text-5xl"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-white mb-4">✅ تم إكمال الامتحان بنجاح!</h2>
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-6">
+                <p class="text-white text-lg mb-2">📝 يرجى انتظار إجابتك لدى المعلم</p>
+                <p class="text-indigo-200 text-sm">سيتم مراجعة إجاباتك وإعلامك بالنتيجة قريباً</p>
+            </div>
+            <div class="text-indigo-200 text-sm">
+                <i class="fas fa-envelope ml-1"></i> يمكنك التواصل مع المعلم لمتابعة نتيجتك
+            </div>
+        </div>
+    `;
+    
+    // إزالة أي رسالة سابقة
+    const oldMessage = document.getElementById('completionMessage');
+    if (oldMessage) oldMessage.remove();
+    
+    document.body.appendChild(messageDiv);
+    
+    // منع التمرير خلف الرسالة
+    document.body.style.overflow = 'hidden';
+    document.body.style.background = '#1e1b4b';
 }
     document.getElementById('userAvatar')?.addEventListener('click', toggleUserDropdown);
     
