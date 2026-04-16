@@ -388,6 +388,23 @@ body.exam-mode #studentExamContainer .bg-white {
 body.exam-mode {
     overflow: hidden;
 }
+/* تأثيرات للرسالة */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+.animate-bounce {
+    animation: bounce 0.6s ease-in-out;
+}
+
+#completionMessage {
+    backdrop-filter: blur(10px);
+}
+
+#completionMessage .bg-white\/10 {
+    backdrop-filter: blur(20px);
+}
     </style>
 </head>
 <body>
@@ -1665,7 +1682,7 @@ async function submitStudentExam(event, examId) {
     // التحقق إذا كان الطالب قد أدى هذا الامتحان مسبقاً
     const studentKey = `exam_${examId}_completed`;
     if (sessionStorage.getItem(studentKey) === 'true') {
-        showSubmissionMessage('لقد قمت بالفعل بإرسال إجابات هذا الامتحان من قبل', false);
+        showCompletionMessage();
         return;
     }
     
@@ -1716,31 +1733,97 @@ async function submitStudentExam(event, examId) {
     // حفظ أن هذا الطالب أدى هذا الامتحان
     sessionStorage.setItem(studentKey, 'true');
     
-    // عرض رسالة النجاح (بدون العودة للموقع)
-    let message = '';
-    if (exam.showResult !== false) {
-        message = `تم تسجيل إجاباتك بنجاح!\n\nالدرجة: ${total}/${totalPossible}\nالنسبة: ${percentage.toFixed(1)}%\nالتقدير: ${grade}`;
-    } else {
-        message = 'تم تسليم الامتحان بنجاح. شكراً لك!';
-    }
-    
-    showSubmissionMessage(message, true);
+    // عرض رسالة الإكمال (بدون العودة للموقع)
+    showCompletionMessage();
     
     if (currentUser && currentUser.uid === exam.creatorId) refreshHome();
 }
     
-    function closeStudentExam() {
-        document.getElementById('studentExamContainer').classList.add('hidden-page');
-        if (studentTimer) clearInterval(studentTimer);
-        sessionStorage.clear();
-        
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('exam')) {
-            const newUrl = window.location.pathname;
-            window.history.pushState({}, '', newUrl);
-        }
-    }
+function closeStudentExam() {
+    // إخفاء الامتحان
+    document.getElementById('studentExamContainer').classList.add('hidden-page');
     
+    // إظهار رسالة بدلاً من الموقع الأصلي
+    showCompletionMessage();
+    
+    // تنظيف الـ sessionStorage
+    sessionStorage.clear();
+    
+    // إزالة الـ hash من الرابط
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('exam')) {
+        const newUrl = window.location.pathname;
+        window.history.pushState({}, '', newUrl);
+    }
+}
+function showCompletionMessage() {
+    // إخفاء كل محتوى الموقع الأصلي
+    const mainContainer = document.querySelector('.container');
+    const sidebar = document.getElementById('sidebar');
+    const header = document.querySelector('nav');
+    const footer = document.querySelector('.footer');
+    
+    if (mainContainer) mainContainer.style.display = 'none';
+    if (sidebar) sidebar.style.display = 'none';
+    if (header) header.style.display = 'none';
+    if (footer) footer.style.display = 'none';
+    
+    // إخفاء أي عناصر منبثقة
+    const overlays = document.querySelectorAll('.popup');
+    overlays.forEach(overlay => overlay.classList.remove('show'));
+    
+    // إنشاء رسالة التأكيد
+    const messageDiv = document.createElement('div');
+    messageDiv.id = 'completionMessage';
+    messageDiv.className = 'fixed inset-0 bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center z-50';
+    messageDiv.innerHTML = `
+        <div class="text-center p-8 max-w-md mx-auto">
+            <div class="w-24 h-24 mx-auto bg-green-500 rounded-full flex items-center justify-center mb-6 animate-bounce">
+                <i class="fas fa-check-circle text-white text-5xl"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-white mb-4">✅ تم إكمال الامتحان بنجاح!</h2>
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-6">
+                <p class="text-white text-lg mb-2">📝 يرجى انتظار إجابتك لدى المعلم</p>
+                <p class="text-indigo-200 text-sm">سيتم مراجعة إجاباتك وإعلامك بالنتيجة قريباً</p>
+            </div>
+            <div class="text-indigo-200 text-sm">
+                <i class="fas fa-envelope ml-1"></i> يمكنك التواصل مع المعلم لمتابعة نتيجتك
+            </div>
+        </div>
+    `;
+    
+    // إزالة أي رسالة سابقة
+    const oldMessage = document.getElementById('completionMessage');
+    if (oldMessage) oldMessage.remove();
+    
+    document.body.appendChild(messageDiv);
+    
+    // منع التمرير خلف الرسالة
+    document.body.style.overflow = 'hidden';
+    document.body.style.background = '#1e1b4b';
+}
+
+// دالة لإعادة تعيين كل شيء (إذا احتجت في أي وقت)
+function resetToNormalMode() {
+    const messageDiv = document.getElementById('completionMessage');
+    if (messageDiv) messageDiv.remove();
+    
+    const mainContainer = document.querySelector('.container');
+    const sidebar = document.getElementById('sidebar');
+    const header = document.querySelector('nav');
+    const footer = document.querySelector('.footer');
+    
+    if (mainContainer) mainContainer.style.display = '';
+    if (sidebar) sidebar.style.display = '';
+    if (header) header.style.display = '';
+    if (footer) footer.style.display = '';
+    
+    document.body.style.overflow = '';
+    document.body.style.background = '';
+    
+    // إعادة تحميل البيانات
+    location.reload();
+}
     // ==================== دوال حذف الامتحان ====================
     
     async function deleteExam(id) {
