@@ -572,80 +572,59 @@ body.exam-mode {
         
     </div>
 
-   <!-- ==================== صفحة إنشاء امتحان ==================== -->
-
-<div id="createExamPage" class="page hidden-page">
+    <!-- ==================== صفحة إنشاء امتحان ==================== -->
     
-    <div class="bg-white rounded-2xl shadow-xl p-6">
-        <h2 class="text-2xl font-bold mb-6">✏️ إنشاء امتحان جديد</h2>
+    <div id="createExamPage" class="page hidden-page">
         
-        <div id="examLimitWarning" class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 hidden">
-            <p id="limitMsg" class="text-amber-700"></p>
+        <div class="bg-white rounded-2xl shadow-xl p-6">
+            <h2 class="text-2xl font-bold mb-6">✏️ إنشاء امتحان جديد</h2>
+            
+            <div id="examLimitWarning" class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 hidden">
+                <p id="limitMsg" class="text-amber-700"></p>
+            </div>
+            
+            <form id="examForm">
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">عنوان الامتحان</label>
+                    <input type="text" id="examTitle" placeholder="مثال: اختبار الرياضيات - الفصل الأول" class="w-full p-3 border rounded-lg" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">اسم الصف الدراسي</label>
+                    <input type="text" id="examClass" placeholder="مثال: الصف الثالث الثانوي - شعبة علمي" class="w-full p-3 border rounded-lg" required>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">المدة (دقائق)</label>
+                        <input type="number" id="examDuration" placeholder="المدة" class="w-full p-3 border rounded-lg" value="30">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">درجة النجاح (%)</label>
+                        <input type="number" id="examPassScore" placeholder="درجة النجاح" value="50" class="w-full p-3 border rounded-lg">
+                    </div>
+                    
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">الأسئلة</label>
+                    <div id="questionsContainer" class="space-y-4 mb-4"></div>
+                    <button type="button" onclick="addQuestion()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition">
+                        + إضافة سؤال
+                    </button>
+                </div>
+                
+                <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition">
+                    💾 حفظ وإنشاء رابط الامتحان
+                </button>
+                
+            </form>
         </div>
         
-        <form id="examForm">
-            
-            <!-- عنوان الامتحان -->
-            <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">عنوان الامتحان</label>
-                <input type="text" id="examTitle" placeholder="مثال: اختبار الرياضيات - الفصل الأول" class="w-full p-3 border rounded-lg" required>
-            </div>
-            
-            <!-- اسم الصف الدراسي -->
-            <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">اسم الصف الدراسي</label>
-                <input type="text" id="examClass" placeholder="مثال: الصف الثالث الثانوي - شعبة علمي" class="w-full p-3 border rounded-lg" required>
-            </div>
-            
-            <!-- المدة ودرجة النجاح -->
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-2">المدة (دقائق)</label>
-                    <input type="number" id="examDuration" placeholder="المدة" class="w-full p-3 border rounded-lg" value="30">
-                </div>
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-2">درجة النجاح (%)</label>
-                    <input type="number" id="examPassScore" placeholder="درجة النجاح" value="50" class="w-full p-3 border rounded-lg">
-                </div>
-            </div>
-            
-            <!-- ========== خيار إظهار/إخفاء النتيجة ========== -->
-            <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">عرض النتيجة بعد الامتحان:</label>
-                <div class="flex gap-4">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="showResult" value="true" checked class="w-4 h-4 text-indigo-600">
-                        <span>✅ نعم، اعرض النتيجة للطالب</span>
-                    </label>
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="showResult" value="false" class="w-4 h-4 text-gray-600">
-                        <span>❌ لا، أخفي النتيجة (يظهر رسالة فقط)</span>
-                    </label>
-                </div>
-                <p class="text-xs text-gray-500 mt-2">
-                    <i class="fas fa-info-circle ml-1"></i> 
-                    إذا اخترت "لا"، سيظهر للطالب رسالة "تم إرسال الامتحان بنجاح" فقط بدون درجته
-                </p>
-            </div>
-            
-            <!-- الأسئلة -->
-            <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">الأسئلة</label>
-                <div id="questionsContainer" class="space-y-4 mb-4"></div>
-                <button type="button" onclick="addQuestion()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition">
-                    <i class="fas fa-plus ml-1"></i> إضافة سؤال
-                </button>
-            </div>
-            
-            <!-- زر الحفظ -->
-            <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition">
-                <i class="fas fa-save ml-2"></i> حفظ وإنشاء رابط الامتحان
-            </button>
-            
-        </form>
     </div>
-    
-</div>
 
     <!-- ==================== صفحة قائمة الامتحانات ==================== -->
     
@@ -1214,62 +1193,73 @@ function refreshQuestionBank() {
     });
 }
     
-    function refreshAccountPage() {
-        const container = document.getElementById('accountContent');
+function refreshAccountPage() {
+    const container = document.getElementById('accountContent');
+    
+    if (currentUser) {
+        const plan = plans.find(p => p.id === currentUser.plan) || plans[0];
+        container.innerHTML = `
+            <div class="text-center">
+                <div class="w-24 h-24 mx-auto bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white text-3xl font-bold mb-4">
+                    ${currentUser.name?.charAt(0) || 'U'}
+                </div>
+                <h3 class="text-xl font-bold">${currentUser.name || ''}</h3>
+                <p class="text-gray-500 mb-4">${currentUser.email || ''}</p>
+                <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                    <p>الباقة: <strong class="text-indigo-600">${plan.name}</strong></p>
+                    <p id="accountRemaining">الامتحانات المتبقية: --</p>
+                    <p id="accountExpiry">تاريخ التجديد: --</p>
+                </div>
+                
+                <!-- زر تسجيل الدخول بـ تكنو شرك - يفتح صفحة خارجية في تبويب جديد -->
+                <a href="https://mohamedemadmaxplas.github.io/NABD_/" target="_blank" 
+                   class="w-full bg-emerald-600 text-white py-2 rounded-lg mb-2 hover:bg-emerald-700 transition text-center block">
+                    <i class="fas fa-coins ml-2"></i> تسجيل الدخول بـ تكنو شرك
+                </a>
+                
+                <button onclick="navigateTo('upgrade')" class="w-full bg-amber-500 text-white py-2 rounded-lg mb-2 hover:bg-amber-600 transition">
+                    🚀 ترقية الحساب
+                </button>
+                <button onclick="logout()" class="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition">
+                    تسجيل خروج
+                </button>
+            </div>
+        `;
+        updateRemainingExams();
+    } else {
+        container.innerHTML = `
+            <div class="text-center">
+                <i class="fas fa-user-circle text-6xl text-indigo-600 mb-4"></i>
+                <h2 class="text-2xl font-bold mb-4">مرحباً بك</h2>
+                <div id="googleBtn"></div>
+                <div class="relative my-6">
+                    <div class="border-t border-gray-300"></div>
+                    <span class="absolute top-[-12px] left-1/2 transform -translate-x-1/2 bg-white px-2 text-gray-500">أو</span>
+                </div>
+                
+                <!-- زر تسجيل الدخول بـ تكنو شرك للمستخدم غير المسجل -->
+                <a href="https://mohamedemadmaxplas.github.io/NABD_/" target="_blank" 
+                   class="w-full bg-emerald-600 text-white py-2 rounded-lg mb-3 hover:bg-emerald-700 transition text-center block">
+                    <i class="fas fa-coins ml-2"></i> تسجيل الدخول بـ تكنو شرك
+                </a>
+                
+                <p>ليس لديك حساب؟ <a onclick="showRegisterPopup()" class="text-indigo-600 cursor-pointer hover:underline">إنشاء حساب</a></p>
+            </div>
+        `;
         
-        if (currentUser) {
-            const plan = plans.find(p => p.id === currentUser.plan) || plans[0];
-            container.innerHTML = `
-                <div class="text-center">
-                    <div class="w-24 h-24 mx-auto bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white text-3xl font-bold mb-4">
-                        ${currentUser.name?.charAt(0) || 'U'}
-                    </div>
-                    <h3 class="text-xl font-bold">${currentUser.name || ''}</h3>
-                    <p class="text-gray-500 mb-4">${currentUser.email || ''}</p>
-                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
-                        <p>الباقة: <strong class="text-indigo-600">${plan.name}</strong></p>
-                        <p id="accountRemaining">الامتحانات المتبقية: --</p>
-                        <p id="accountExpiry">تاريخ التجديد: --</p>
-                    </div>
-                    <button onclick="navigateTo('upgrade')" class="w-full bg-amber-500 text-white py-2 rounded-lg mb-2 hover:bg-amber-600 transition">
-                        🚀 ترقية الحساب
-                    </button>
-                    <button onclick="logout()" class="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition">
-                        تسجيل خروج
-                    </button>
-                </div>
-            `;
-            updateRemainingExams();
-        } else {
-            container.innerHTML = `
-                <div class="text-center">
-                    <i class="fas fa-user-circle text-6xl text-indigo-600 mb-4"></i>
-                    <h2 class="text-2xl font-bold mb-4">مرحباً بك</h2>
-                    <div id="googleBtn"></div>
-                    <div class="relative my-6">
-                        <div class="border-t border-gray-300"></div>
-                        <span class="absolute top-[-12px] left-1/2 transform -translate-x-1/2 bg-white px-2 text-gray-500">أو</span>
-                    </div>
-                    <button onclick="showTecnoPopup()" class="w-full bg-emerald-600 text-white py-2 rounded-lg mb-3 hover:bg-emerald-700 transition">
-                        <i class="fas fa-coins"></i> تكنو شرك
-                    </button>
-                    <p>ليس لديك حساب؟ <a onclick="showRegisterPopup()" class="text-indigo-600 cursor-pointer hover:underline">إنشاء حساب</a></p>
-                </div>
-            `;
-            
-            if (typeof google !== 'undefined') {
-                google.accounts.id.initialize({
-                    client_id: "501314955450-r7tcdfbocl0vpa6f9s0clac43215tmuf.apps.googleusercontent.com",
-                    callback: handleGoogleLogin
-                });
-                google.accounts.id.renderButton(document.getElementById("googleBtn"), {
-                    theme: "outline",
-                    size: "large",
-                    width: "100%"
-                });
-            }
+        if (typeof google !== 'undefined') {
+            google.accounts.id.initialize({
+                client_id: "501314955450-r7tcdfbocl0vpa6f9s0clac43215tmuf.apps.googleusercontent.com",
+                callback: handleGoogleLogin
+            });
+            google.accounts.id.renderButton(document.getElementById("googleBtn"), {
+                theme: "outline",
+                size: "large",
+                width: "100%"
+            });
         }
     }
+}
     
     function refreshPlansPage() {
     const container = document.getElementById('plansList');
@@ -1581,13 +1571,45 @@ function refreshQuestionBank() {
         sessionStorage.setItem('currentExam', JSON.stringify(exam));
         showStudentExam(exam);
     }
- 
+    function showStudentExam(exam) {
+    // إضافة تأثير الضبابية على الصفحة الرئيسية
+    const mainContent = document.querySelector('.container');
+    const sidebar = document.getElementById('sidebar');
+    const header = document.querySelector('nav');
+    const footer = document.querySelector('.footer');
+    
+    if (mainContent) mainContent.classList.add('blur-background');
+    if (sidebar) sidebar.classList.add('blur-background');
+    if (header) header.classList.add('blur-background');
+    if (footer) footer.classList.add('blur-background');
+    
+    document.getElementById('studentExamContainer').classList.remove('hidden-page');
+    const container = document.getElementById('studentExamContent');
+    container.innerHTML = `
+        <div class="text-center p-8">
+            <i class="fas fa-user-graduate text-6xl text-indigo-600 mb-4"></i>
+            <h2 class="text-2xl font-bold mb-2">${exam.title}</h2>
+            <p class="text-indigo-600 mb-4">📚 ${exam.className || 'بدون صف'}</p>
+            <p class="text-gray-600 mb-6">الرجاء إدخال بياناتك لبدء الامتحان</p>
+            <input type="text" id="studentName" placeholder="الاسم الكامل" class="w-full max-w-md p-3 border rounded-lg mb-3 mx-auto">
+            <input type="text" id="studentNumber" placeholder="رقم الجلوس" class="w-full max-w-md p-3 border rounded-lg mb-6 mx-auto">
+            <button onclick="renderExam('${exam.id}')" class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition">
+                بدء الامتحان
+            </button>
+        </div>
+    `;
+}
     
 function renderExam(examId) {
     const exam = exams.find(e => e.id === examId);
     if (!exam) return;
     
-    // لا نحتاج للتحقق هنا لأن showStudentExam قام بالتحقق بالفعل
+    // التحقق إذا كان الطالب قد أدى هذا الامتحان مسبقاً
+    const studentKey = `exam_${examId}_completed`;
+    if (sessionStorage.getItem(studentKey) === 'true') {
+        showSubmissionMessage('لقد قمت بالفعل بإرسال إجابات هذا الامتحان من قبل', false);
+        return;
+    }
     
     const studentName = document.getElementById('studentName')?.value.trim();
     if (!studentName) {
@@ -1671,7 +1693,7 @@ async function submitStudentExam(event, examId) {
     // التحقق إذا كان الطالب قد أدى هذا الامتحان مسبقاً
     const studentKey = `exam_${examId}_completed`;
     if (sessionStorage.getItem(studentKey) === 'true') {
-        showSubmissionMessage('لقد قمت بالفعل بإرسال إجابات هذا الامتحان من قبل', false);
+        showCompletionMessage();
         return;
     }
     
@@ -1722,157 +1744,12 @@ async function submitStudentExam(event, examId) {
     // حفظ أن هذا الطالب أدى هذا الامتحان
     sessionStorage.setItem(studentKey, 'true');
     
-    // عرض شاشة النتيجة (مع مراعاة إعداد إظهار/إخفاء النتيجة)
-    showResultScreen(exam, total, totalPossible, percentage, grade, passed);
+    // عرض رسالة الإكمال (بدون العودة للموقع)
+    showCompletionMessage();
     
     if (currentUser && currentUser.uid === exam.creatorId) refreshHome();
 }
-function showResultScreen(exam, total, totalPossible, percentage, grade, passed) {
-    // إخفاء كل محتوى الموقع الأصلي
-    const mainContainer = document.querySelector('.container');
-    const sidebar = document.getElementById('sidebar');
-    const header = document.querySelector('nav');
-    const footer = document.querySelector('.footer');
     
-    if (mainContainer) mainContainer.style.display = 'none';
-    if (sidebar) sidebar.style.display = 'none';
-    if (header) header.style.display = 'none';
-    if (footer) footer.style.display = 'none';
-    
-    // إخفاء أي عناصر منبثقة
-    const overlays = document.querySelectorAll('.popup');
-    overlays.forEach(overlay => overlay.classList.remove('show'));
-    
-    // إخفاء الامتحان
-    const examContainer = document.getElementById('studentExamContainer');
-    if (examContainer) examContainer.classList.add('hidden-page');
-    
-    // التحقق من إعدادات إظهار النتيجة
-    const showResult = exam.showResult !== false;
-    
-    // إنشاء شاشة النتيجة
-    const resultDiv = document.createElement('div');
-    resultDiv.id = 'resultScreen';
-    resultDiv.className = 'fixed inset-0 bg-gradient-to-br from-green-600 to-teal-700 flex items-center justify-center z-50';
-    
-    if (showResult) {
-        // عرض النتيجة كاملة مع الدرجة
-        resultDiv.innerHTML = `
-            <div class="text-center p-8 max-w-md mx-auto">
-                <div class="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center mb-6 animate-bounce">
-                    <i class="fas fa-check-circle text-green-600 text-5xl"></i>
-                </div>
-                <h2 class="text-3xl font-bold text-white mb-4">✅ تم إرسال الامتحان بنجاح!</h2>
-                <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-6 mb-6">
-                    <p class="text-white text-lg mb-2">📝 ${exam.title}</p>
-                    <p class="text-white text-md mb-4">📚 ${exam.className || 'بدون صف'}</p>
-                    <div class="border-t border-white/30 my-4"></div>
-                    <div class="space-y-2">
-                        <p class="text-white text-lg">الدرجة: <strong class="text-yellow-300">${total}/${totalPossible}</strong></p>
-                        <p class="text-white text-lg">النسبة: <strong class="text-yellow-300">${percentage.toFixed(1)}%</strong></p>
-                        <p class="text-white text-lg">التقدير: <strong class="${passed ? 'text-green-300' : 'text-red-300'}">${grade}</strong></p>
-                    </div>
-                </div>
-                <div class="text-white/80 text-sm">
-                    <i class="fas fa-envelope ml-1"></i> يمكنك التواصل مع المعلم لمتابعة نتيجتك
-                </div>
-                <button onclick="closeResultScreen()" class="mt-6 bg-white text-green-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-100 transition">
-                    إغلاق
-                </button>
-            </div>
-        `;
-    } else {
-        // عرض رسالة فقط بدون درجة (عند اختيار المدرس "إخفاء النتيجة")
-        resultDiv.innerHTML = `
-            <div class="text-center p-8 max-w-md mx-auto">
-                <div class="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center mb-6 animate-bounce">
-                    <i class="fas fa-check-circle text-green-600 text-5xl"></i>
-                </div>
-                <h2 class="text-3xl font-bold text-white mb-4">✅ تم إرسال الامتحان بنجاح!</h2>
-                <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-6 mb-6">
-                    <p class="text-white text-lg mb-2">📝 ${exam.title}</p>
-                    <p class="text-white text-md mb-4">📚 ${exam.className || 'بدون صف'}</p>
-                    <div class="border-t border-white/30 my-4"></div>
-                    <p class="text-white text-lg">📝 يرجى انتظار إجابتك لدى المعلم</p>
-                    <p class="text-indigo-200 text-sm mt-2">سيتم مراجعة إجاباتك وإعلامك بالنتيجة قريباً</p>
-                </div>
-                <div class="text-white/80 text-sm">
-                    <i class="fas fa-envelope ml-1"></i> يمكنك التواصل مع المعلم لمتابعة نتيجتك
-                </div>
-                <button onclick="closeResultScreen()" class="mt-6 bg-white text-green-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-100 transition">
-                    إغلاق
-                </button>
-            </div>
-        `;
-    }
-    
-    // إزالة أي شاشة سابقة
-    const oldScreen = document.getElementById('resultScreen');
-    if (oldScreen) oldScreen.remove();
-    
-    document.body.appendChild(resultDiv);
-    
-    // منع التمرير خلف الشاشة
-    document.body.style.overflow = 'hidden';
-}
-
-function closeResultScreen() {
-    const resultScreen = document.getElementById('resultScreen');
-    if (resultScreen) resultScreen.remove();
-    
-    // إظهار الموقع مرة أخرى
-    const mainContainer = document.querySelector('.container');
-    const sidebar = document.getElementById('sidebar');
-    const header = document.querySelector('nav');
-    const footer = document.querySelector('.footer');
-    
-    if (mainContainer) mainContainer.style.display = '';
-    if (sidebar) sidebar.style.display = '';
-    if (header) header.style.display = '';
-    if (footer) footer.style.display = '';
-    
-    document.body.style.overflow = '';
-    document.body.style.background = '';
-    
-    // إزالة أي أثر للامتحان
-    sessionStorage.clear();
-    
-    // إزالة الـ hash من الرابط
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('exam')) {
-        const newUrl = window.location.pathname;
-        window.history.pushState({}, '', newUrl);
-    }
-}
-
-function closeResultScreen() {
-    const resultScreen = document.getElementById('resultScreen');
-    if (resultScreen) resultScreen.remove();
-    
-    // إظهار الموقع مرة أخرى
-    const mainContainer = document.querySelector('.container');
-    const sidebar = document.getElementById('sidebar');
-    const header = document.querySelector('nav');
-    const footer = document.querySelector('.footer');
-    
-    if (mainContainer) mainContainer.style.display = '';
-    if (sidebar) sidebar.style.display = '';
-    if (header) header.style.display = '';
-    if (footer) footer.style.display = '';
-    
-    document.body.style.overflow = '';
-    document.body.style.background = '';
-    
-    // إزالة أي أثر للامتحان
-    sessionStorage.clear();
-    
-    // إزالة الـ hash من الرابط
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('exam')) {
-        const newUrl = window.location.pathname;
-        window.history.pushState({}, '', newUrl);
-    }
-}
 function closeStudentExam() {
     // إخفاء الامتحان
     document.getElementById('studentExamContainer').classList.add('hidden-page');
@@ -3344,159 +3221,6 @@ function showSubmissionMessage(message, isSuccess = true) {
             </button>
         </div>
     `;
-}
-// الحصول على معرف فريد للمتصفح (أو إنشاء واحد جديد)
-function getBrowserId() {
-    let browserId = localStorage.getItem('browser_id');
-    if (!browserId) {
-        // إنشاء معرف فريد جديد
-        browserId = 'BROWSER_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15) + '_' + navigator.userAgent.length;
-        localStorage.setItem('browser_id', browserId);
-    }
-    return browserId;
-}
-
-// الحصول على مفتاح فريد للطالب (معرف المتصفح + معرف الامتحان)
-function getStudentExamKey(examId) {
-    const browserId = getBrowserId();
-    return `exam_${examId}_${browserId}`;
-}
-
-// التحقق إذا كان هذا المتصفح قد أدى هذا الامتحان مسبقاً
-async function hasBrowserTakenExam(examId) {
-    // 1. التحقق من localStorage أولاً (سريع)
-    const examKey = getStudentExamKey(examId);
-    if (localStorage.getItem(examKey) === 'true') {
-        return true;
-    }
-    
-    // 2. التحقق من قاعدة البيانات (للتأكد من عدم التلاعب)
-    const browserId = getBrowserId();
-    const resultsSnapshot = await db.ref('results').once('value');
-    if (resultsSnapshot.val()) {
-        const allResults = Object.values(resultsSnapshot.val());
-        const existingResult = allResults.find(r => 
-            r.browserId === browserId && 
-            r.examId === examId
-        );
-        if (existingResult) {
-            // تخزين في localStorage لمنع إعادة المحاولة
-            localStorage.setItem(examKey, 'true');
-            return true;
-        }
-    }
-    
-    return false;
-}
-
-// تسجيل أن هذا المتصفح أدى الامتحان
-function markExamAsCompleted(examId) {
-    const examKey = getStudentExamKey(examId);
-    localStorage.setItem(examKey, 'true');
-}
-
-// عرض شاشة "تم إكمال الامتحان" للطلاب الذين حاولوا إعادة الامتحان
-function showAlreadyCompletedScreen() {
-    // إخفاء كل محتوى الموقع الأصلي
-    const mainContainer = document.querySelector('.container');
-    const sidebar = document.getElementById('sidebar');
-    const header = document.querySelector('nav');
-    const footer = document.querySelector('.footer');
-    
-    if (mainContainer) mainContainer.style.display = 'none';
-    if (sidebar) sidebar.style.display = 'none';
-    if (header) header.style.display = 'none';
-    if (footer) footer.style.display = 'none';
-    
-    // إخفاء أي عناصر منبثقة
-    const overlays = document.querySelectorAll('.popup.show');
-    overlays.forEach(overlay => overlay.classList.remove('show'));
-    
-    // إخفاء الامتحان إذا كان مفتوحاً
-    const examContainer = document.getElementById('studentExamContainer');
-    if (examContainer) examContainer.classList.add('hidden-page');
-    
-    // إنشاء شاشة "تم الإكمال"
-    const messageDiv = document.createElement('div');
-    messageDiv.id = 'completionMessage';
-    messageDiv.className = 'fixed inset-0 bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center z-50';
-    messageDiv.innerHTML = `
-        <div class="text-center p-8 max-w-md mx-auto">
-            <div class="w-24 h-24 mx-auto bg-green-500 rounded-full flex items-center justify-center mb-6 animate-bounce">
-                <i class="fas fa-check-circle text-white text-5xl"></i>
-            </div>
-            <h2 class="text-3xl font-bold text-white mb-4">✅ تم إكمال الامتحان بنجاح!</h2>
-            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-6">
-                <p class="text-white text-lg mb-2">📝 يرجى انتظار إجابتك لدى المعلم</p>
-                <p class="text-indigo-200 text-sm">لقد قمت بالفعل بإكمال هذا الامتحان من هذا المتصفح</p>
-            </div>
-            <div class="text-indigo-200 text-sm">
-                <i class="fas fa-envelope ml-1"></i> يمكنك التواصل مع المعلم لمتابعة نتيجتك
-            </div>
-        </div>
-    `;
-    
-    // إزالة أي رسالة سابقة
-    const oldMessage = document.getElementById('completionMessage');
-    if (oldMessage) oldMessage.remove();
-    
-    document.body.appendChild(messageDiv);
-    
-    // منع التمرير خلف الرسالة
-    document.body.style.overflow = 'hidden';
-    document.body.style.background = '#1e1b4b';
-}
-
-// إظهار رسالة الإكمال العادية (بعد الإرسال)
-function showCompletionMessage() {
-    // إخفاء كل محتوى الموقع الأصلي
-    const mainContainer = document.querySelector('.container');
-    const sidebar = document.getElementById('sidebar');
-    const header = document.querySelector('nav');
-    const footer = document.querySelector('.footer');
-    
-    if (mainContainer) mainContainer.style.display = 'none';
-    if (sidebar) sidebar.style.display = 'none';
-    if (header) header.style.display = 'none';
-    if (footer) footer.style.display = 'none';
-    
-    // إخفاء أي عناصر منبثقة
-    const overlays = document.querySelectorAll('.popup.show');
-    overlays.forEach(overlay => overlay.classList.remove('show'));
-    
-    // إخفاء الامتحان إذا كان مفتوحاً
-    const examContainer = document.getElementById('studentExamContainer');
-    if (examContainer) examContainer.classList.add('hidden-page');
-    
-    // إنشاء رسالة التأكيد
-    const messageDiv = document.createElement('div');
-    messageDiv.id = 'completionMessage';
-    messageDiv.className = 'fixed inset-0 bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center z-50';
-    messageDiv.innerHTML = `
-        <div class="text-center p-8 max-w-md mx-auto">
-            <div class="w-24 h-24 mx-auto bg-green-500 rounded-full flex items-center justify-center mb-6 animate-bounce">
-                <i class="fas fa-check-circle text-white text-5xl"></i>
-            </div>
-            <h2 class="text-3xl font-bold text-white mb-4">✅ تم إكمال الامتحان بنجاح!</h2>
-            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-6">
-                <p class="text-white text-lg mb-2">📝 يرجى انتظار إجابتك لدى المعلم</p>
-                <p class="text-indigo-200 text-sm">سيتم مراجعة إجاباتك وإعلامك بالنتيجة قريباً</p>
-            </div>
-            <div class="text-indigo-200 text-sm">
-                <i class="fas fa-envelope ml-1"></i> يمكنك التواصل مع المعلم لمتابعة نتيجتك
-            </div>
-        </div>
-    `;
-    
-    // إزالة أي رسالة سابقة
-    const oldMessage = document.getElementById('completionMessage');
-    if (oldMessage) oldMessage.remove();
-    
-    document.body.appendChild(messageDiv);
-    
-    // منع التمرير خلف الرسالة
-    document.body.style.overflow = 'hidden';
-    document.body.style.background = '#1e1b4b';
 }
     document.getElementById('userAvatar')?.addEventListener('click', toggleUserDropdown);
     
