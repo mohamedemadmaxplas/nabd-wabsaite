@@ -3,21 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Imtihan | منصة الامتحانات الإلكترونية</title>
+    <title>Tecno Shark | تسجيل الدخول</title>
     
-    <!-- الخطوط والمكتبات -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    
-    <!-- Firebase -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <meta name="referrer" content="no-referrer-when-downgrade">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
     
     <style>
         * {
@@ -27,938 +18,395 @@
         }
         
         body {
-            font-family: 'Cairo', sans-serif;
-            direction: rtl;
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            font-family: 'Segoe UI', 'Cairo', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            direction: rtl;
         }
         
-        .hidden-page {
-            display: none !important;
+        body.english {
+            direction: ltr;
         }
         
-        .sidebar-open {
-            transform: translateX(0) !important;
+        body.english .input-group label {
+            text-align: left;
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 32px;
+            padding: 40px 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .login-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .lang-switch {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border: none;
+            padding: 10px 18px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            z-index: 100;
+        }
+        
+        .lang-switch:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #1e3a5f, #0f2b3d);
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 15px 30px -10px rgba(30, 58, 95, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .logo::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+        
+        .logo-content {
+            text-align: center;
+            z-index: 1;
+        }
+        
+        .logo-content .main-letter {
+            font-size: 42px;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -2px;
+        }
+        
+        .logo-content .small-text {
+            font-size: 10px;
+            color: #10b981;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+        
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #1e3a5f, #0f2b3d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .subtitle {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+        
+        .input-group label {
+            display: block;
+            text-align: right;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        
+        .username-wrapper {
+            position: relative;
+        }
+        
+        .username-suffix {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #10b981;
+            font-size: 14px;
+            font-weight: 500;
+            background: white;
+            padding-right: 5px;
+            pointer-events: none;
+        }
+        
+        .username-wrapper input {
+            padding-left: 110px;
+        }
+        
+        .next-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+        }
+        
+        .next-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .back-btn {
+            width: 100%;
+            background: transparent;
+            border: 2px solid #e5e7eb;
+            color: #374151;
+            padding: 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .back-btn:hover {
+            background: #f3f4f6;
+            border-color: #10b981;
+        }
+        
+        .links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            font-size: 13px;
+        }
+        
+        .links a {
+            color: #10b981;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .message {
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .message.error {
+            background: #fee2e2;
+            color: #dc2626;
+            border-right: 4px solid #dc2626;
+            display: block;
+        }
+        
+        .message.success {
+            background: #d1fae5;
+            color: #059669;
+            border-right: 4px solid #059669;
+            display: block;
+        }
+        
+        .suggestions {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .suggestion-badge {
+            background: #f3f4f6;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #374151;
+        }
+        
+        .suggestion-badge:hover {
+            background: #10b981;
+            color: white;
+        }
+        
+        .terms-box {
+            background: #f9fafb;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: right;
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .terms-box h3 {
+            color: #1e3a5f;
+            margin-bottom: 15px;
+        }
+        
+        .terms-box p {
+            color: #4b5563;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .agree-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
         }
         
         .toast {
             position: fixed;
-            top: 80px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background: #1e293b;
+            background: #1f2937;
             color: white;
             padding: 12px 24px;
             border-radius: 50px;
-            z-index: 5000;
-            opacity: 0;
-            transition: 0.3s;
-            pointer-events: none;
             font-size: 14px;
-            z-index: 6000;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
         }
         
         .toast.show {
             opacity: 1;
         }
         
-        .popup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
+        .step-indicator {
             display: flex;
-            align-items: center;
             justify-content: center;
-            z-index: 3000;
-            visibility: hidden;
-            opacity: 0;
-            transition: 0.2s;
+            gap: 8px;
+            margin-bottom: 30px;
         }
         
-        .popup.show {
-            visibility: visible;
-            opacity: 1;
-        }
-        
-        .popup-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 16px;
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .exam-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.2rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            border: 1px solid rgba(99,102,241,0.2);
-        }
-        
-        .exam-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-        }
-        
-        .user-avatar {
-            width: 40px;
-            height: 40px;
+        .step-dot {
+            width: 8px;
+            height: 8px;
+            background: #e5e7eb;
             border-radius: 50%;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.3s;
         }
         
-        .user-avatar:hover {
-            transform: scale(1.05);
+        .step-dot.active {
+            width: 24px;
+            background: #10b981;
+            border-radius: 4px;
         }
         
-        .user-dropdown {
-            position: absolute;
-            top: 50px;
-            left: 0;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-            min-width: 180px;
-            z-index: 100;
-            overflow: hidden;
+        .step-dot.completed {
+            background: #10b981;
         }
         
-        .user-dropdown a {
-            display: block;
-            padding: 10px 16px;
-            cursor: pointer;
-        }
-        
-        .user-dropdown a:hover {
-            background: #f3f4f6;
-        }
-        
-        .search-overlay {
-            position: fixed;
-            top: 70px;
-            left: 0;
-            right: 0;
-            background: white;
-            padding: 1rem;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-            z-index: 1001;
-            display: none;
-        }
-        
-        .search-overlay.show {
-            display: block;
-        }
-        
-        .search-wrapper {
-            max-width: 500px;
-            margin: 0 auto;
-            position: relative;
-        }
-        
-        .search-wrapper input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #e2e8f0;
-            border-radius: 40px;
-            font-size: 14px;
-        }
-        
-        .search-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-            margin-top: 8px;
-            max-height: 300px;
-            overflow-y: auto;
-            display: none;
-        }
-        
-        .search-results.show {
-            display: block;
-        }
-        
-        .search-result-item {
-            padding: 10px 15px;
-            cursor: pointer;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        
-        .search-result-item:hover {
-            background: #f8fafc;
-        }
-        
-        .question-builder {
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .option-row {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-            align-items: center;
-        }
-        
-        .option-row input {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-        }
-        
-        .shake {
-            animation: shake 0.3s ease;
-        }
-        
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-3px); }
-            75% { transform: translateX(3px); }
-        }
-        
-        .sidebar {
-            position: fixed;
-            top: 0;
-            right: -280px;
-            width: 280px;
-            height: 100%;
-            background: white;
-            box-shadow: -2px 0 20px rgba(0,0,0,0.1);
-            transition: right 0.3s;
-            z-index: 2000;
-            padding: 1.5rem;
-            overflow-y: auto;
-        }
-        
-        .sidebar.open {
-            right: 0;
-        }
-        
-        .overlay-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.4);
-            z-index: 1500;
-            display: none;
-        }
-        
-        .overlay-bg.show {
-            display: block;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.2rem;
-            text-align: center;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            transition: 0.3s;
-            cursor: pointer;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-        }
-        
-        .stat-card-blue {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-        }
-        
-        .stat-card-green {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-        }
-        
-        .stat-card-purple {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-        }
-        
-        .stat-card-orange {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: white;
-        }
-        
-        .link-box {
-            background: #f1f5f9;
-            padding: 10px;
-            border-radius: 8px;
-            word-break: break-all;
-            font-size: 12px;
-            direction: ltr;
-            text-align: left;
-        }
-        
-        .class-badge {
-            display: inline-block;
-            background: #e0e7ff;
-            color: #3730a3;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            margin: 4px;
-        }
-        
-        .grade-card {
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 8px;
-            background: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        
-        .footer {
-            background: #1e293b;
-            color: #94a3b8;
-            padding: 20px;
-            text-align: center;
-            margin-top: 40px;
-            border-radius: 20px 20px 0 0;
-        }
-        
-        .footer a {
-            color: #a5b4fc;
-            text-decoration: none;
-        }
-        
-        .footer p {
-            margin: 5px 0;
-        }
-        
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 260px;
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 30px 20px;
+            }
+            h1 {
+                font-size: 24px;
             }
         }
-        /* إخفاء جميع عناصر الموقع الرئيسي عند فتح الامتحان */
-body.exam-mode .sidebar,
-body.exam-mode nav,
-body.exam-mode .footer,
-body.exam-mode .search-overlay,
-body.exam-mode #searchBtn,
-body.exam-mode #userArea,
-body.exam-mode .container > .page:not(#studentExamContainer) {
-    display: none !important;
-}
-
-body.exam-mode .container {
-    padding: 0 !important;
-    margin: 0 !important;
-    max-width: 100% !important;
-}
-
-body.exam-mode #studentExamContainer {
-    position: relative !important;
-    background: transparent !important;
-    display: block !important;
-}
-
-body.exam-mode #studentExamContainer .bg-white {
-    margin: 0 auto;
-    box-shadow: none;
-}
-
-/* منع التمرير خلف الامتحان */
-body.exam-mode {
-    overflow: hidden;
-}
-/* تأثيرات للرسالة */
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-15px); }
-}
-
-.animate-bounce {
-    animation: bounce 0.6s ease-in-out;
-}
-
-#completionMessage {
-    backdrop-filter: blur(10px);
-}
-
-#completionMessage .bg-white\/10 {
-    backdrop-filter: blur(20px);
-}
     </style>
 </head>
 <body>
 
-<!-- ==================== عناصر مشتركة ==================== -->
+<button class="lang-switch" id="langSwitch">
+    <i class="fas fa-globe"></i>
+    <span>English</span>
+</button>
 
+<div class="login-container" id="app"></div>
 <div id="toast" class="toast"></div>
-<div class="overlay-bg" id="overlayBg"></div>
-
-<!-- ==================== القائمة الجانبية (Sidebar) ==================== -->
-
-<div class="sidebar" id="sidebar">
-    
-    <div class="flex justify-between items-center mb-8 pb-4 border-b">
-        <div class="flex items-center gap-2">
-            <i class="fas fa-pen-alt text-indigo-600 text-2xl"></i>
-            <h2 class="text-2xl font-bold text-indigo-600">Imtihan</h2>
-        </div>
-        <button onclick="closeSidebar()" class="text-gray-500 hover:text-red-500 text-2xl">&times;</button>
-    </div>
-    
-    <div class="space-y-2">
-        
-        <button onclick="navigateTo('home')" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3">
-            <i class="fas fa-home text-indigo-600 w-6"></i>
-            <span>الرئيسية</span>
-        </button>
-        
-        <button onclick="navigateTo('createExam')" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3">
-            <i class="fas fa-plus-circle text-indigo-600 w-6"></i>
-            <span>إنشاء امتحان</span>
-        </button>
-        
-        <button onclick="navigateTo('examsList')" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3">
-            <i class="fas fa-list text-indigo-600 w-6"></i>
-            <span>الامتحانات</span>
-        </button>
-        
-        <button onclick="navigateTo('questionBank')" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3">
-            <i class="fas fa-database text-indigo-600 w-6"></i>
-            <span>بنك الأسئلة</span>
-        </button>
-        
-        <button onclick="navigateTo('analytics')" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3">
-            <i class="fas fa-chart-line text-indigo-600 w-6"></i>
-            <span>التحليلات</span>
-        </button>
-        
-        <button onclick="navigateTo('account')" class="w-full text-right p-3 rounded-xl hover:bg-indigo-50 flex items-center gap-3">
-            <i class="fas fa-user-circle text-indigo-600 w-6"></i>
-            <span>حسابي</span>
-        </button>
-        
-        <button onclick="navigateTo('upgrade')" class="w-full text-right p-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white flex items-center gap-3">
-            <i class="fas fa-gem w-6"></i>
-            <span>🚀 رقي حسابك</span>
-        </button>
-        
-        <hr class="my-3">
-        
-        <button onclick="logout()" class="w-full text-right p-3 rounded-xl hover:bg-red-50 flex items-center gap-3 text-red-600">
-            <i class="fas fa-sign-out-alt w-6"></i>
-            <span>تسجيل خروج</span>
-        </button>
-        
-    </div>
-    
-</div>
-
-<!-- ==================== الهيدر (الشريط العلوي) ==================== -->
-
-<nav class="bg-white shadow-lg sticky top-0 z-40">
-    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-        
-        <div class="flex items-center gap-4">
-            <button onclick="toggleSidebar()" class="text-gray-600 hover:text-indigo-600 text-2xl transition-transform hover:scale-110">
-                <i class="fas fa-bars"></i>
-            </button>
-            
-            <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('home')">
-                <i class="fas fa-pen-alt text-indigo-600 text-xl"></i>
-                <span class="text-xl font-bold text-gray-800">Imtihan</span>
-            </div>
-        </div>
-        
-        <div class="flex items-center gap-4">
-            
-            <button id="searchBtn" class="text-gray-600 hover:text-indigo-600 text-2xl transition-transform hover:scale-110">
-                <i class="fas fa-search"></i>
-            </button>
-            
-            <div id="userArea" class="relative">
-                
-                <div id="loginBtnArea">
-                    <button onclick="navigateTo('account')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 transition">
-                        Sign Up
-                    </button>
-                </div>
-                
-                <div id="userAvatarArea" class="hidden relative">
-                    <div id="userAvatar" class="user-avatar" onclick="navigateTo('account')">
-                        <span id="avatarInitial">U</span>
-                    </div>
-                </div>
-                
-            </div>
-            
-        </div>
-        
-    </div>
-</nav>
-
-<!-- ==================== شريط البحث المنبثق ==================== -->
-
-<div class="search-overlay" id="searchOverlay">
-    <div class="search-wrapper">
-        <input type="text" id="searchInput" placeholder="🔍 بحث عن امتحان... أو اكتب 'adminmohamed' للوحة التحكم" autocomplete="off">
-        <div class="search-results" id="searchResults"></div>
-    </div>
-</div>
-
-<!-- ==================== المحتوى الرئيسي ==================== -->
-
-<div class="container mx-auto px-4 py-8">
-
-    <!-- ==================== الصفحة الرئيسية ==================== -->
-    
-    <div id="homePage" class="page">
-        
-        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-xl p-6 mb-8 text-center text-white">
-            <h1 class="text-3xl font-bold">📚 Imtihan</h1>
-            <p class="mt-2">منصة الامتحانات الإلكترونية - أنشئ امتحانك وشاركه مع طلابك</p>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            
-            <div class="stat-card stat-card-blue" onclick="showStatDetails('exams')">
-                <i class="fas fa-file-alt text-3xl mb-2"></i>
-                <h3 class="text-sm opacity-90">إجمالي الامتحانات</h3>
-                <p id="totalExams" class="text-2xl font-bold">0</p>
-            </div>
-            
-            <div class="stat-card stat-card-green" onclick="showStatDetails('active')">
-                <i class="fas fa-check-circle text-3xl mb-2"></i>
-                <h3 class="text-sm opacity-90">الامتحانات النشطة</h3>
-                <p id="activeExams" class="text-2xl font-bold">0</p>
-            </div>
-            
-            <div class="stat-card stat-card-purple" onclick="showStatDetails('students')">
-                <i class="fas fa-users text-3xl mb-2"></i>
-                <h3 class="text-sm opacity-90">عدد الطلاب</h3>
-                <p id="totalStudents" class="text-2xl font-bold">0</p>
-            </div>
-            
-            <div class="stat-card stat-card-orange" onclick="showStatDetails('completed')">
-                <i class="fas fa-chart-line text-3xl mb-2"></i>
-                <h3 class="text-sm opacity-90">الامتحانات المكتملة</h3>
-                <p id="completedExams" class="text-2xl font-bold">0</p>
-            </div>
-            
-        </div>
-        
-        <h2 class="text-xl font-bold mb-4">📖 أحدث الامتحانات</h2>
-        <div id="recentExamsList" class="space-y-3"></div>
-        
-    </div>
-
-    <!-- ==================== صفحة إنشاء امتحان ==================== -->
-    
-    <div id="createExamPage" class="page hidden-page">
-        
-        <div class="bg-white rounded-2xl shadow-xl p-6">
-            <h2 class="text-2xl font-bold mb-6">✏️ إنشاء امتحان جديد</h2>
-            
-            <div id="examLimitWarning" class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 hidden">
-                <p id="limitMsg" class="text-amber-700"></p>
-            </div>
-            
-            <form id="examForm">
-                
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2">عنوان الامتحان</label>
-                    <input type="text" id="examTitle" placeholder="مثال: اختبار الرياضيات - " class="w-full p-3 border rounded-lg" required>
-                </div>
-                
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2">اسم الصف الدراسي</label>
-                    <input type="text" id="examClass" placeholder="مثال: الصف الثالث الثانوي -  " class="w-full p-3 border rounded-lg" required>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    
-                    <div>
-                        <label class="block text-gray-700 font-semibold mb-2">المدة (دقائق)</label>
-                        <input type="number" id="examDuration" placeholder="المدة" class="w-full p-3 border rounded-lg" value="30">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-gray-700 font-semibold mb-2">درجة النجاح (%)</label>
-                        <input type="number" id="examPassScore" placeholder="درجة النجاح" value="50" class="w-full p-3 border rounded-lg">
-                    </div>
-                    
-                </div>
-                <!-- خيار إظهار/إخفاء النتيجة -->
-<div class="mb-4">
-    <label class="block text-gray-700 font-semibold mb-2">عرض النتيجة بعد الامتحان:</label>
-    <div class="flex gap-4">
-        <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="showResult" value="true" checked class="w-4 h-4 text-indigo-600">
-            <span>✅ نعم، اعرض النتيجة للطالب</span>
-        </label>
-        <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="showResult" value="false" class="w-4 h-4 text-gray-600">
-            <span>❌ لا، أخفي النتيجة (يظهر رسالة فقط)</span>
-        </label>
-    </div>
-    <p class="text-xs text-gray-500 mt-2">
-        <i class="fas fa-info-circle ml-1"></i> 
-        إذا اخترت "لا"، سيظهر للطالب رسالة "تم إرسال الامتحان بنجاح" فقط بدون درجته
-    </p>
-</div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2">الأسئلة</label>
-                    <div id="questionsContainer" class="space-y-4 mb-4"></div>
-                    <button type="button" onclick="addQuestion()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition">
-                        + إضافة سؤال
-                    </button>
-                </div>
-                
-                <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition">
-                    💾 حفظ وإنشاء رابط الامتحان
-                </button>
-                
-            </form>
-        </div>
-        
-    </div>
-
-    <!-- ==================== صفحة قائمة الامتحانات ==================== -->
-    
-    <div id="examsListPage" class="page hidden-page">
-        
-        <div class="bg-white rounded-2xl shadow-xl p-6">
-            <h2 class="text-2xl font-bold mb-6">📋 جميع الامتحانات</h2>
-            <div id="allExamsList" class="space-y-3"></div>
-        </div>
-        
-    </div>
-
-    <!-- ==================== صفحة بنك الأسئلة ==================== -->
-    
-    <div id="questionBankPage" class="page hidden-page">
-        
-        <div class="bg-white rounded-2xl shadow-xl p-6">
-            <h2 class="text-2xl font-bold mb-6">📚 بنك الأسئلة</h2>
-            <button onclick="openQuestionModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg mb-4 hover:bg-indigo-700 transition">
-                + إضافة سؤال
-            </button>
-            <div id="bankQuestionsList" class="space-y-3"></div>
-        </div>
-        
-    </div>
-
-    <!-- ==================== صفحة التحليلات ==================== -->
-    
-    <div id="analyticsPage" class="page hidden-page">
-        
-        <div class="bg-white rounded-2xl shadow-xl p-6">
-            <h2 class="text-2xl font-bold mb-6">📊 التحليلات</h2>
-            <canvas id="statsChart" height="200"></canvas>
-            
-            <div class="grid grid-cols-2 gap-4 mt-6">
-                
-                <div class="bg-gray-50 p-4 rounded-lg text-center">
-                    <p class="text-gray-500">متوسط الدرجات</p>
-                    <p id="avgScore" class="text-2xl font-bold text-indigo-600">0%</p>
-                </div>
-                
-                <div class="bg-gray-50 p-4 rounded-lg text-center">
-                    <p class="text-gray-500">نسبة النجاح</p>
-                    <p id="passRate" class="text-2xl font-bold text-green-600">0%</p>
-                </div>
-                
-            </div>
-        </div>
-        
-    </div>
-
-    <!-- ==================== صفحة الحساب ==================== -->
-    
-    <div id="accountPage" class="page hidden-page">
-        
-        <div class="bg-white rounded-2xl shadow-xl p-6 max-w-md mx-auto" id="accountContent"></div>
-        
-    </div>
-
-    <!-- ==================== صفحة الترقية ==================== -->
-    
-    <div id="upgradePage" class="page hidden-page">
-        
-        <div class="bg-white rounded-2xl shadow-xl p-6">
-            <h2 class="text-2xl font-bold mb-6">🚀 باقات الترقية</h2>
-            <div id="plansList" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-        </div>
-        
-    </div>
-
-    <!-- ==================== صفحة الإدارة (تظهر فقط عن طريق البحث) ==================== -->
-    
-    <div id="adminPage" class="page hidden-page">
-        
-        <div class="bg-white rounded-2xl shadow-xl p-6">
-            <h2 class="text-2xl font-bold mb-6">👑 لوحة التحكم - Admin</h2>
-            
-            <div class="flex gap-2 mb-4 flex-wrap">
-                <button onclick="showAdminTab('users')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">👥 المستخدمين</button>
-                <button onclick="showAdminTab('plans')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">📦 الباقات</button>
-                <button onclick="showAdminTab('reports')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">📊 التقارير</button>
-                <button onclick="showAdminTab('subscriptions')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">📅 اشتراكات العملاء</button>
-            </div>
-            
-            <div id="adminUsersTab"><div id="usersTable"></div></div>
-            
-            <div id="adminPlansTab" class="hidden">
-                <div id="adminPlansList"></div>
-                <button onclick="showAddPlanPopup()" class="bg-green-600 text-white px-4 py-2 rounded-lg mt-3 hover:bg-green-700 transition">+ إضافة باقة</button>
-            </div>
-            
-            <div id="adminReportsTab" class="hidden">
-                
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-center text-white">
-                        <p class="text-sm opacity-90">إجمالي المستخدمين</p>
-                        <p id="adminTotalUsers" class="text-2xl font-bold">0</p>
-                    </div>
-                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 text-center text-white">
-                        <p class="text-sm opacity-90">مستخدمين Pro</p>
-                        <p id="adminProUsers" class="text-2xl font-bold">0</p>
-                    </div>
-                    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 text-center text-white">
-                        <p class="text-sm opacity-90">إجمالي الأرباح</p>
-                        <p id="adminTotalProfit" class="text-2xl font-bold">0</p>
-                    </div>
-                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 text-center text-white">
-                        <p class="text-sm opacity-90">زوار الموقع</p>
-                        <p id="adminVisitors" class="text-2xl font-bold">0</p>
-                    </div>
-                </div>
-                
-                <canvas id="profitChart" height="200"></canvas>
-                
-            </div>
-            
-            <div id="adminSubscriptionsTab" class="hidden">
-                <div id="subscriptionsList" class="space-y-3"></div>
-            </div>
-            
-            <button onclick="navigateTo('home')" class="mt-6 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">
-                العودة للرئيسية
-            </button>
-            
-        </div>
-        
-    </div>
-    
-</div>
-
-<!-- ==================== صفحة الطالب (لأداء الامتحان) ==================== -->
-
-<div id="studentExamContainer" class="hidden-page fixed inset-0 bg-gray-900 bg-opacity-95 z-50 overflow-y-auto">
-    <div class="container mx-auto px-4 py-8">
-        <div class="bg-white rounded-2xl p-6 max-w-4xl mx-auto" id="studentExamContent"></div>
-    </div>
-</div>
-
-<!-- ==================== نافذة تفاصيل الطالب ==================== -->
-
-<div id="studentDetailsPopup" class="popup">
-    <div class="popup-content" style="max-width: 700px; width: 90%;">
-        <h3 class="text-xl font-bold mb-4" id="detailsStudentName"></h3>
-        <div id="detailsContent"></div>
-        <button onclick="printStudentDetails()" class="bg-green-600 text-white px-4 py-2 rounded-lg mt-3 ml-2">
-            <i class="fas fa-print"></i> طباعة PDF
-        </button>
-        <button onclick="closeStudentDetailsPopup()" class="bg-gray-300 px-4 py-2 rounded-lg mt-3">
-            إغلاق
-        </button>
-    </div>
-</div>
-
-<!-- ==================== نافذة تفاصيل الاشتراك ==================== -->
-
-<div id="subscriptionDetailsPopup" class="popup">
-    <div class="popup-content" style="max-width: 500px;">
-        <h3 class="text-xl font-bold mb-4" id="subDetailsClientName"></h3>
-        <div id="subDetailsContent"></div>
-        <button onclick="closeSubscriptionDetailsPopup()" class="bg-gray-300 px-4 py-2 rounded-lg mt-3">
-            إغلاق
-        </button>
-    </div>
-</div>
-
-<!-- ==================== نافذة تفاصيل البطاقة ==================== -->
-
-<div id="statDetailsPopup" class="popup">
-    <div class="popup-content" style="max-width: 700px; width: 90%;">
-        <h3 class="text-xl font-bold mb-4" id="statDetailsTitle"></h3>
-        <div id="statDetailsContent"></div>
-        <button onclick="closeStatDetailsPopup()" class="bg-gray-300 px-4 py-2 rounded-lg mt-3">
-            إغلاق
-        </button>
-    </div>
-</div>
-
-<!-- ==================== نافذة إضافة سؤال ==================== -->
-
-<div id="questionModal" class="popup">
-    <div class="popup-content">
-        <h3 class="text-xl font-bold mb-4">إضافة سؤال</h3>
-        <input type="text" id="qText" placeholder="نص السؤال" class="w-full p-2 border rounded mb-3">
-        <select id="qType" class="w-full p-2 border rounded mb-3">
-            <option value="mcq">اختيار من متعدد</option>
-            <option value="truefalse">صح/خطأ</option>
-        </select>
-        <div id="qOptions"></div>
-        <input type="text" id="qCorrect" placeholder="الإجابة الصحيحة" class="w-full p-2 border rounded mb-3">
-        <button onclick="addToBank()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">إضافة</button>
-        <button onclick="closeQuestionModal()" class="bg-gray-300 px-4 py-2 rounded mt-2">إلغاء</button>
-    </div>
-</div>
-
-<!-- ==================== نافذة تسجيل الدخول تكنو شرك ==================== -->
-
-<div id="tecnoLoginPopup" class="popup">
-    <div class="popup-content">
-        <i class="fas fa-coins text-3xl text-indigo-600 mb-3"></i>
-        <h3 class="text-xl font-bold mb-4">تسجيل الدخول - تكنو شرك</h3>
-        <input type="text" id="tecnoUser" placeholder="اسم المستخدم" class="w-full p-2 border rounded mb-3">
-        <input type="password" id="tecnoPass" placeholder="كلمة المرور" class="w-full p-2 border rounded mb-3">
-        <a onclick="showForgotPasswordPopup()" class="text-indigo-600 cursor-pointer text-sm block mb-3 hover:underline">نسيت كلمة المرور؟</a>
-        <button onclick="tecnoLogin()" class="bg-indigo-600 text-white w-full py-2 rounded mb-2 hover:bg-indigo-700">تسجيل الدخول</button>
-        <button onclick="closeTecnoPopup()" class="bg-gray-300 w-full py-2 rounded hover:bg-gray-400">إلغاء</button>
-        <hr class="my-3">
-        <a onclick="closeTecnoPopup(); showRegisterPopup()" class="text-indigo-600 cursor-pointer hover:underline">إنشاء حساب جديد</a>
-    </div>
-</div>
-
-<!-- ==================== نافذة إنشاء حساب ==================== -->
-
-<div id="registerPopup" class="popup">
-    <div class="popup-content">
-        <h3 class="text-xl font-bold mb-4">إنشاء حساب - تكنو شرك</h3>
-        <input type="text" id="regName" placeholder="الاسم الكامل" class="w-full p-2 border rounded mb-3">
-        <input type="tel" id="regPhone" placeholder="رقم الهاتف" class="w-full p-2 border rounded mb-3">
-        <input type="text" id="regUsername" placeholder="اسم المستخدم" class="w-full p-2 border rounded mb-3">
-        <div id="usernameError" class="text-red-500 text-sm hidden mb-2">⚠️ اسم المستخدم موجود بالفعل</div>
-        <input type="password" id="regPassword" placeholder="كلمة المرور" class="w-full p-2 border rounded mb-3">
-        <input type="password" id="regConfirm" placeholder="تأكيد كلمة المرور" class="w-full p-2 border rounded mb-3">
-        <button onclick="registerTecno()" class="bg-indigo-600 text-white w-full py-2 rounded mb-2 hover:bg-indigo-700">إنشاء حساب</button>
-        <button onclick="closeRegisterPopup()" class="bg-gray-300 w-full py-2 rounded hover:bg-gray-400">إلغاء</button>
-    </div>
-</div>
-
-<!-- ==================== نافذة نسيت كلمة المرور ==================== -->
-
-<div id="forgotPasswordPopup" class="popup">
-    <div class="popup-content">
-        <i class="fas fa-key text-3xl text-indigo-600 mb-3"></i>
-        <h3 class="text-xl font-bold mb-4">استعادة كلمة المرور</h3>
-        <p class="text-gray-600 mb-4">الرجاء إدخال رقم الهاتف المسجل بهذا الحساب</p>
-        <input type="tel" id="forgotPhone" placeholder="رقم الهاتف" class="w-full p-2 border rounded mb-3">
-        <button onclick="verifyPhoneForReset()" class="bg-indigo-600 text-white w-full py-2 rounded mb-2 hover:bg-indigo-700">تحقق</button>
-        <button onclick="closeForgotPasswordPopup()" class="bg-gray-300 w-full py-2 rounded hover:bg-gray-400">إلغاء</button>
-    </div>
-</div>
-
-<!-- ==================== نافذة إعادة تعيين كلمة المرور ==================== -->
-
-<div id="resetPasswordPopup" class="popup">
-    <div class="popup-content">
-        <i class="fas fa-lock text-3xl text-indigo-600 mb-3"></i>
-        <h3 class="text-xl font-bold mb-4">إعادة تعيين كلمة المرور</h3>
-        <input type="password" id="newPassword" placeholder="كلمة المرور الجديدة" class="w-full p-2 border rounded mb-3">
-        <input type="password" id="confirmNewPassword" placeholder="تأكيد كلمة المرور الجديدة" class="w-full p-2 border rounded mb-3">
-        <button onclick="resetPassword()" class="bg-indigo-600 text-white w-full py-2 rounded mb-2 hover:bg-indigo-700">تغيير كلمة المرور</button>
-        <button onclick="closeResetPasswordPopup()" class="bg-gray-300 w-full py-2 rounded hover:bg-gray-400">إلغاء</button>
-    </div>
-</div>
-
-<!-- ==================== نافذة إضافة باقة ==================== -->
-
-<div id="addPlanPopup" class="popup">
-    <div class="popup-content">
-        <h3 class="text-xl font-bold mb-4">إضافة باقة</h3>
-        <input type="text" id="planName" placeholder="اسم الباقة" class="w-full p-2 border rounded mb-3">
-        <input type="number" id="planExams" placeholder="عدد الامتحانات" class="w-full p-2 border rounded mb-3">
-        <input type="number" id="planPrice" placeholder="السعر" class="w-full p-2 border rounded mb-3">
-        <textarea id="planFeatures" placeholder="المميزات (كل سطر ميزة)" rows="3" class="w-full p-2 border rounded mb-3"></textarea>
-        <button onclick="addPlan()" class="bg-indigo-600 text-white w-full py-2 rounded mb-2 hover:bg-indigo-700">إضافة</button>
-        <button onclick="closeAddPlanPopup()" class="bg-gray-300 w-full py-2 rounded hover:bg-gray-400">إلغاء</button>
-    </div>
-</div>
-
-<!-- ==================== نافذة تأكيد حذف ==================== -->
-
-<div id="deleteConfirmPopup" class="popup">
-    <div class="popup-content">
-        <h3 class="text-xl font-bold text-red-600 mb-4">تأكيد الحذف</h3>
-        <p>هل أنت متأكد من حذف هذا الامتحان؟</p>
-        <div class="flex gap-3 mt-4">
-            <button onclick="confirmDelete()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">حذف</button>
-            <button onclick="closeDeletePopup()" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">إلغاء</button>
-        </div>
-    </div>
-</div>
-
-<!-- ==================== نافذة كلمة سر الإدارة ==================== -->
-
-<div id="adminPasswordPopup" class="popup">
-    <div class="popup-content">
-        <i class="fas fa-shield-alt text-4xl text-indigo-600 mb-3"></i>
-        <h3 class="text-xl font-bold mb-4">🔐 الدخول إلى لوحة التحكم</h3>
-        <p class="text-gray-600 mb-4">الرجاء إدخال كلمة السر</p>
-        <input type="password" id="adminPasswordInput" placeholder="كلمة السر" class="w-full p-3 border rounded-lg mb-4" autocomplete="off">
-        <div class="flex gap-3">
-            <button onclick="checkAdminPassword()" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">تأكيد</button>
-            <button onclick="closeAdminPasswordPopup()" class="flex-1 bg-gray-300 py-2 rounded-lg hover:bg-gray-400">إلغاء</button>
-        </div>
-    </div>
-</div>
-
-<!-- ==================== الفوتر (Footer) ==================== -->
-
-<footer class="footer">
-    <p>Developed by <strong class="text-indigo-400">Mohamed Emad Abd El-Atty</strong></p>
-    <p>📞 01144100018</p>
-    <p class="text-xs mt-2">© 2026 Imtihan - منصة الامتحانات الإلكترونية</p>
-</footer>
-
-<!-- ==================== جافا سكريبت ==================== -->
 
 <script>
     // ==================== إعدادات Firebase ====================
-    
    const firebaseConfig = {
-  apiKey: "AIzaSyD-atJ2hlfbAWqIaHuBgNASArZmVS6PhA0",
-  authDomain: "imtihan-494010.firebaseapp.com",
-  projectId: "imtihan-494010",
-  storageBucket: "imtihan-494010.firebasestorage.app",
-  messagingSenderId: "764038463015",
-  appId: "1:764038463015:web:e57dbfcf55ac393435d802",
-  measurementId: "G-2LT9PJNZK7"
+    apiKey: "AIzaSyDLndo0o-Bf67Sw8_n84pM-__ErB3SuTx4",  // ✅ المفتاح الجديد
+    authDomain: "tecno-shark.firebaseapp.com",
+    databaseURL: "https://tecno-shark-default-rtdb.firebaseio.com",
+    projectId: "tecno-shark",
+    storageBucket: "tecno-shark.firebasestorage.app",
+    messagingSenderId: "536495831614",
+    appId: "1:536495831614:web:e113969218666828496f6f",
+    measurementId: "G-ECZYM05D0S"
 };
 
     
@@ -967,35 +415,19 @@ body.exam-mode {
     const db = firebase.database();
     
     // ==================== المتغيرات العامة ====================
-    // منع تهيئة Google عدة مرات
-window.googleInitialized = false;
-    let currentUser = null;
-    let exams = [];
-    let results = [];
-    let questions = [];
-    let plans = [];
-    let allUsers = [];
-    let profits = [];
-    let subscriptions = [];
-    let deleteTarget = null;
-    let chart = null;
-    let profitChart = null;
-    let studentTimer = null;
-    let isAdminLoggedIn = false;
-    let resetTargetUser = null;
-    // متغيرات جديدة للتحكم في عرض النتيجة وإعادة الامتحان
-let showResultAfterExam = true;  // افتراضي: إظهار النتيجة
-let completedExams = new Set();   // لتخزين الامتحانات التي تم أداؤها (لمنع إعادة الامتحان)
-    // ==================== الخطط الافتراضية ====================
-    
-   // ==================== الخطط الافتراضية ====================
-const defaultPlans = [
-    { id: "free", name: "مجاني", examsCount: 8, price: 0, features: ["8 امتحان شهرياً", "تصحيح تلقائي"] },
-    { id: "pro", name: "Pro", examsCount: 999, price: 100, features: ["امتحانات غير محدودة", "تقارير متقدمة", "دعم優先"] }
-];
+    let currentStep = 'login';
+    let currentLang = 'ar';
+    let tempUserData = {
+        firstName: '',
+        lastName: '',
+        phone: '',
+        username: '',
+        password: ''
+    };
+    let resetUserData = null;
+    let returnToUrl = null;
     
     // ==================== دوال مساعدة ====================
-    
     function showToast(msg) {
         const toast = document.getElementById('toast');
         toast.textContent = msg;
@@ -1003,2482 +435,744 @@ const defaultPlans = [
         setTimeout(() => toast.classList.remove('show'), 3000);
     }
     
-    function genId() {
-        return Math.random().toString(36).substring(2, 10).toUpperCase();
+    function showMessage(msg, isError) {
+        const box = document.getElementById('messageBox');
+        if (box) {
+            box.textContent = msg;
+            box.className = 'message ' + (isError ? 'error' : 'success');
+            setTimeout(() => {
+                if (box) box.className = 'message';
+            }, 3000);
+        }
     }
     
-    function copyToClipboard(text) {
-        if (!text) return;
-        navigator.clipboard.writeText(text).then(() => {
-            showToast('✅ تم نسخ الرابط بنجاح!');
-        }).catch(() => {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            showToast('✅ تم نسخ الرابط بنجاح!');
-        });
+    function maskUsername(username) {
+        if (!username) return '';
+        if (username.length <= 4) return username;
+        return username.substring(0, 2) + '***' + username.substring(username.length - 2);
     }
     
-    // ==================== دوال التنقل ====================
-    
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('open');
-        document.getElementById('overlayBg').classList.toggle('show');
-    }
-    
-    function closeSidebar() {
-        document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('overlayBg').classList.remove('show');
-    }
-    
-    function navigateTo(pageName) {
-        document.querySelectorAll('.page').forEach(p => p.classList.add('hidden-page'));
-        const target = document.getElementById(pageName + 'Page');
-        if (target) target.classList.remove('hidden-page');
-        closeSidebar();
+    // الحصول على رابط العودة
+    function getReturnUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let returnUrl = urlParams.get('returnUrl');
         
-        if (pageName === 'home') refreshHome();
-        if (pageName === 'examsList') refreshExamsList();
-        if (pageName === 'questionBank') refreshQuestionBank();
-        if (pageName === 'analytics') refreshAnalytics();
-        if (pageName === 'account') refreshAccountPage();
-        if (pageName === 'upgrade') refreshPlansPage();
-        if (pageName === 'createExam') {
-            if (document.getElementById('questionsContainer').children.length === 0) addQuestion();
-            refreshExamLimit();
+        if (!returnUrl && document.referrer) {
+            returnUrl = document.referrer;
         }
-    }
-    
-    // ==================== دوال العرض والتحديث ====================
-    
-    function refreshHome() {
-    // إذا لم يكن هناك مستخدم مسجل الدخول، لا تظهر أي بيانات
-    if (!currentUser) {
-        document.getElementById('totalExams').innerText = '0';
-        document.getElementById('activeExams').innerText = '0';
-        document.getElementById('totalStudents').innerText = '0';
-        document.getElementById('completedExams').innerText = '0';
-        const container = document.getElementById('recentExamsList');
-        container.innerHTML = '<div class="text-center p-6 bg-white rounded-xl shadow">الرجاء تسجيل الدخول لعرض الامتحانات</div>';
-        return;
-    }
-    
-    // تصفية الامتحانات الخاصة بالمستخدم الحالي فقط
-    const userExams = exams.filter(e => e.creatorId === currentUser.uid);
-    const userResults = results.filter(r => r.userId === currentUser.uid);
-    
-    document.getElementById('totalExams').innerText = userExams.length;
-    document.getElementById('activeExams').innerText = userExams.filter(e => e.isActive !== false).length;
-    
-    const uniqueStudents = new Set(userResults.map(r => r.studentName));
-    document.getElementById('totalStudents').innerText = uniqueStudents.size;
-    document.getElementById('completedExams').innerText = userResults.length;
-    
-    const recent = [...userExams].reverse().slice(0, 5);
-    const container = document.getElementById('recentExamsList');
-    
-    if (recent.length === 0) {
-        container.innerHTML = '<div class="text-center p-6 bg-white rounded-xl shadow">لا توجد امتحانات. قم بإنشاء امتحان جديد</div>';
-    } else {
-        container.innerHTML = recent.map(exam => `
-            <div class="exam-card">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold">${exam.title}</h3>
-                        <p class="text-sm text-gray-500">${exam.className || 'بدون صف'} | ${exam.questions?.length || 0} سؤال</p>
-                    </div>
-                    <button onclick="startExam('${exam.id}')" class="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700 transition">
-                        بدء الامتحان
-                    </button>
-                </div>
-            </div>
-        `).join('');
-    }
-}
-    
-function refreshExamsList() {
-    const container = document.getElementById('allExamsList');
-    
-    // إذا لم يكن هناك مستخدم مسجل الدخول، لا تظهر أي امتحانات
-    if (!currentUser) {
-        container.innerHTML = '<div class="text-center p-6 bg-white rounded-xl shadow">الرجاء تسجيل الدخول لعرض امتحاناتك</div>';
-        return;
-    }
-    
-    // تصفية الامتحانات الخاصة بالمستخدم الحالي فقط
-    const userExams = exams.filter(e => e.creatorId === currentUser.uid);
-    
-    if (userExams.length === 0) {
-        container.innerHTML = '<div class="text-center p-6 bg-white rounded-xl shadow">لا توجد امتحانات. قم بإنشاء امتحان جديد</div>';
-        return;
-    }
-    
-    container.innerHTML = userExams.map(exam => `
-        <div class="exam-card">
-            <div class="flex justify-between items-start flex-wrap gap-3">
-                <div>
-                    <h3 class="font-bold">${exam.title}</h3>
-                    <p class="text-sm text-gray-500">
-                        <span class="class-badge">📚 ${exam.className || 'بدون صف'}</span>
-                        ${exam.questions?.length || 0} سؤال | ${exam.duration || 30} دقيقة
-                    </p>
-                    <div class="link-box mt-2">
-                        <i class="fas fa-link text-gray-400 ml-1"></i> 
-                        ${window.location.origin}${window.location.pathname}?exam=${exam.id}
-                    </div>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="copyToClipboard('${window.location.origin}${window.location.pathname}?exam=${exam.id}')" 
-                        class="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700 transition">
-                        <i class="fas fa-copy"></i> نسخ الرابط
-                    </button>
-                    <button onclick="deleteExam('${exam.id}')" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition">
-                        <i class="fas fa-trash"></i> حذف
-                    </button>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-    
-function refreshQuestionBank() {
-    const container = document.getElementById('bankQuestionsList');
-    
-    if (!currentUser) {
-        container.innerHTML = '<div class="text-center p-6 bg-white rounded-xl shadow">الرجاء تسجيل الدخول أولاً</div>';
-        return;
-    }
-    
-    if (questions.length === 0) {
-        container.innerHTML = '<div class="text-center p-6 bg-white rounded-xl shadow">لا توجد أسئلة. أضف سؤالاً الآن!</div>';
-    } else {
-        container.innerHTML = questions.map(q => `
-            <div class="bg-white rounded-xl p-4 shadow flex justify-between items-center">
-                <div>
-                    <p class="font-semibold">${q.text}</p>
-                    <p class="text-sm text-gray-500">${q.type === 'mcq' ? 'اختيار من متعدد' : 'صح/خطأ'}</p>
-                </div>
-                <button onclick="deleteQuestion('${q.id}')" class="text-red-500 hover:text-red-700 transition">
-                    <i class="fas fa-trash"></i> حذف
-                </button>
-            </div>
-        `).join('');
-    }
-}
-    
-    function refreshAnalytics() {
-    // إذا لم يكن هناك مستخدم مسجل الدخول، لا تظهر أي إحصائيات
-    if (!currentUser) {
-        document.getElementById('avgScore').innerText = '0%';
-        document.getElementById('passRate').innerText = '0%';
-        const ctx = document.getElementById('statsChart').getContext('2d');
-        if (chart) chart.destroy();
-        chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['الدرجات'],
-                datasets: [{
-                    label: 'الدرجات (%)',
-                    data: [0],
-                    backgroundColor: '#6366f1',
-                    borderRadius: 8
-                }]
-            }
-        });
-        return;
-    }
-    
-    const userResults = results.filter(r => r.userId === currentUser.uid);
-    const percentages = userResults.map(r => r.percentage);
-    const avg = percentages.length ? (percentages.reduce((a, b) => a + b, 0) / percentages.length).toFixed(1) : 0;
-    const passCount = percentages.filter(p => p >= 50).length;
-    const passRate = percentages.length ? ((passCount / percentages.length) * 100).toFixed(1) : 0;
-    
-    document.getElementById('avgScore').innerText = avg + '%';
-    document.getElementById('passRate').innerText = passRate + '%';
-    
-    const ctx = document.getElementById('statsChart').getContext('2d');
-    if (chart) chart.destroy();
-    chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['الدرجات'],
-            datasets: [{
-                label: 'الدرجات (%)',
-                data: percentages.length ? percentages : [0],
-                backgroundColor: '#6366f1',
-                borderRadius: 8
-            }]
+        
+        if (!returnUrl) {
+            returnUrl = 'https://mohamedemadmaxplas.github.io/nabd-wabsaite/';
         }
-    });
-}
-    
-function refreshAccountPage() {
-    const container = document.getElementById('accountContent');
-    
-    if (currentUser) {
-        const plan = plans.find(p => p.id === currentUser.plan) || plans[0];
-        container.innerHTML = `
-            <div class="text-center">
-                <div class="w-24 h-24 mx-auto bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white text-3xl font-bold mb-4">
-                    ${currentUser.name?.charAt(0) || 'U'}
-                </div>
-                <h3 class="text-xl font-bold">${currentUser.name || ''}</h3>
-                <p class="text-gray-500 mb-4">${currentUser.email || ''}</p>
-                <div class="bg-gray-50 p-4 rounded-lg mb-4">
-                    <p>الباقة: <strong class="text-indigo-600">${plan.name}</strong></p>
-                    <p id="accountRemaining">الامتحانات المتبقية: --</p>
-                    <p id="accountExpiry">تاريخ التجديد: --</p>
-                </div>
-                
-                <!-- زر تسجيل الدخول بـ تكنو شرك - يفتح صفحة خارجية في تبويب جديد -->
-                <a href="https://mohamedemadmaxplas.github.io/NABD_/" target="_blank" 
-                   class="w-full bg-emerald-600 text-white py-2 rounded-lg mb-2 hover:bg-emerald-700 transition text-center block">
-                    <i class="fas fa-coins ml-2"></i> تسجيل الدخول بـ تكنو شرك
-                </a>
-                
-                <button onclick="navigateTo('upgrade')" class="w-full bg-amber-500 text-white py-2 rounded-lg mb-2 hover:bg-amber-600 transition">
-                    🚀 ترقية الحساب
-                </button>
-                <button onclick="logout()" class="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition">
-                    تسجيل خروج
-                </button>
-            </div>
-        `;
-        updateRemainingExams();
-    } else {
-        container.innerHTML = `
-            <div class="text-center">
-                <i class="fas fa-user-circle text-6xl text-indigo-600 mb-4"></i>
-                <h2 class="text-2xl font-bold mb-4">مرحباً بك</h2>
-                <div id="googleBtn"></div>
-                <div class="relative my-6">
-                    <div class="border-t border-gray-300"></div>
-                    <span class="absolute top-[-12px] left-1/2 transform -translate-x-1/2 bg-white px-2 text-gray-500">أو</span>
-                </div>
-                
-                <!-- زر تسجيل الدخول بـ تكنو شرك للمستخدم غير المسجل -->
-                <a href="https://mohamedemadmaxplas.github.io/NABD_/" target="_blank" 
-                   class="w-full bg-emerald-600 text-white py-2 rounded-lg mb-3 hover:bg-emerald-700 transition text-center block">
-                    <i class="fas fa-coins ml-2"></i> تسجيل الدخول بـ تكنو شرك
-                </a>
-                
-                <p>ليس لديك حساب؟ <a onclick="showRegisterPopup()" class="text-indigo-600 cursor-pointer hover:underline">إنشاء حساب</a></p>
-            </div>
-        `;
-        // داخل دالة refreshAccountPage، بعد سطر container.innerHTML = ...
-if (currentUser) {
-    // ... بعد إنشاء الـ HTML
-    setTimeout(() => {
-        loadUserSubscription();
-    }, 100);
-}
-        // ✅ منع التهيئة المتكررة لـ Google Sign-In مع الـ Client ID الجديد
-        if (typeof google !== 'undefined' && !window.googleInitialized) {
-            window.googleInitialized = true;
-            google.accounts.id.initialize({
-                client_id: "764038463015-7dq76h1otro36g79aa9ndscro5efs24q.apps.googleusercontent.com",
-                callback: handleGoogleLogin
-            });
-            google.accounts.id.renderButton(document.getElementById("googleBtn"), {
-                theme: "outline",
-                size: "large",
-                width: "100%"
-            });
-        }
+        
+        returnToUrl = returnUrl;
+        return returnUrl;
     }
-}
-   // التأكد من تحميل الخطط والاشتراكات
-async function loadUserSubscription() {
-    if (!currentUser) return;
     
-    // التحقق من وجود العنصر قبل استخدامه
-    const accountExpiryElement = document.getElementById('accountExpiry');
-    if (!accountExpiryElement) {
-        console.log('عنصر accountExpiry غير موجود بعد');
+   async function checkIdentifier() {
+    const identifier = document.getElementById('loginIdentifier').value.trim();
+    
+    if (!identifier) {
+        showMessage('الرجاء إدخال رقم الهاتف أو اسم المستخدم', true);
         return;
     }
+    
+    // معالجة اسم المستخدم
+    let cleanIdentifier = identifier.replace(/@tecno\.shark$/i, '');
+    let fullIdentifier = cleanIdentifier + '@tecno.shark';
     
     try {
-        const subSnapshot = await db.ref(`subscriptions/${currentUser.uid}`).once('value');
-        if (subSnapshot.exists()) {
-            const sub = subSnapshot.val();
-            accountExpiryElement.innerText = `تاريخ التجديد: ${new Date(sub.expiryDate).toLocaleDateString('ar-EG')}`;
-        } else {
-            // إنشاء اشتراك افتراضي للمستخدم الجديد
-            const defaultSub = {
-                userId: currentUser.uid,
-                planId: 'free',
-                planName: 'مجاني',
-                examsLimit: 8,
-                startDate: new Date().toISOString(),
-                expiryDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),
-                isActive: true,
-                renewedCount: 0
-            };
-            await db.ref(`subscriptions/${currentUser.uid}`).set(defaultSub);
-            accountExpiryElement.innerText = `تاريخ التجديد: ${new Date(defaultSub.expiryDate).toLocaleDateString('ar-EG')}`;
-        }
-    } catch (error) {
-        console.error('خطأ في تحميل الاشتراك:', error);
-        accountExpiryElement.innerText = `تاريخ التجديد: غير محدد`;
-    }
-}
-    function refreshPlansPage() {
-    const container = document.getElementById('plansList');
-    // الباقات تظهر للجميع بغض النظر عن تسجيل الدخول
-    const availablePlans = plans.filter(p => p.id !== 'free');
-    
-    if (availablePlans.length === 0) {
-        container.innerHTML = '<div class="text-center p-6 bg-white rounded-xl shadow">لا توجد باقات متاحة</div>';
-        return;
-    }
-    
-    container.innerHTML = availablePlans.map(plan => `
-        <div class="bg-white rounded-xl shadow-lg p-6 text-center border-2 hover:border-indigo-400 transition">
-            <div class="w-16 h-16 mx-auto bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center mb-4">
-                <i class="fas fa-gem text-white text-2xl"></i>
-            </div>
-            <h3 class="text-2xl font-bold text-indigo-600">${plan.name}</h3>
-            <p class="text-3xl font-bold my-2">${plan.price} ج</p>
-            <p>${plan.examsCount} امتحان شهرياً</p>
-            <ul class="text-sm text-gray-500 mt-3">
-                ${plan.features.map(f => `<li><i class="fas fa-check text-green-500 ml-1"></i> ${f}</li>`).join('')}
-            </ul>
-            <button onclick="requestUpgrade('${plan.id}')" class="mt-4 bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition">
-                <i class="fab fa-whatsapp ml-1"></i> اطلب الترقية
-            </button>
-        </div>
-    `).join('');
-}
-    
-   async function refreshExamLimit() {
-    if (!currentUser) return;
-    
-    try {
-        // التأكد من تحميل الخطط
-        if (plans.length === 0) {
-            await loadPlans();
+        // تجربة طريقة مختلفة تماماً للوصول للبيانات
+        console.log('جاري محاولة قراءة البيانات...');
+        
+        // استخدام REST API مباشرة
+        const response = await fetch('https://mindful-marking-493119-d0-default-rtdb.firebaseio.com/users.json');
+        
+        if (!response.ok) {
+            throw new Error('فشل الاتصال بقاعدة البيانات');
         }
         
-        // الحصول على خطة المستخدم
-        let userPlan = plans.find(p => p.id === currentUser.plan);
-        if (!userPlan) {
-            userPlan = plans.find(p => p.id === 'free') || defaultPlans[0];
-        }
+        const data = await response.json();
+        console.log('البيانات المستلمة:', data);
         
-        const maxExams = userPlan.examsCount || 8;
-        
-        // حساب عدد الامتحانات التي أنشأها المستخدم هذا الشهر
-        const now = new Date();
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-        
-        // الامتحانات التي أنشأها المستخدم
-        const userExams = exams.filter(e => e.creatorId === currentUser.uid);
-        
-        // النتائج التي حصل عليها المستخدم (الطلاب الذين امتحنوا)
-        const userResultsThisMonth = results.filter(r => 
-            r.userId === currentUser.uid && new Date(r.date).getTime() >= startOfMonth
-        );
-        
-        // عدد الامتحانات المستخدمة = عدد الامتحانات التي أنشأها + عدد الطلاب الذين امتحنوا
-        const usedExams = userExams.length + userResultsThisMonth.length;
-        const remaining = Math.max(0, maxExams - usedExams);
-        
-        // تحديث الواجهة
-        const warning = document.getElementById('examLimitWarning');
-        const limitMsg = document.getElementById('limitMsg');
-        const accountRemaining = document.getElementById('accountRemaining');
-        
-        if (remaining <= 0 && warning) {
-            warning.classList.remove('hidden');
-            if (limitMsg) {
-                limitMsg.innerText = `⚠️ لقد استنفذت حدك الشهري (${maxExams} امتحان). قم بالترقية لإنشاء المزيد.`;
-            }
-        } else if (warning) {
-            warning.classList.add('hidden');
-        }
-        
-        if (accountRemaining) {
-            accountRemaining.innerText = `الامتحانات المتبقية: ${remaining} من ${maxExams}`;
-        }
-        
-        console.log(`الخطة: ${userPlan.name}, الحد الأقصى: ${maxExams}, المستخدم: ${usedExams}, المتبقي: ${remaining}`);
-        
-    } catch (error) {
-        console.error('خطأ في تحديث حد الامتحانات:', error);
-        // في حالة الخطأ، عرض القيم الافتراضية
-        const accountRemaining = document.getElementById('accountRemaining');
-        if (accountRemaining) {
-            accountRemaining.innerText = `الامتحانات المتبقية: 8 من 8`;
-        }
-    }
-}
-    
-    function updateRemainingExams() {
-        refreshExamLimit();
-    }
-    
-    // ==================== دوال إنشاء الامتحان ====================
-    
-    function addQuestion() {
-        const container = document.getElementById('questionsContainer');
-        const id = Date.now();
-        const div = document.createElement('div');
-        div.className = 'question-builder';
-        div.setAttribute('data-id', id);
-        div.innerHTML = `
-            <div class="flex justify-between items-center mb-2">
-                <strong>سؤال جديد</strong>
-                <button type="button" onclick="this.closest('.question-builder').remove()" class="text-red-500 hover:text-red-700">✖</button>
-            </div>
-            <input type="text" placeholder="نص السؤال" class="q-text w-full p-2 border rounded mb-2">
-            <select class="q-type w-full p-2 border rounded mb-2" onchange="updateType(this)">
-                <option value="mcq">اختيار من متعدد</option>
-                <option value="truefalse">صح/خطأ</option>
-            </select>
-            <div class="options-area"></div>
-            <input type="number" placeholder="درجة السؤال" class="q-score w-full p-2 border rounded mt-2" value="10">
-        `;
-        container.appendChild(div);
-        updateType(div.querySelector('.q-type'));
-    }
-    
-    function updateType(select) {
-        const div = select.closest('.question-builder');
-        const area = div.querySelector('.options-area');
-        const type = select.value;
-        const randomId = 'q_' + Date.now() + '_' + Math.random();
-        div.setAttribute('data-id', randomId);
-        
-        if (type === 'mcq') {
-            area.innerHTML = `
-                <div class="option-row">
-                    <input type="text" placeholder="الخيار 1" class="flex-1 p-2 border rounded">
-                    <input type="radio" name="correct-${randomId}" value="0">
-                </div>
-                <div class="option-row">
-                    <input type="text" placeholder="الخيار 2" class="flex-1 p-2 border rounded">
-                    <input type="radio" name="correct-${randomId}" value="1">
-                </div>
-                <button type="button" onclick="addOption(this)" class="text-green-600 text-sm mt-1 hover:text-green-700">
-                    + إضافة خيار
-                </button>
-            `;
-        } else {
-            area.innerHTML = `
-                <div class="option-row">
-                    <input type="text" value="صح" readonly class="flex-1 p-2 border rounded bg-gray-100">
-                    <input type="radio" name="correct-${randomId}" value="صح">
-                </div>
-                <div class="option-row">
-                    <input type="text" value="خطأ" readonly class="flex-1 p-2 border rounded bg-gray-100">
-                    <input type="radio" name="correct-${randomId}" value="خطأ">
-                </div>
-            `;
-        }
-    }
-    
-    function addOption(btn) {
-        const area = btn.closest('.options-area');
-        const div = btn.closest('.question-builder');
-        const count = area.querySelectorAll('.option-row').length;
-        const row = document.createElement('div');
-        row.className = 'option-row';
-        row.innerHTML = `
-            <input type="text" placeholder="الخيار ${count + 1}" class="flex-1 p-2 border rounded">
-            <input type="radio" name="correct-${div.dataset.id}" value="${count}">
-        `;
-        area.insertBefore(row, btn);
-    }
-    
-    function collectQuestions() {
-        const qs = [];
-        document.querySelectorAll('#questionsContainer .question-builder').forEach((div, index) => {
-            const text = div.querySelector('.q-text')?.value;
-            const type = div.querySelector('.q-type')?.value;
-            const score = parseInt(div.querySelector('.q-score')?.value) || 10;
-            let correct = '';
-            let options = [];
-            
-            if (type === 'mcq') {
-                const rows = div.querySelectorAll('.option-row');
-                rows.forEach((row, i) => {
-                    const opt = row.querySelector('input[type="text"]')?.value;
-                    if (opt && opt.trim()) options.push(opt.trim());
-                    const radio = row.querySelector('input[type="radio"]');
-                    if (radio && radio.checked) correct = opt;
-                });
-            } else if (type === 'truefalse') {
-                const radio = div.querySelector('input[type="radio"]:checked');
-                correct = radio ? radio.value : '';
-                options = ['صح', 'خطأ'];
-            }
-            
-            if (text && text.trim() && correct) {
-                qs.push({
-                    id: Date.now() + index,
-                    text: text.trim(),
-                    type: type,
-                    options: options,
-                    correct: correct,
-                    score: score
-                });
-            }
-        });
-        return qs;
-    }
-    
-    async function createNewExam() {
-    if (!currentUser) {
-        showToast('❌ الرجاء تسجيل الدخول أولاً');
-        navigateTo('account');
-        return false;
-    }
-    
-    const title = document.getElementById('examTitle')?.value.trim();
-    const className = document.getElementById('examClass')?.value.trim();
-    const duration = parseInt(document.getElementById('examDuration')?.value) || 30;
-    const passScore = parseInt(document.getElementById('examPassScore')?.value) || 50;
-    
-    // جلب قيمة إظهار النتيجة
-    const showResultRadio = document.querySelector('input[name="showResult"]:checked');
-    const showResult = showResultRadio ? showResultRadio.value === 'true' : true;
-    
-    if (!title) {
-        showToast('❌ الرجاء إدخال عنوان الامتحان');
-        return false;
-    }
-    
-    if (!className) {
-        showToast('❌ الرجاء إدخال اسم الصف الدراسي');
-        return false;
-    }
-    
-    const questionsList = collectQuestions();
-    if (questionsList.length === 0) {
-        showToast('❌ الرجاء إضافة سؤال واحد على الأقل');
-        return false;
-    }
-    
-    const totalScore = questionsList.reduce((sum, q) => sum + (q.score || 10), 0);
-    const examId = 'EXAM_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8).toUpperCase();
-    const baseUrl = window.location.href.split('?')[0];
-    const examLink = baseUrl + '?exam=' + examId;
-    
-    const examData = {
-        id: examId,
-        title: title,
-        className: className,
-        duration: duration,
-        passScore: passScore,
-        totalScore: totalScore,
-        questions: questionsList,
-        examLink: examLink,
-        isActive: true,
-        showResult: showResult,  // إضافة هذا الحقل الجديد
-        creatorId: currentUser.uid,
-        creatorName: currentUser.name,
-        createdAt: new Date().toISOString()
-    };
-    
-    try {
-        await db.ref(`exams/${examId}`).set(examData);
-        exams.push(examData);
-        
-        showExamLinkPopup(examLink, title, className);
-        
-        document.getElementById('examTitle').value = '';
-        document.getElementById('examClass').value = '';
-        document.getElementById('questionsContainer').innerHTML = '';
-        addQuestion();
-        
-        // إعادة تعيين خيارات العرض
-        const showTrueRadio = document.querySelector('input[name="showResult"][value="true"]');
-        if (showTrueRadio) showTrueRadio.checked = true;
-        
-        refreshExamsList();
-        refreshHome();
-        return true;
-    } catch (error) {
-        console.error(error);
-        showToast('❌ حدث خطأ في حفظ الامتحان');
-        return false;
-    }
-}
-    
-    function showExamLinkPopup(link, title, className) {
-        const oldModal = document.getElementById('examLinkModal');
-        if (oldModal) oldModal.remove();
-        
-        const modalHtml = `
-            <div id="examLinkModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 text-center">
-                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-check text-green-500 text-3xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2">✅ تم إنشاء الامتحان بنجاح!</h3>
-                    <p class="text-gray-600 mb-1">${title}</p>
-                    <p class="text-indigo-600 text-sm mb-4">📚 ${className}</p>
-                    <div class="bg-gray-100 p-3 rounded-lg mb-4">
-                        <p class="text-xs text-gray-500 mb-1">🔗 رابط الامتحان:</p>
-                        <p class="text-sm break-all font-mono">${link}</p>
-                    </div>
-                    <div class="flex gap-3">
-                        <button onclick="copyToClipboard('${link}'); closeExamLinkModal()" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
-                            <i class="fas fa-copy ml-1"></i> نسخ الرابط
-                        </button>
-                        <button onclick="closeExamLinkModal()" class="flex-1 bg-gray-200 py-2 rounded-lg hover:bg-gray-300">
-                            إغلاق
-                        </button>
-                    </div>
-                    <p class="text-xs text-gray-400 mt-3">يمكنك مشاركة هذا الرابط مع طلابك</p>
-                </div>
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    }
-    
-    function closeExamLinkModal() {
-        const modal = document.getElementById('examLinkModal');
-        if (modal) modal.remove();
-    }
-    
-    // ==================== دوال الامتحانات للطلاب ====================
-    
-   function startExam(examId) {
-    const exam = exams.find(e => e.id === examId);
-    if (!exam) return;
-    
-    if (exam.isActive === false) {
-        showToast('الامتحان متوقف حالياً');
-        return;
-    }
-    
-    // ✅ التحقق إذا كان هذا المتصفح قد أدى هذا الامتحان مسبقاً
-    if (hasTakenExam(examId)) {
-        showAlreadyTakenScreen(exam.title);
-        return;
-    }
-    
-    sessionStorage.setItem('currentExam', JSON.stringify(exam));
-    showStudentExam(exam);
-}
-    function showStudentExam(exam) {
-    // إضافة تأثير الضبابية على الصفحة الرئيسية
-    const mainContent = document.querySelector('.container');
-    const sidebar = document.getElementById('sidebar');
-    const header = document.querySelector('nav');
-    const footer = document.querySelector('.footer');
-    
-    if (mainContent) mainContent.classList.add('blur-background');
-    if (sidebar) sidebar.classList.add('blur-background');
-    if (header) header.classList.add('blur-background');
-    if (footer) footer.classList.add('blur-background');
-    
-    document.getElementById('studentExamContainer').classList.remove('hidden-page');
-    const container = document.getElementById('studentExamContent');
-    container.innerHTML = `
-        <div class="text-center p-8">
-            <i class="fas fa-user-graduate text-6xl text-indigo-600 mb-4"></i>
-            <h2 class="text-2xl font-bold mb-2">${exam.title}</h2>
-            <p class="text-indigo-600 mb-4">📚 ${exam.className || 'بدون صف'}</p>
-            <p class="text-gray-600 mb-6">الرجاء إدخال بياناتك لبدء الامتحان</p>
-            <input type="text" id="studentName" placeholder="الاسم الكامل" class="w-full max-w-md p-3 border rounded-lg mb-3 mx-auto">
-            <input type="text" id="studentNumber" placeholder="كود الطالب" class="w-full max-w-md p-3 border rounded-lg mb-6 mx-auto">
-            <button onclick="renderExam('${exam.id}')" class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition">
-                بدء الامتحان
-            </button>
-        </div>
-    `;
-}
-    
-function renderExam(examId) {
-    const exam = exams.find(e => e.id === examId);
-    if (!exam) return;
-    
-    // التحقق إذا كان الطالب قد أدى هذا الامتحان مسبقاً
-    const studentKey = `exam_${examId}_completed`;
-    if (sessionStorage.getItem(studentKey) === 'true') {
-        showSubmissionMessage('لقد قمت بالفعل بإرسال إجابات هذا الامتحان من قبل', false);
-        return;
-    }
-    
-    const studentName = document.getElementById('studentName')?.value.trim();
-    if (!studentName) {
-        alert('أدخل اسمك');
-        return;
-    }
-    
-    const studentNumber = document.getElementById('studentNumber')?.value.trim() || 'غير محدد';
-    sessionStorage.setItem('studentName', studentName);
-    sessionStorage.setItem('studentNumber', studentNumber);
-    
-    let qHtml = '';
-    exam.questions.forEach((q, idx) => {
-        if (q.type === 'mcq') {
-            qHtml += `
-                <div class="border rounded-lg p-4 mb-4 bg-gray-50">
-                    <p class="font-bold mb-2">${idx + 1}. ${q.text} <span class="text-indigo-600">(${q.score} درجة)</span></p>
-                    ${q.options.map(opt => `
-                        <label class="flex items-center gap-2 py-1 cursor-pointer hover:bg-gray-100 p-1 rounded">
-                            <input type="radio" name="q${idx}" value="${opt}">
-                            <span>${opt}</span>
-                        </label>
-                    `).join('')}
-                </div>
-            `;
-        } else {
-            qHtml += `
-                <div class="border rounded-lg p-4 mb-4 bg-gray-50">
-                    <p class="font-bold mb-2">${idx + 1}. ${q.text} <span class="text-indigo-600">(${q.score} درجة)</span></p>
-                    <label class="flex items-center gap-2 py-1 cursor-pointer hover:bg-gray-100 p-1 rounded">
-                        <input type="radio" name="q${idx}" value="true"> صح
-                    </label>
-                    <label class="flex items-center gap-2 py-1 cursor-pointer hover:bg-gray-100 p-1 rounded">
-                        <input type="radio" name="q${idx}" value="false"> خطأ
-                    </label>
-                </div>
-            `;
-        }
-    });
-    
-    const container = document.getElementById('studentExamContent');
-    container.innerHTML = `
-        <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
-            <h2 class="text-xl font-bold">${exam.title}</h2>
-            <div class="bg-gray-100 p-3 rounded text-center">
-                <div class="text-sm text-gray-500">الوقت المتبقي</div>
-                <div id="timerDisplay" class="text-2xl font-bold text-indigo-600">${exam.duration}:00</div>
-            </div>
-        </div>
-        <form id="examForm2" onsubmit="submitStudentExam(event, '${exam.id}')">
-            ${qHtml}
-            <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg mt-4 hover:bg-green-700 transition">
-                <i class="fas fa-paper-plane ml-2"></i> إرسال الإجابات
-            </button>
-        </form>
-    `;
-    
-    let timeLeft = exam.duration * 60;
-    if (studentTimer) clearInterval(studentTimer);
-    studentTimer = setInterval(() => {
-        if (timeLeft <= 0) {
-            clearInterval(studentTimer);
-            submitStudentExam(null, exam.id);
-        } else {
-            timeLeft--;
-            const mins = Math.floor(timeLeft / 60);
-            const secs = timeLeft % 60;
-            const timerDisplay = document.getElementById('timerDisplay');
-            if (timerDisplay) timerDisplay.innerHTML = `${mins}:${secs.toString().padStart(2, '0')}`;
-        }
-    }, 1000);
-}
-    
-async function submitStudentExam(event, examId) {
-    if (event) event.preventDefault();
-    if (studentTimer) clearInterval(studentTimer);
-    
-    const exam = exams.find(e => e.id === examId);
-    if (!exam) return;
-    
-    // ✅ التحقق مرة أخرى قبل الإرسال
-    if (hasTakenExam(examId)) {
-        showAlreadyTakenScreen(exam.title);
-        return;
-    }
-    
-    const studentName = sessionStorage.getItem('studentName');
-    const studentNumber = sessionStorage.getItem('studentNumber');
-    let total = 0;
-    let answers = [];
-    
-    exam.questions.forEach((q, idx) => {
-        const selected = document.querySelector(`input[name="q${idx}"]:checked`);
-        const qScore = q.score || 10;
-        const isCorrect = selected && selected.value === q.correct;
-        if (isCorrect) total += qScore;
-        answers.push({
-            question: q.text,
-            userAnswer: selected ? selected.value : 'لم يجب',
-            correctAnswer: q.correct,
-            isCorrect: isCorrect,
-            score: qScore
-        });
-    });
-    
-    const totalPossible = exam.totalScore || exam.questions.reduce((sum, q) => sum + (q.score || 10), 0);
-    const percentage = totalPossible > 0 ? (total / totalPossible) * 100 : 0;
-    const passed = percentage >= (exam.passScore || 50);
-    const grade = percentage >= 90 ? 'ممتاز' : percentage >= 75 ? 'جيد جداً' : percentage >= 50 ? 'مقبول' : 'ضعيف';
-    
-    const result = {
-        id: genId(),
-        studentName: studentName,
-        studentNumber: studentNumber,
-        examId: exam.id,
-        examTitle: exam.title,
-        examClass: exam.className,
-        score: total,
-        totalScore: totalPossible,
-        percentage: percentage,
-        passed: passed,
-        grade: grade,
-        answers: answers,
-        userId: exam.creatorId,
-        browserFingerprint: getBrowserFingerprint(), // ✅ حفظ بصمة المتصفح
-        date: new Date().toISOString()
-    };
-    
-    await db.ref(`results/${result.id}`).set(result);
-    results.push(result);
-    
-    // ✅ تسجيل أن هذا المتصفح أدى هذا الامتحان
-    markExamAsTaken(examId);
-    
-    // عرض رسالة النجاح
-    showCompletionMessage();
-    
-    if (currentUser && currentUser.uid === exam.creatorId) refreshHome();
-}
-// دالة لإعادة تعيين بصمة المتصفح (للتجربة - يمكن إزالتها في الإنتاج)
-function resetBrowserFingerprint() {
-    localStorage.removeItem('browser_fingerprint');
-    // حذف جميع محاولات الامتحانات
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('exam_attempt_')) {
-            localStorage.removeItem(key);
-        }
-    }
-    showToast('✅ تم إعادة تعيين بصمة المتصفح');
-}
-    
-function closeStudentExam() {
-    // إخفاء الامتحان
-    document.getElementById('studentExamContainer').classList.add('hidden-page');
-    
-    // إظهار رسالة بدلاً من الموقع الأصلي
-    showCompletionMessage();
-    
-    // تنظيف الـ sessionStorage
-    sessionStorage.clear();
-    
-    // إزالة الـ hash من الرابط
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('exam')) {
-        const newUrl = window.location.pathname;
-        window.history.pushState({}, '', newUrl);
-    }
-}
-function showCompletionMessage() {
-    // إخفاء كل محتوى الموقع الأصلي
-    const mainContainer = document.querySelector('.container');
-    const sidebar = document.getElementById('sidebar');
-    const header = document.querySelector('nav');
-    const footer = document.querySelector('.footer');
-    
-    if (mainContainer) mainContainer.style.display = 'none';
-    if (sidebar) sidebar.style.display = 'none';
-    if (header) header.style.display = 'none';
-    if (footer) footer.style.display = 'none';
-    
-    // إخفاء أي عناصر منبثقة
-    const overlays = document.querySelectorAll('.popup');
-    overlays.forEach(overlay => overlay.classList.remove('show'));
-    
-    // إنشاء رسالة التأكيد
-    const messageDiv = document.createElement('div');
-    messageDiv.id = 'completionMessage';
-    messageDiv.className = 'fixed inset-0 bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center z-50';
-    messageDiv.innerHTML = `
-        <div class="text-center p-8 max-w-md mx-auto">
-            <div class="w-24 h-24 mx-auto bg-green-500 rounded-full flex items-center justify-center mb-6 animate-bounce">
-                <i class="fas fa-check-circle text-white text-5xl"></i>
-            </div>
-            <h2 class="text-3xl font-bold text-white mb-4">✅ تم إكمال الامتحان بنجاح!</h2>
-            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-6">
-                <p class="text-white text-lg mb-2">📝 يرجى انتظار إجابتك لدى المعلم</p>
-                <p class="text-indigo-200 text-sm">سيتم مراجعة إجاباتك وإعلامك بالنتيجة قريباً</p>
-            </div>
-            <div class="text-indigo-200 text-sm">
-                <i class="fas fa-envelope ml-1"></i> يمكنك التواصل مع المعلم لمتابعة نتيجتك
-            </div>
-        </div>
-    `;
-    
-    // إزالة أي رسالة سابقة
-    const oldMessage = document.getElementById('completionMessage');
-    if (oldMessage) oldMessage.remove();
-    
-    document.body.appendChild(messageDiv);
-    
-    // منع التمرير خلف الرسالة
-    document.body.style.overflow = 'hidden';
-    document.body.style.background = '#1e1b4b';
-}
-
-// دالة لإعادة تعيين كل شيء (إذا احتجت في أي وقت)
-function resetToNormalMode() {
-    const messageDiv = document.getElementById('completionMessage');
-    if (messageDiv) messageDiv.remove();
-    
-    const mainContainer = document.querySelector('.container');
-    const sidebar = document.getElementById('sidebar');
-    const header = document.querySelector('nav');
-    const footer = document.querySelector('.footer');
-    
-    if (mainContainer) mainContainer.style.display = '';
-    if (sidebar) sidebar.style.display = '';
-    if (header) header.style.display = '';
-    if (footer) footer.style.display = '';
-    
-    document.body.style.overflow = '';
-    document.body.style.background = '';
-    
-    // إعادة تحميل البيانات
-    location.reload();
-}
-    // ==================== دوال حذف الامتحان ====================
-    
-    async function deleteExam(id) {
-        deleteTarget = id;
-        document.getElementById('deleteConfirmPopup').classList.add('show');
-    }
-    
-    async function confirmDelete() {
-        if (deleteTarget) {
-            await db.ref(`exams/${deleteTarget}`).remove();
-            exams = exams.filter(e => e.id !== deleteTarget);
-            refreshExamsList();
-            refreshHome();
-            showToast('تم حذف الامتحان');
-        }
-        closeDeletePopup();
-    }
-    
-    function closeDeletePopup() {
-        document.getElementById('deleteConfirmPopup').classList.remove('show');
-        deleteTarget = null;
-    }
-    
-    // ==================== دوال بنك الأسئلة ====================
-    
-    function openQuestionModal() {
-        document.getElementById('questionModal').classList.add('show');
-        updateQOptions();
-    }
-    
-    function closeQuestionModal() {
-        document.getElementById('questionModal').classList.remove('show');
-    }
-    
-    function updateQOptions() {
-        const type = document.getElementById('qType').value;
-        const container = document.getElementById('qOptions');
-        if (type === 'mcq') {
-            container.innerHTML = `
-                <input type="text" id="opt1" placeholder="الخيار 1" class="w-full p-2 border rounded mb-2">
-                <input type="text" id="opt2" placeholder="الخيار 2" class="w-full p-2 border rounded mb-2">
-            `;
-        } else {
-            container.innerHTML = '';
-        }
-    }
-    
-    document.getElementById('qType')?.addEventListener('change', updateQOptions);
-    
-    async function addToBank() {
-        if (!currentUser) {
-            showToast('سجل الدخول أولاً');
-            closeQuestionModal();
-            navigateTo('account');
+        if (!data) {
+            showMessage('لا يوجد حسابات مسجلة', true);
             return;
         }
         
-        const text = document.getElementById('qText').value;
-        const type = document.getElementById('qType').value;
-        const correct = document.getElementById('qCorrect').value;
-        
-        if (!text || !correct) {
-            showToast('املأ جميع الحقول');
-            return;
-        }
-        
-        let options = [];
-        if (type === 'mcq') {
-            options = [document.getElementById('opt1')?.value, document.getElementById('opt2')?.value].filter(o => o);
-        }
-        
-        const qid = genId();
-        await db.ref(`users/${currentUser.uid}/questions/${qid}`).set({
-            id: qid,
-            text: text,
-            type: type,
-            correct: correct,
-            options: options
-        });
-        await loadQuestions();
-        closeQuestionModal();
-        showToast('تمت إضافة السؤال');
-    }
-    
-    async function deleteQuestion(id) {
-        await db.ref(`users/${currentUser.uid}/questions/${id}`).remove();
-        await loadQuestions();
-        refreshQuestionBank();
-        showToast('تم حذف السؤال');
-    }
-    
-    // ==================== دوال تسجيل الدخول ====================
-    
-    async function handleGoogleLogin(response) {
-        try {
-            const cred = firebase.auth.GoogleAuthProvider.credential(response.credential);
-            const result = await auth.signInWithCredential(cred);
-            const user = result.user;
-            const snap = await db.ref(`users/${user.uid}`).once('value');
-            
-            if (!snap.val()) {
-                const newUser = {
-                    name: user.displayName,
-                    email: user.email,
-                    phone: '',
-                    plan: 'free',
-                    createdAt: new Date().toISOString()
-                };
-                await db.ref(`users/${user.uid}`).set(newUser);
-                await activateFreePlan(user.uid);
-            }
-            
-            currentUser = { uid: user.uid, ...(snap.val() || newUser) };
-            updateUserUI();
-            showToast(`مرحباً ${currentUser.name}`);
-            await loadAllData();
-            navigateTo('home');
-        } catch (e) {
-            showToast('خطأ في التسجيل');
-        }
-    }
-    
-    async function activateFreePlan(userId) {
-        const subscription = {
-            userId: userId,
-            planId: 'free',
-            planName: 'مجاني',
-            examsLimit: 8,
-            startDate: new Date().toISOString(),
-            expiryDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),
-            isActive: true,
-            renewedCount: 0
-        };
-        await db.ref(`subscriptions/${userId}`).set(subscription);
-        subscriptions.push(subscription);
-    }
-    
-    function showTecnoPopup() {
-        document.getElementById('tecnoLoginPopup').classList.add('show');
-    }
-    
-    function closeTecnoPopup() {
-        document.getElementById('tecnoLoginPopup').classList.remove('show');
-        document.getElementById('tecnoUser').value = '';
-        document.getElementById('tecnoPass').value = '';
-    }
-    
-    function showRegisterPopup() {
-        document.getElementById('registerPopup').classList.add('show');
-        document.getElementById('usernameError').classList.add('hidden');
-    }
-    
-    function closeRegisterPopup() {
-        document.getElementById('registerPopup').classList.remove('show');
-        document.getElementById('regName').value = '';
-        document.getElementById('regPhone').value = '';
-        document.getElementById('regUsername').value = '';
-        document.getElementById('regPassword').value = '';
-        document.getElementById('regConfirm').value = '';
-    }
-    
-    async function checkUsernameExists(username) {
-        const snap = await db.ref('users').once('value');
-        if (!snap.val()) return false;
-        for (let id in snap.val()) {
-            if (snap.val()[id].username === username) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    async function registerTecno() {
-    const name = document.getElementById('regName').value.trim();
-    const phone = document.getElementById('regPhone').value.trim();
-    let username = document.getElementById('regUsername').value.trim();
-    const pass = document.getElementById('regPassword').value;
-    const confirm = document.getElementById('regConfirm').value;
-    
-    if (!name || !phone || !username || !pass) {
-        showToast('املأ جميع الحقول');
-        return;
-    }
-    
-    if (pass !== confirm) {
-        showToast('كلمة المرور غير متطابقة');
-        return;
-    }
-    
-    if (!username.includes('@tecno.shark')) {
-        username = username.split('@')[0] + '@tecno.shark';
-    }
-    
-    const usernameExists = await checkUsernameExists(username);
-    if (usernameExists) {
-        document.getElementById('usernameError').classList.remove('hidden');
-        showToast('اسم المستخدم موجود بالفعل');
-        return;
-    }
-    
-    document.getElementById('usernameError').classList.add('hidden');
-    
-    const email = username.split('@')[0] + '@examhub.com';
-    
-    try {
-        // أولاً: إنشاء حساب في Authentication
-        const userCred = await auth.createUserWithEmailAndPassword(email, pass);
-        const firebaseUser = userCred.user;
-        
-        // ثانياً: حفظ بيانات المستخدم في Realtime Database
-        const newUser = {
-            name: name,
-            phone: phone,
-            username: username,
-            email: email,
-            password: pass,
-            plan: 'free',
-            createdAt: new Date().toISOString()
-        };
-        
-        await db.ref(`users/${firebaseUser.uid}`).set(newUser);
-        await activateFreePlan(firebaseUser.uid);
-        
-        // ثالثاً: تعيين المستخدم الحالي
-        currentUser = { uid: firebaseUser.uid, ...newUser };
-        
-        // رابعاً: إغلاق النوافذ وتحديث الواجهة
-        closeRegisterPopup();
-        updateUserUI();
-        showToast('تم إنشاء الحساب بنجاح');
-        
-        // خامساً: تحميل البيانات
-        await loadAllData();
-        navigateTo('home');
-        
-    } catch (error) {
-        console.error('خطأ في إنشاء الحساب:', error);
-        showToast('حدث خطأ في إنشاء الحساب: ' + error.message);
-    }
-}
-    
-    // ==================== دوال نسيت كلمة المرور ====================
-    
-    function showForgotPasswordPopup() {
-        closeTecnoPopup();
-        document.getElementById('forgotPasswordPopup').classList.add('show');
-        document.getElementById('forgotPhone').value = '';
-    }
-    
-    function closeForgotPasswordPopup() {
-        document.getElementById('forgotPasswordPopup').classList.remove('show');
-    }
-    
-    async function verifyPhoneForReset() {
-        const phone = document.getElementById('forgotPhone').value.trim();
-        if (!phone) {
-            showToast('الرجاء إدخال رقم الهاتف');
-            return;
-        }
-        
-        const snap = await db.ref('users').once('value');
         let foundUser = null;
         let foundUid = null;
         
-        if (snap.val()) {
-            for (let uid in snap.val()) {
-                if (snap.val()[uid].phone === phone) {
-                    foundUser = snap.val()[uid];
-                    foundUid = uid;
-                    break;
-                }
+        for (let uid in data) {
+            const user = data[uid];
+            if (user.phone === identifier) {
+                foundUser = user;
+                foundUid = uid;
+                break;
+            }
+            if (user.username === fullIdentifier) {
+                foundUser = user;
+                foundUid = uid;
+                break;
             }
         }
         
         if (!foundUser) {
-            showToast('لا يوجد حساب بهذا الرقم');
+            showMessage('لا يوجد حساب بهذه البيانات', true);
             return;
         }
         
-        resetTargetUser = { uid: foundUid, ...foundUser };
-        closeForgotPasswordPopup();
-        document.getElementById('resetPasswordPopup').classList.add('show');
-        document.getElementById('newPassword').value = '';
-        document.getElementById('confirmNewPassword').value = '';
+        resetUserData = { uid: foundUid, ...foundUser };
+        currentStep = 'reset';
+        render();
+        
+    } catch (error) {
+        console.error('خطأ في التحقق:', error);
+        showMessage('حدث خطأ في الاتصال بقاعدة البيانات: ' + error.message, true);
+    }
+}
+    
+    function goToLogin() {
+        currentStep = 'login';
+        render();
     }
     
-    function closeResetPasswordPopup() {
-        document.getElementById('resetPasswordPopup').classList.remove('show');
-        resetTargetUser = null;
+    function goToForgot() {
+        currentStep = 'forgot';
+        render();
+    }
+    
+    // ==================== دوال تسجيل الدخول ====================
+
+async function tecnoLogin() {
+    let username = document.getElementById('tecnoUser')?.value.trim();
+    const password = document.getElementById('tecnoPass')?.value;
+    
+    if (!username || !password) {
+        showMessage('الرجاء إدخال اسم المستخدم وكلمة المرور', true);
+        return;
+    }
+    
+    let cleanUsername = username.replace(/@tecno\.shark$/i, '');
+    let fullUsername = cleanUsername + '@tecno.shark';
+    const email = cleanUsername + '@tecno.com';
+    
+    try {
+        // البحث عن المستخدم في قاعدة البيانات أولاً
+        const userSnapshot = await db.ref('users').orderByChild('username').equalTo(fullUsername).once('value');
+        let found = null;
+        let foundUid = null;
+        
+        if (userSnapshot.exists()) {
+            userSnapshot.forEach((child) => {
+                found = child.val();
+                foundUid = child.key;
+            });
+        }
+        
+        if (!found || found.password !== password) {
+            showMessage('اسم المستخدم أو كلمة المرور غير صحيحة', true);
+            return;
+        }
+        
+        // محاولة تسجيل الدخول إلى Firebase Authentication
+        try {
+            await auth.signInWithEmailAndPassword(email, password);
+        } catch (authError) {
+            if (authError.code === 'auth/user-not-found') {
+                // إذا لم يكن موجوداً في Authentication، قم بإنشائه
+                await auth.createUserWithEmailAndPassword(email, password);
+            } else {
+                throw authError;
+            }
+        }
+        
+        // تحديث آخر تسجيل دخول
+        await db.ref(`users/${auth.currentUser.uid}/lastLogin`).set(new Date().toISOString());
+        
+        const returnUrl = getReturnUrl();
+        showMessage('✅ تم تسجيل الدخول بنجاح! جاري التحويل...', false);
+        
+        setTimeout(() => {
+            window.location.href = returnUrl;
+        }, 1500);
+        
+    } catch (error) {
+        console.error(error);
+        showMessage('حدث خطأ في تسجيل الدخول: ' + error.message, true);
+    }
+}
+    
+    // ==================== دوال استعادة كلمة المرور ====================
+    async function verifyPhone() {
+        const phone = document.getElementById('forgotPhone').value.trim();
+        if (!phone) {
+            showMessage('الرجاء إدخال رقم الهاتف', true);
+            return;
+        }
+        
+        try {
+            const phoneSnapshot = await db.ref('users').orderByChild('phone').equalTo(phone).once('value');
+            let foundUser = null;
+            let foundUid = null;
+            
+            if (phoneSnapshot.exists()) {
+                phoneSnapshot.forEach((child) => {
+                    foundUser = child.val();
+                    foundUid = child.key;
+                });
+            }
+            
+            if (!foundUser) {
+                showMessage('لا يوجد حساب بهذا الرقم', true);
+                return;
+            }
+            
+            resetUserData = { uid: foundUid, ...foundUser };
+            currentStep = 'reset';
+            render();
+            
+        } catch (error) {
+            showMessage('حدث خطأ', true);
+        }
     }
     
     async function resetPassword() {
         const newPass = document.getElementById('newPassword').value;
-        const confirmPass = document.getElementById('confirmNewPassword').value;
+        const confirmPass = document.getElementById('confirmPassword').value;
         
         if (!newPass || !confirmPass) {
-            showToast('الرجاء إدخال كلمة المرور');
+            showMessage('الرجاء إدخال كلمة المرور', true);
             return;
         }
         
         if (newPass !== confirmPass) {
-            showToast('كلمة المرور غير متطابقة');
+            showMessage('كلمة المرور غير متطابقة', true);
             return;
         }
         
         if (newPass.length < 6) {
-            showToast('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+            showMessage('كلمة المرور يجب أن تكون 6 أحرف على الأقل', true);
             return;
         }
         
-        if (!resetTargetUser) {
-            showToast('حدث خطأ، حاول مرة أخرى');
+        if (!resetUserData) {
+            showMessage('حدث خطأ، حاول مرة أخرى', true);
             return;
         }
         
         try {
-            await db.ref(`users/${resetTargetUser.uid}/password`).set(newPass);
+            await db.ref(`users/${resetUserData.uid}/password`).set(newPass);
             
-            const email = resetTargetUser.email;
+            const email = resetUserData.email;
             try {
                 await auth.signInWithEmailAndPassword(email, newPass);
             } catch {
-                // قد يكون المستخدم غير مسجل في Auth
+                await auth.createUserWithEmailAndPassword(email, newPass);
             }
             
-            closeResetPasswordPopup();
-            showToast('تم تغيير كلمة المرور بنجاح');
+            const returnUrl = getReturnUrl();
+            showMessage('✅ تم تغيير كلمة المرور بنجاح! جاري التحويل...', false);
+            
+            setTimeout(() => {
+                window.location.href = returnUrl;
+            }, 1500);
+            
         } catch (error) {
-            showToast('حدث خطأ في تغيير كلمة المرور');
+            showMessage('حدث خطأ', true);
         }
     }
     
-    async function tecnoLogin() {
-        const username = document.getElementById('tecnoUser').value.trim();
-        const password = document.getElementById('tecnoPass').value;
+    // ==================== دوال إنشاء حساب ====================
+    function goToRegister() {
+        tempUserData = { firstName: '', lastName: '', phone: '', username: '', password: '' };
+        currentStep = 'register-step1';
+        render();
+    }
+    
+    function goToRegisterStep1() {
+        currentStep = 'register-step1';
+        render();
+    }
+    
+    function goToRegisterStep2() {
+        const firstName = document.getElementById('firstName')?.value.trim();
+        const lastName = document.getElementById('lastName')?.value.trim();
         
-        if (!username || !password) {
-            showToast('أدخل البيانات');
+        if (!firstName || !lastName) {
+            showMessage('الرجاء إدخال الاسم الأول والاسم الأخير', true);
             return;
         }
         
-        let clean = username.includes('@') ? username : username + '@tecno.shark';
-        const snap = await db.ref('users').once('value');
-        let found = null;
-        let foundId = null;
+        tempUserData.firstName = firstName;
+        tempUserData.lastName = lastName;
+        currentStep = 'register-step2';
+        render();
+    }
+    
+    function goToRegisterStep3() {
+        const phone = document.getElementById('phone')?.value.trim();
         
-        if (snap.val()) {
-            for (let id in snap.val()) {
-                if (snap.val()[id].username === clean) {
-                    found = snap.val()[id];
-                    foundId = id;
-                    break;
+        if (!phone) {
+            showMessage('الرجاء إدخال رقم الهاتف', true);
+            return;
+        }
+        
+        if (phone.length < 10) {
+            showMessage('رقم الهاتف غير صحيح', true);
+            return;
+        }
+        
+        tempUserData.phone = phone;
+        currentStep = 'register-step3';
+        render();
+    }
+    
+    async function checkUsernameAvailability() {
+        const usernameInput = document.getElementById('username');
+        if (!usernameInput) return;
+        
+        const username = usernameInput.value.trim();
+        const errorDiv = document.getElementById('usernameError');
+        const nextBtn = document.getElementById('nextBtn3');
+        const suggestionsDiv = document.getElementById('suggestions');
+        
+        if (!username || username.length < 3) {
+            if (errorDiv) errorDiv.style.display = 'none';
+            if (nextBtn) nextBtn.disabled = true;
+            if (suggestionsDiv) suggestionsDiv.innerHTML = '';
+            return;
+        }
+        
+        try {
+            const fullUsername = username + '@tecno.shark';
+            const userSnapshot = await db.ref('users').orderByChild('username').equalTo(fullUsername).once('value');
+            const exists = userSnapshot.exists();
+            
+            if (exists) {
+                if (errorDiv) {
+                    errorDiv.style.display = 'block';
+                    errorDiv.textContent = '⚠️ اسم المستخدم موجود بالفعل';
                 }
-            }
-        }
-        
-        if (!found || found.password !== password) {
-            showToast('بيانات غير صحيحة');
-            return;
-        }
-        
-        const email = clean.split('@')[0] + '@examhub.com';
-        try {
-            await auth.signInWithEmailAndPassword(email, password);
-        } catch {
-            await auth.createUserWithEmailAndPassword(email, password);
-        }
-        
-        currentUser = { uid: auth.currentUser.uid, ...found };
-        await db.ref(`users/${currentUser.uid}`).set(currentUser);
-        closeTecnoPopup();
-        updateUserUI();
-        showToast(`مرحباً ${currentUser.name}`);
-        await loadAllData();
-        navigateTo('home');
-    }
-    
-    async function logout() {
-        await auth.signOut();
-        currentUser = null;
-        updateUserUI();
-        showToast('تم تسجيل الخروج');
-        navigateTo('home');
-        await loadAllData();
-    }
-    
-    function updateUserUI() {
-    const loginArea = document.getElementById('loginBtnArea');
-    const avatarArea = document.getElementById('userAvatarArea');
-    
-    if (currentUser) {
-        if (loginArea) loginArea.classList.add('hidden');
-        if (avatarArea) avatarArea.classList.remove('hidden');
-        
-        const avatarInitial = document.getElementById('avatarInitial');
-        if (avatarInitial) {
-            avatarInitial.innerText = currentUser.name?.charAt(0).toUpperCase() || 'U';
-        }
-        
-        // التحقق من وجود عناصر القائمة المنسدلة قبل استخدامها
-        const dropdownName = document.getElementById('dropdownName');
-        const dropdownEmail = document.getElementById('dropdownEmail');
-        
-        if (dropdownName) dropdownName.innerText = currentUser.name || '';
-        if (dropdownEmail) dropdownEmail.innerText = currentUser.email || '';
-        
-    } else {
-        if (loginArea) loginArea.classList.remove('hidden');
-        if (avatarArea) avatarArea.classList.add('hidden');
-    }
-}
-    
-    // ==================== دوال الإدارة ====================
-    
-    function showAdminLogin() {
-        document.getElementById('adminPasswordPopup').classList.add('show');
-        document.getElementById('adminPasswordInput').value = '';
-    }
-    
-    function closeAdminPasswordPopup() {
-        document.getElementById('adminPasswordPopup').classList.remove('show');
-    }
-    
-    function checkAdminPassword() {
-        const password = document.getElementById('adminPasswordInput').value;
-        if (password === "011441000") {
-            isAdminLoggedIn = true;
-            closeAdminPasswordPopup();
-            showToast('✅ مرحباً بك في لوحة التحكم');
-            loadAdminData();
-            navigateTo('admin');
-        } else {
-            showToast('❌ كلمة السر غير صحيحة');
-        }
-    }
-    
-    async function loadAdminData() {
-        try {
-            const usersSnap = await db.ref('users').once('value');
-            allUsers = usersSnap.val() ? Object.entries(usersSnap.val()).map(([id, d]) => ({ id, ...d })) : [];
-            
-            const profitsSnap = await db.ref('profits').once('value');
-            profits = profitsSnap.val() ? Object.values(profitsSnap.val()) : [];
-            
-            const subsSnap = await db.ref('subscriptions').once('value');
-            subscriptions = subsSnap.val() ? Object.values(subsSnap.val()) : [];
-            
-            let visitors = parseInt(localStorage.getItem('visitors') || '0');
-            if (!sessionStorage.getItem('visited')) {
-                visitors++;
-                localStorage.setItem('visitors', visitors);
-                sessionStorage.setItem('visited', 'true');
-            }
-            
-            renderUsersTable();
-            renderAdminPlans();
-            renderSubscriptionsList();
-            
-            const reportsTab = document.getElementById('adminReportsTab');
-            if (reportsTab && reportsTab.style.display !== 'none') {
-                renderAdminReports(visitors);
-            }
-        } catch (error) {
-            console.error('خطأ في تحميل بيانات الإدارة:', error);
-            showToast('حدث خطأ في تحميل البيانات');
-        }
-    }
-    
-    function renderUsersTable() {
-        const container = document.getElementById('usersTable');
-        if (!container) return;
-        
-        container.innerHTML = `
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-100">
-                        <tr>
-                            <th class="p-3 text-right">الاسم</th>
-                            <th class="p-3 text-right">البريد</th>
-                            <th class="p-3 text-right">الهاتف</th>
-                            <th class="p-3 text-right">الباقة</th>
-                            <th class="p-3 text-right">الترقية</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${allUsers.map(u => `
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-3">${u.name || '-'}</td>
-                                <td class="p-3">${u.email || '-'}</td>
-                                <td class="p-3">${u.phone || '-'}</td>
-                                <td class="p-3">
-                                    <span class="px-2 py-1 rounded-full text-xs ${u.plan === 'free' ? 'bg-gray-200' : 'bg-green-200 text-green-800'}">
-                                        ${u.plan === 'free' ? 'مجاني' : (u.planName || u.plan || 'Pro')}
-                                    </span>
-                                </td>
-                                <td class="p-3">
-                                    <select onchange="upgradeUser('${u.id}', this.value)" class="p-2 border rounded">
-                                        <option value="">اختر الباقة</option>
-                                        ${plans.filter(p => p.id !== 'free').map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
-                                    </select>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        `;
-    }
-    
-    async function upgradeUser(uid, planId) {
-        if (!planId) return;
-        const plan = plans.find(p => p.id === planId);
-        if (!plan) return;
-        
-        await db.ref(`users/${uid}/plan`).set(planId);
-        await db.ref(`users/${uid}/planName`).set(plan.name);
-        
-        const newExpiry = new Date();
-        newExpiry.setMonth(newExpiry.getMonth() + 1);
-        
-        const subscription = {
-            userId: uid,
-            planId: planId,
-            planName: plan.name,
-            examsLimit: plan.examsCount,
-            startDate: new Date().toISOString(),
-            expiryDate: newExpiry.toISOString(),
-            isActive: true,
-            renewedCount: (subscriptions.find(s => s.userId === uid)?.renewedCount || 0) + 1
-        };
-        
-        await db.ref(`subscriptions/${uid}`).set(subscription);
-        await db.ref(`profits`).push({
-            userId: uid,
-            amount: plan.price,
-            plan: plan.name,
-            date: new Date().toISOString()
-        });
-        
-        showToast(`تم ترقية المستخدم إلى باقة ${plan.name}`);
-        loadAdminData();
-    }
-    
-    function renderAdminPlans() {
-        const container = document.getElementById('adminPlansList');
-        if (!container) return;
-        
-        if (!plans || plans.length === 0) {
-            container.innerHTML = '<div class="text-center p-4 text-gray-500">لا توجد باقات</div>';
-            return;
-        }
-        
-        container.innerHTML = plans.map(p => `
-            <div class="flex justify-between items-center border-b py-3">
-                <div>
-                    <span class="font-bold">${p.name || 'بدون اسم'}</span> - 
-                    ${p.examsCount || 0} امتحان - 
-                    ${p.price || 0} ج
-                    ${p.features ? `<div class="text-xs text-gray-500">${p.features.join(', ')}</div>` : ''}
-                </div>
-                <button onclick="deletePlanAdmin('${p.id}')" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600" ${p.id === 'free' ? 'disabled' : ''}>
-                    حذف
-                </button>
-            </div>
-        `).join('');
-    }
-    
-    async function deletePlanAdmin(id) {
-        await db.ref(`plans/${id}`).remove();
-        plans = plans.filter(p => p.id !== id);
-        renderAdminPlans();
-        refreshPlansPage();
-        showToast('تم حذف الباقة');
-    }
-    
-    function renderSubscriptionsList() {
-        const container = document.getElementById('subscriptionsList');
-        if (!container) return;
-        
-        if (!subscriptions || subscriptions.length === 0) {
-            container.innerHTML = '<div class="text-center p-4 text-gray-500">لا توجد اشتراكات</div>';
-            return;
-        }
-        
-        container.innerHTML = subscriptions.map(sub => {
-            const user = allUsers.find(u => u.id === sub.userId);
-            const remaining = calculateRemainingExams(sub.userId);
-            const expiryDate = new Date(sub.expiryDate).toLocaleDateString('ar-EG');
-            
-            return `
-                <div class="bg-white rounded-xl p-4 shadow flex justify-between items-center flex-wrap gap-3">
-                    <div>
-                        <p class="font-bold">${user?.name || 'مستخدم غير معروف'}</p>
-                        <p class="text-sm text-gray-500">📧 ${user?.email || '-'}</p>
-                        <p class="text-sm">📦 الباقة: <strong class="text-indigo-600">${sub.planName || sub.planId}</strong></p>
-                        <p class="text-sm">📊 الامتحانات المتبقية: <strong>${remaining}</strong> من ${sub.examsLimit}</p>
-                        <p class="text-sm">📅 تاريخ التجديد: ${expiryDate}</p>
-                        <p class="text-sm">🔄 تم التجديد: ${sub.renewedCount || 0} مرة</p>
-                    </div>
-                    <button onclick="showSubscriptionDetails('${sub.userId}')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 transition">
-                        تفاصيل
-                    </button>
-                </div>
-            `;
-        }).join('');
-    }
-    
-    function calculateRemainingExams(userId) {
-        const sub = subscriptions.find(s => s.userId === userId);
-        if (!sub) return 0;
-        
-        const now = new Date();
-        const startMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-        const userResults = results.filter(r => r.userId === userId && new Date(r.date).getTime() >= startMonth);
-        const used = userResults.length;
-        
-        return Math.max(0, sub.examsLimit - used);
-    }
-    
-    function showSubscriptionDetails(userId) {
-        const sub = subscriptions.find(s => s.userId === userId);
-        const user = allUsers.find(u => u.id === userId);
-        
-        if (!sub || !user) return;
-        
-        const remaining = calculateRemainingExams(userId);
-        const expiryDate = new Date(sub.expiryDate).toLocaleDateString('ar-EG');
-        const startDate = new Date(sub.startDate).toLocaleDateString('ar-EG');
-        
-        document.getElementById('subDetailsClientName').innerHTML = `${user.name} <span class="text-sm text-gray-500">(${user.email})</span>`;
-        document.getElementById('subDetailsContent').innerHTML = `
-            <div class="text-right space-y-3">
-                <div class="bg-gray-50 p-3 rounded-lg">
-                    <p><strong>📦 الباقة:</strong> ${sub.planName || sub.planId}</p>
-                    <p><strong>📊 عدد الامتحانات المسموحة:</strong> ${sub.examsLimit} امتحان شهرياً</p>
-                    <p><strong>✅ الامتحانات المتبقية:</strong> ${remaining}</p>
-                </div>
-                <div class="bg-gray-50 p-3 rounded-lg">
-                    <p><strong>📅 تاريخ بدء الاشتراك:</strong> ${startDate}</p>
-                    <p><strong>📅 تاريخ انتهاء الاشتراك:</strong> ${expiryDate}</p>
-                    <p><strong>🔄 عدد مرات التجديد:</strong> ${sub.renewedCount || 0}</p>
-                </div>
-                <div class="bg-gray-50 p-3 rounded-lg">
-                    <p><strong>💰 إجمالي المدفوع:</strong> ${(sub.renewedCount || 0) * (plans.find(p => p.id === sub.planId)?.price || 0)} ج</p>
-                </div>
-            </div>
-        `;
-        document.getElementById('subscriptionDetailsPopup').classList.add('show');
-    }
-    
-    function closeSubscriptionDetailsPopup() {
-        document.getElementById('subscriptionDetailsPopup').classList.remove('show');
-    }
-    
-    function renderAdminReports(visitors) {
-        const proUsers = allUsers.filter(u => u.plan !== 'free' && u.plan);
-        const totalProfit = profits.reduce((sum, p) => sum + (p.amount || 0), 0);
-        
-        document.getElementById('adminTotalUsers').innerText = allUsers.length;
-        document.getElementById('adminProUsers').innerText = proUsers.length;
-        document.getElementById('adminTotalProfit').innerText = totalProfit;
-        document.getElementById('adminVisitors').innerText = visitors;
-        
-        const profitByMonth = {};
-        profits.forEach(p => {
-            const month = new Date(p.date).toLocaleString('ar', { month: 'short' });
-            profitByMonth[month] = (profitByMonth[month] || 0) + p.amount;
-        });
-        
-        const ctx = document.getElementById('profitChart')?.getContext('2d');
-        if (ctx) {
-            if (profitChart) profitChart.destroy();
-            profitChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: Object.keys(profitByMonth),
-                    datasets: [{
-                        label: 'الأرباح (ج)',
-                        data: Object.values(profitByMonth),
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99,102,241,0.1)',
-                        fill: true
-                    }]
+                if (nextBtn) nextBtn.disabled = true;
+                
+                const suggestions = [
+                    username + Math.floor(Math.random() * 100),
+                    username + '_' + Math.floor(Math.random() * 1000),
+                    username + new Date().getFullYear(),
+                    username + '_official'
+                ];
+                
+                if (suggestionsDiv) {
+                    suggestionsDiv.innerHTML = suggestions.map(s => 
+                        `<span class="suggestion-badge" onclick="useSuggestion('${s}')">${s}@tecno.shark</span>`
+                    ).join('');
                 }
-            });
-        }
-    }
-    
-    function showAddPlanPopup() {
-        document.getElementById('planName').value = '';
-        document.getElementById('planExams').value = '';
-        document.getElementById('planPrice').value = '';
-        document.getElementById('planFeatures').value = '';
-        document.getElementById('addPlanPopup').classList.add('show');
-    }
-    
-    function closeAddPlanPopup() {
-        document.getElementById('addPlanPopup').classList.remove('show');
-    }
-    
-    async function addPlan() {
-        try {
-            const name = document.getElementById('planName')?.value.trim();
-            const examsCount = parseInt(document.getElementById('planExams')?.value);
-            const price = parseInt(document.getElementById('planPrice')?.value);
-            const featuresText = document.getElementById('planFeatures')?.value;
-            
-            if (!name) {
-                showToast('❌ الرجاء إدخال اسم الباقة');
-                return;
-            }
-            
-            if (isNaN(examsCount) || examsCount <= 0) {
-                showToast('❌ الرجاء إدخال عدد صحيح للامتحانات');
-                return;
-            }
-            
-            if (isNaN(price) || price < 0) {
-                showToast('❌ الرجاء إدخال سعر صحيح');
-                return;
-            }
-            
-            let features = [];
-            if (featuresText && featuresText.trim()) {
-                features = featuresText.split('\n').filter(f => f.trim().length > 0);
             } else {
-                features = [`${examsCount} امتحان شهرياً`];
+                if (errorDiv) errorDiv.style.display = 'none';
+                if (nextBtn) nextBtn.disabled = false;
+                if (suggestionsDiv) suggestionsDiv.innerHTML = '';
             }
-            
-            const newPlanId = 'plan_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
-            const newPlan = {
-                id: newPlanId,
-                name: name,
-                examsCount: examsCount,
-                period: 'month',
-                price: price,
-                features: features,
+        } catch (error) {
+            console.error('خطأ في التحقق:', error);
+            if (nextBtn) nextBtn.disabled = false;
+        }
+    }
+    
+    function useSuggestion(suggestion) {
+        const usernameInput = document.getElementById('username');
+        if (usernameInput) {
+            usernameInput.value = suggestion;
+            checkUsernameAvailability();
+        }
+    }
+    
+    function goToRegisterStep4() {
+        const username = document.getElementById('username')?.value.trim();
+        
+        if (!username) {
+            showMessage('الرجاء إدخال اسم المستخدم', true);
+            return;
+        }
+        
+        if (username.length < 3) {
+            showMessage('اسم المستخدم يجب أن يكون 3 أحرف على الأقل', true);
+            return;
+        }
+        
+        tempUserData.username = username + '@tecno.shark';
+        currentStep = 'register-step4';
+        render();
+    }
+    
+    function goToTerms() {
+        const password = document.getElementById('password')?.value;
+        const confirmPassword = document.getElementById('confirmPassword')?.value;
+        
+        if (!password) {
+            showMessage('الرجاء إدخال كلمة المرور', true);
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            showMessage('كلمة المرور غير متطابقة', true);
+            return;
+        }
+        
+        if (password.length < 6) {
+            showMessage('كلمة المرور يجب أن تكون 6 أحرف على الأقل', true);
+            return;
+        }
+        
+        tempUserData.password = password;
+        currentStep = 'register-terms';
+        render();
+    }
+    
+    async function completeRegistration() {
+    const email = tempUserData.username.split('@')[0] + '@tecno.com';
+    
+    // إظهار رسالة انتظار
+    showMessage('جاري إنشاء الحساب...', false);
+    
+    try {
+        let firebaseUser = null;
+        
+        // محاولة تسجيل الدخول أولاً (إذا كان الحساب موجود مسبقاً)
+        try {
+            // حاول تسجيل الدخول
+            const userCred = await auth.signInWithEmailAndPassword(email, tempUserData.password);
+            firebaseUser = userCred.user;
+            console.log('تم تسجيل الدخول بحساب موجود');
+        } catch (signInError) {
+            // إذا فشل تسجيل الدخول، حاول إنشاء حساب جديد
+            if (signInError.code === 'auth/user-not-found') {
+                const userCred = await auth.createUserWithEmailAndPassword(email, tempUserData.password);
+                firebaseUser = userCred.user;
+                console.log('تم إنشاء حساب جديد');
+            } else {
+                throw signInError;
+            }
+        }
+        
+        // التحقق من وجود المستخدم في Realtime Database
+        const userSnapshot = await db.ref(`users/${firebaseUser.uid}`).once('value');
+        
+        if (!userSnapshot.exists()) {
+            // إذا لم يكن موجوداً في قاعدة البيانات، قم بإضافته
+            const newUser = {
+                name: tempUserData.firstName + ' ' + tempUserData.lastName,
+                firstName: tempUserData.firstName,
+                lastName: tempUserData.lastName,
+                phone: tempUserData.phone,
+                username: tempUserData.username,
+                email: email,
+                password: tempUserData.password,
+                plan: 'free',
                 createdAt: new Date().toISOString()
             };
             
-            await db.ref(`plans/${newPlanId}`).set(newPlan);
-            plans.push(newPlan);
-            renderAdminPlans();
-            refreshPlansPage();
-            closeAddPlanPopup();
-            showToast('✅ تم إضافة الباقة بنجاح!');
-            
-        } catch (error) {
-            console.error('خطأ في إضافة الباقة:', error);
-            showToast('❌ حدث خطأ في إضافة الباقة');
+            await db.ref(`users/${firebaseUser.uid}`).set(newUser);
+            console.log('تم إضافة المستخدم إلى قاعدة البيانات');
+        } else {
+            console.log('المستخدم موجود مسبقاً في قاعدة البيانات');
+        }
+        
+        // تأكيد تسجيل الدخول
+        await auth.signInWithEmailAndPassword(email, tempUserData.password);
+        
+        const returnUrl = getReturnUrl();
+        showMessage('✅ تم تسجيل الدخول بنجاح! جاري التحويل...', false);
+        
+        setTimeout(() => {
+            window.location.href = returnUrl;
+        }, 2000);
+        
+    } catch (error) {
+        console.error('خطأ كامل:', error);
+        
+        // رسائل خطأ مفهومة للمستخدم
+        if (error.code === 'auth/email-already-in-use') {
+            showMessage('⚠️ هذا البريد الإلكتروني مستخدم بالفعل. يرجى تسجيل الدخول بدلاً من ذلك.', true);
+            // العودة إلى صفحة تسجيل الدخول بعد 3 ثوان
+            setTimeout(() => {
+                currentStep = 'login';
+                render();
+            }, 3000);
+        } else if (error.code === 'auth/weak-password') {
+            showMessage('⚠️ كلمة المرور ضعيفة. يجب أن تكون 6 أحرف على الأقل.', true);
+        } else if (error.code === 'auth/invalid-email') {
+            showMessage('⚠️ البريد الإلكتروني غير صالح.', true);
+        } else {
+            showMessage('❌ حدث خطأ: ' + error.message, true);
         }
     }
-    
-    function showAdminTab(tab) {
-        const usersTab = document.getElementById('adminUsersTab');
-        const plansTab = document.getElementById('adminPlansTab');
-        const reportsTab = document.getElementById('adminReportsTab');
-        const subsTab = document.getElementById('adminSubscriptionsTab');
-        
-        if (usersTab) usersTab.style.display = tab === 'users' ? 'block' : 'none';
-        if (plansTab) plansTab.style.display = tab === 'plans' ? 'block' : 'none';
-        if (reportsTab) reportsTab.style.display = tab === 'reports' ? 'block' : 'none';
-        if (subsTab) subsTab.style.display = tab === 'subscriptions' ? 'block' : 'none';
-        
-        if (tab === 'reports') loadAdminData();
-        if (tab === 'subscriptions') renderSubscriptionsList();
-    }
-    
-    function requestUpgrade(planId) {
-        const plan = plans.find(p => p.id === planId);
-        if (plan && currentUser) {
-            window.open(`https://wa.me/201026463211?text=${encodeURIComponent(`🚀 طلب ترقية حساب\n\nالاسم: ${currentUser.name}\nالبريد: ${currentUser.email}\nالباقة المطلوبة: ${plan.name}\nالسعر: ${plan.price} ج`)}`, '_blank');
-        } else if (plan) {
-            window.open(`https://wa.me/201026463211?text=${encodeURIComponent(`🚀 طلب ترقية حساب\nالباقة المطلوبة: ${plan.name}\nالسعر: ${plan.price} ج`)}`, '_blank');
-        }
-    }
-    
-    // ==================== دوال البطاقات ونافذة التفاصيل ====================
-    function showStatDetails(type) {
-    let title = '';
-    let content = '';
-    
-    if (type === 'exams') {
-        title = '📋 إجمالي الامتحانات';
-        const userExams = currentUser ? exams.filter(e => e.creatorId === currentUser.uid) : exams;
-        if (userExams.length === 0) {
-            content = '<p class="text-gray-500">لا توجد امتحانات</p>';
-        } else {
-            content = `
-                <div class="space-y-2 text-right">
-                    ${userExams.map(exam => `
-                        <div class="border-b pb-2">
-                            <p class="font-bold">${exam.title}</p>
-                            <p class="text-sm text-gray-500">📚 ${exam.className || 'بدون صف'} | ${exam.questions?.length || 0} سؤال</p>
-                            <p class="text-xs text-gray-400">تم الإنشاء: ${new Date(exam.createdAt).toLocaleDateString('ar-EG')}</p>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-    } else if (type === 'active') {
-        title = '✅ الامتحانات النشطة';
-        const activeExams = exams.filter(e => e.isActive !== false);
-        if (activeExams.length === 0) {
-            content = '<p class="text-gray-500">لا توجد امتحانات نشطة</p>';
-        } else {
-            content = `
-                <div class="space-y-2 text-right">
-                    ${activeExams.map(exam => `
-                        <div class="border-b pb-2">
-                            <p class="font-bold">${exam.title}</p>
-                            <p class="text-sm text-gray-500">📚 ${exam.className || 'بدون صف'} | بواسطة: ${exam.creatorName || 'مدرس'}</p>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-    } else if (type === 'students') {
-        title = '👥 الطلاب والنتائج';
-        
-        // تجميع الفصول المتاحة من الامتحانات الخاصة بالمستخدم الحالي
-        const userExams = currentUser ? exams.filter(e => e.creatorId === currentUser.uid) : [];
-        const allClasses = [...new Set(userExams.map(e => e.className).filter(c => c))];
-        const hasExams = userExams.length > 0;
-        
-        if (!hasExams || allClasses.length === 0) {
-            content = '<p class="text-gray-500">لا توجد امتحانات حتى الآن</p>';
-        } else {
-            // تخزين البيانات في متغيرات مؤقتة للنافذة
-            window.studentsData = {
-                exams: userExams,
-                results: results.filter(r => r.userId === currentUser?.uid),
-                allClasses: allClasses
-            };
-            
-            content = `
-                <div class="text-right">
-                    <div class="mb-4">
-                        <label class="block text-gray-700 font-semibold mb-2">📚 اختر الفصل الدراسي:</label>
-                        <select id="selectClass" class="w-full p-2 border rounded-lg" onchange="loadExamsForClass()">
-                            <option value="">-- اختر الفصل --</option>
-                            ${allClasses.map(c => `<option value="${c}">${c}</option>`).join('')}
-                        </select>
-                    </div>
-                    
-                    <div id="examSelectDiv" class="mb-4" style="display:none;">
-                        <label class="block text-gray-700 font-semibold mb-2">📝 اختر الامتحان:</label>
-                        <select id="selectExam" class="w-full p-2 border rounded-lg" onchange="loadStudentsResults()">
-                            <option value="">-- اختر الامتحان --</option>
-                        </select>
-                    </div>
-                    
-                    <div id="studentsResultsDiv" style="display:none;">
-                        <div class="flex justify-between items-center mb-3">
-                            <h4 class="font-bold text-indigo-600">📊 نتائج الطلاب</h4>
-                            <button onclick="printStudentsResults()" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition">
-                                <i class="fas fa-print ml-1"></i> طباعة PDF
-                            </button>
-                        </div>
-                        <div id="studentsList" class="space-y-2 max-h-96 overflow-y-auto"></div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        // تعريف الدوال المساعدة للنافذة
-        window.loadExamsForClass = function() {
-            const selectedClass = document.getElementById('selectClass').value;
-            const examSelectDiv = document.getElementById('examSelectDiv');
-            const selectExam = document.getElementById('selectExam');
-            const studentsDiv = document.getElementById('studentsResultsDiv');
-            
-            if (!selectedClass) {
-                examSelectDiv.style.display = 'none';
-                studentsDiv.style.display = 'none';
-                return;
-            }
-            
-            const classExams = window.studentsData.exams.filter(e => e.className === selectedClass);
-            
-            if (classExams.length === 0) {
-                examSelectDiv.style.display = 'none';
-                studentsDiv.style.display = 'none';
-                return;
-            }
-            
-            // ملء قائمة الامتحانات
-            selectExam.innerHTML = '<option value="">-- اختر الامتحان --</option>' + 
-                classExams.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
-            
-            examSelectDiv.style.display = 'block';
-            studentsDiv.style.display = 'none';
-        };
-        
-        window.loadStudentsResults = function() {
-            const selectedExamId = document.getElementById('selectExam').value;
-            const studentsDiv = document.getElementById('studentsResultsDiv');
-            const studentsList = document.getElementById('studentsList');
-            
-            if (!selectedExamId) {
-                studentsDiv.style.display = 'none';
-                return;
-            }
-            
-            const exam = window.studentsData.exams.find(e => e.id === selectedExamId);
-            const examResults = window.studentsData.results.filter(r => r.examId === selectedExamId);
-            
-            if (examResults.length === 0) {
-                studentsList.innerHTML = '<div class="text-center p-4 text-gray-500">📭 لا يوجد طلاب أدوا هذا الامتحان بعد</div>';
-            } else {
-                // ترتيب النتائج من الأعلى إلى الأقل
-                const sortedResults = [...examResults].sort((a, b) => b.percentage - a.percentage);
-                
-                studentsList.innerHTML = sortedResults.map((r, index) => `
-                    <div class="grade-card bg-white rounded-lg p-3 shadow-sm border-r-4 ${r.percentage >= 50 ? 'border-green-500' : 'border-red-500'}">
-                        <div class="flex justify-between items-center flex-wrap gap-2">
-                            <div class="flex items-center gap-2">
-                                <span class="font-bold text-gray-500">${index + 1}.</span>
-                                <span class="font-semibold">${r.studentName}</span>
-                                <span class="text-xs text-gray-400">(كود الطالب: ${r.studentNumber || '-'})</span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <span class="text-sm">
-                                    الدرجة: <strong class="${r.percentage >= 50 ? 'text-green-600' : 'text-red-600'}">${r.score}/${r.totalScore}</strong>
-                                </span>
-                                <span class="text-sm">
-                                    النسبة: <strong>${r.percentage.toFixed(1)}%</strong>
-                                </span>
-                                <button onclick="showStudentDetails('${r.studentName}', '${selectedExamId}')" 
-                                    class="bg-indigo-600 text-white px-2 py-1 rounded text-xs hover:bg-indigo-700 transition">
-                                    <i class="fas fa-eye"></i> تفاصيل
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            }
-            
-            studentsDiv.style.display = 'block';
-        };
-        
-        // دالة طباعة نتائج الطلاب
-        window.printStudentsResults = function() {
-            const selectedExamId = document.getElementById('selectExam').value;
-            if (!selectedExamId) {
-                showToast('الرجاء اختيار امتحان أولاً');
-                return;
-            }
-            
-            const exam = window.studentsData.exams.find(e => e.id === selectedExamId);
-            const examResults = window.studentsData.results.filter(r => r.examId === selectedExamId);
-            const sortedResults = [...examResults].sort((a, b) => b.percentage - a.percentage);
-            
-            const printContent = `
-                <div style="direction: rtl; font-family: 'Cairo', sans-serif; padding: 20px;">
-                    <div style="text-align: center; margin-bottom: 30px;">
-                        <h1 style="color: #4f46e5;">📊 نتائج الامتحان</h1>
-                        <h2>${exam.title}</h2>
-                        <p>📚 ${exam.className || 'بدون صف'}</p>
-                        <p>📅 التاريخ: ${new Date().toLocaleDateString('ar-EG')}</p>
-                    </div>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background-color: #4f46e5; color: white;">
-                                <th style="padding: 10px; border: 1px solid #ddd;">#</th>
-                                <th style="padding: 10px; border: 1px solid #ddd;">اسم الطالب</th>
-                                <th style="padding: 10px; border: 1px solid #ddd;">كود الطالب</th>
-                                <th style="padding: 10px; border: 1px solid #ddd;">الدرجة</th>
-                                <th style="padding: 10px; border: 1px solid #ddd;">النسبة</th>
-                                <th style="padding: 10px; border: 1px solid #ddd;">التقدير</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${sortedResults.map((r, index) => `
-                                <tr style="border-bottom: 1px solid #ddd;">
-                                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${index + 1}</td>
-                                    <td style="padding: 8px; border: 1px solid #ddd;">${r.studentName}</td>
-                                    <td style="padding: 8px; border: 1px solid #ddd;">${r.studentNumber || '-'}</td>
-                                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${r.score}/${r.totalScore}</td>
-                                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${r.percentage.toFixed(1)}%</td>
-                                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center; color: ${r.percentage >= 50 ? 'green' : 'red'}; font-weight: bold;">
-                                        ${r.percentage >= 90 ? 'ممتاز' : r.percentage >= 75 ? 'جيد جداً' : r.percentage >= 50 ? 'مقبول' : 'ضعيف'}
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                    <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #666;">
-                        <p>تم الإنشاء بواسطة Imtihan - Mohamed Emad Abd El-Atty</p>
-                    </div>
-                </div>
-            `;
-            
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>نتائج ${exam.title}</title>
-                    <meta charset="UTF-8">
-                    <style>
-                        @media print {
-                            body { margin: 0; padding: 20px; }
-                            button { display: none; }
-                        }
-                    </style>
-                </head>
-                <body>
-                    ${printContent}
-                    <div style="text-align: center; margin-top: 20px;">
-                        <button onclick="window.print()" style="padding: 10px 20px; background: #4f46e5; color: white; border: none; border-radius: 8px; cursor: pointer;">
-                            🖨️ طباعة
-                        </button>
-                        <button onclick="window.close()" style="padding: 10px 20px; background: #666; color: white; border: none; border-radius: 8px; cursor: pointer; margin-right: 10px;">
-                            إغلاق
-                        </button>
-                    </div>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-        };
-        
-    } else if (type === 'completed') {
-        title = '📊 الامتحانات المكتملة';
-        const myResults = currentUser ? results.filter(r => r.userId === currentUser.uid) : [];
-        if (myResults.length === 0) {
-            content = '<p class="text-gray-500">لا توجد نتائج مكتملة</p>';
-        } else {
-            const sortedResults = [...myResults].sort((a, b) => b.percentage - a.percentage);
-            content = `
-                <div class="space-y-2 text-right">
-                    ${sortedResults.map(r => `
-                        <div class="border-b pb-2">
-                            <p class="font-bold">${r.examTitle}</p>
-                            <p class="text-sm">الطالب: ${r.studentName} | الدرجة: ${r.score}/${r.totalScore} (${r.percentage.toFixed(1)}%)</p>
-                            <p class="text-xs text-gray-500">التاريخ: ${new Date(r.date).toLocaleDateString('ar-EG')}</p>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-    }
-    
-    document.getElementById('statDetailsTitle').innerText = title;
-    document.getElementById('statDetailsContent').innerHTML = content;
-    document.getElementById('statDetailsPopup').classList.add('show');
 }
     
-    function closeStatDetailsPopup() {
-        document.getElementById('statDetailsPopup').classList.remove('show');
+    // ==================== الترجمة ====================
+    function switchLanguage() {
+        if (currentLang === 'ar') {
+            currentLang = 'en';
+            document.body.classList.add('english');
+            document.querySelector('.lang-switch span').textContent = 'العربية';
+        } else {
+            currentLang = 'ar';
+            document.body.classList.remove('english');
+            document.querySelector('.lang-switch span').textContent = 'English';
+        }
+        render();
     }
     
-    // ==================== دوال تفاصيل الطالب ====================
+    document.getElementById('langSwitch').addEventListener('click', switchLanguage);
     
-    function showStudentDetails(studentName, examId) {
-        const studentResults = results.filter(r => r.studentName === studentName && r.examId === examId);
-        if (studentResults.length === 0) return;
-        
-        const result = studentResults[0];
-        document.getElementById('detailsStudentName').innerHTML = `${studentName} <span class="text-sm text-gray-500">(كود الطالب: ${result.studentNumber || '-'})</span>`;
-        
-        let wrongAnswersHtml = '';
-        if (result.answers) {
-            const wrongAnswers = result.answers.filter(a => !a.isCorrect);
-            if (wrongAnswers.length === 0) {
-                wrongAnswersHtml = '<p class="text-green-600">✅ جميع الإجابات صحيحة! أحسنت</p>';
-            } else {
-                wrongAnswersHtml = wrongAnswers.map(a => `
-                    <div class="border-b pb-2 mb-2">
-                        <p class="font-semibold">${a.question}</p>
-                        <p class="text-red-600">❌ إجابتك: ${a.userAnswer || 'لم يجب'}</p>
-                        <p class="text-green-600">✓ الإجابة الصحيحة: ${a.correctAnswer}</p>
+    // ==================== عرض الصفحات ====================
+function render() {
+    const app = document.getElementById('app');
+    const isAr = currentLang === 'ar';
+    
+    if (currentStep === 'login') {
+        app.innerHTML = `
+            <div class="login-card">
+                <div class="logo">
+                    <div class="logo-content">
+                        <div class="main-letter">TS</div>
+                        <div class="small-text">TECNO SHARK</div>
                     </div>
-                `).join('');
-            }
-        }
-        
-        document.getElementById('detailsContent').innerHTML = `
-            <div class="text-right">
-                <div class="bg-gray-50 p-3 rounded-lg mb-4">
-                    <p><strong>📝 الامتحان:</strong> ${result.examTitle}</p>
-                    <p><strong>📚 الصف:</strong> ${result.examClass || 'غير محدد'}</p>
-                    <p><strong>📅 التاريخ:</strong> ${new Date(result.date).toLocaleDateString('ar-EG')}</p>
                 </div>
-                <div class="bg-gray-50 p-3 rounded-lg mb-4">
-                    <p><strong>🎯 الدرجة:</strong> ${result.score}/${result.totalScore}</p>
-                    <p><strong>📊 النسبة:</strong> ${result.percentage.toFixed(1)}%</p>
-                    <p><strong>⭐ التقدير:</strong> <span class="${result.passed ? 'text-green-600' : 'text-red-600'} font-bold">${result.grade}</span></p>
+                <h1>${isAr ? 'مرحباً بك' : 'Welcome Back'}</h1>
+                <p class="subtitle">${isAr ? 'سجل الدخول إلى حسابك' : 'Sign in to your account'}</p>
+                <div id="messageBox" class="message"></div>
+                <div class="input-group">
+                    <label>${isAr ? 'رقم الهاتف أو اسم المستخدم' : 'Phone or Username'}</label>
+                    <input type="text" id="loginIdentifier">
                 </div>
-                <div class="bg-gray-50 p-3 rounded-lg">
-                    <p class="font-bold mb-2">❌ الأخطاء:</p>
-                    ${wrongAnswersHtml}
+                <button class="next-btn" onclick="checkIdentifier()">${isAr ? 'التالي' : 'Next'}</button>
+                <div class="links">
+                    <a onclick="goToRegister()">${isAr ? 'إنشاء حساب جديد' : 'Create account'}</a>
+                    <a onclick="goToForgot()">${isAr ? 'نسيت كلمة المرور؟' : 'Forgot password?'}</a>
                 </div>
             </div>
         `;
-        
-        document.getElementById('studentDetailsPopup').classList.add('show');
     }
-    
-    function closeStudentDetailsPopup() {
-        document.getElementById('studentDetailsPopup').classList.remove('show');
-    }
-    
-    function printStudentDetails() {
-        const element = document.getElementById('detailsContent');
-        const opt = {
-            margin: [10, 10, 10, 10],
-            filename: 'نتيجة_الطالب.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-        html2pdf().set(opt).from(element).save();
-    }
-    
-    // ==================== تحميل البيانات ====================
-    
-    async function loadExams() {
-    try {
-        const s = await db.ref('exams').once('value');
-        exams = s.val() ? Object.values(s.val()) : [];
-        refreshHome();
-        refreshExamsList();
-    } catch (error) {
-        console.error('خطأ في تحميل الامتحانات:', error);
-        exams = [];
-        refreshHome();
-        refreshExamsList();
-    }
-}
-    
-async function loadResults() {
-    try {
-        const s = await db.ref('results').once('value');
-        results = s.val() ? Object.values(s.val()) : [];
-        refreshHome();
-        refreshAnalytics();
-    } catch (error) {
-        console.error('خطأ في تحميل النتائج:', error);
-        results = [];
-        refreshHome();
-        refreshAnalytics();
-    }
-}
-    
-    async function loadQuestions() {
-        if (currentUser) {
-            const s = await db.ref(`users/${currentUser.uid}/questions`).once('value');
-            questions = s.val() ? Object.values(s.val()) : [];
-            refreshQuestionBank();
-        }
-    }
-    
-    async function loadPlans() {
-    try {
-        const s = await db.ref('plans').once('value');
-        if (s.val()) {
-            plans = Object.values(s.val());
-        } else {
-            plans = defaultPlans;
-            for (let p of plans) {
-                await db.ref(`plans/${p.id}`).set(p);
-            }
-        }
-        refreshPlansPage();
-        refreshExamLimit(); // تحديث الحد بعد تحميل الخطط
-    } catch (error) {
-        console.error('خطأ في تحميل الخطط:', error);
-        plans = defaultPlans;
-        refreshExamLimit();
-    }
-}
-    
-   async function loadSubscriptions() {
-    try {
-        const s = await db.ref('subscriptions').once('value');
-        if (s.val()) {
-            subscriptions = Object.values(s.val());
-        } else {
-            subscriptions = [];
-        }
-    } catch (error) {
-        console.error('خطأ في تحميل الاشتراكات:', error);
-        subscriptions = [];
-    }
-}
-    
-async function loadAllData() {
-    try {
-        await loadExams();
-        await loadResults();
-        await loadPlans();
-        await loadSubscriptions();
-        await loadUserSubscription();
-        if (currentUser) {
-            await loadQuestions();
-            refreshExamLimit();
-        }
-    } catch (error) {
-        console.error('خطأ في تحميل البيانات:', error);
-        // لا تظهر رسالة خطأ للمستخدم
-    }
-}
-    // حساب عدد الامتحانات المستخدمة هذا الشهر
-function getMonthlyExamUsage() {
-    if (!currentUser) return 0;
-    
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-    
-    // الامتحانات التي أنشأها المستخدم هذا الشهر
-    const userExams = exams.filter(e => 
-        e.creatorId === currentUser.uid && 
-        new Date(e.createdAt).getTime() >= startOfMonth
-    );
-    
-    // النتائج التي حصل عليها المستخدم هذا الشهر
-    const userResults = results.filter(r => 
-        r.userId === currentUser.uid && 
-        new Date(r.date).getTime() >= startOfMonth
-    );
-    
-    return userExams.length + userResults.length;
-}
-// ==================== نظام منع إعادة الامتحان ====================
-
-// الحصول على بصمة فريدة للمتصفح
-function getBrowserFingerprint() {
-    let fingerprint = localStorage.getItem('browser_fingerprint');
-    
-    if (!fingerprint) {
-        // إنشاء بصمة فريدة بناءً على معلومات المتصفح
-        const screenInfo = `${screen.width}x${screen.height}x${screen.colorDepth}`;
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const language = navigator.language;
-        const platform = navigator.platform;
-        const userAgent = navigator.userAgent.substring(0, 100);
-        
-        // إنشاء معرف فريد
-        const fingerprintData = `${screenInfo}|${timezone}|${language}|${platform}|${userAgent}`;
-        
-        // تشفير بسيط
-        let hash = 0;
-        for (let i = 0; i < fingerprintData.length; i++) {
-            hash = ((hash << 5) - hash) + fingerprintData.charCodeAt(i);
-            hash = hash & hash;
-        }
-        
-        fingerprint = 'BROWSER_' + Math.abs(hash) + '_' + Date.now().toString(36);
-        localStorage.setItem('browser_fingerprint', fingerprint);
-    }
-    
-    return fingerprint;
-}
-
-// الحصول على مفتاح فريد للامتحان (معرف المتصفح + معرف الامتحان)
-function getExamAttemptKey(examId) {
-    const browserId = getBrowserFingerprint();
-    return `exam_attempt_${examId}_${browserId}`;
-}
-
-// التحقق إذا كان هذا المتصفح قد أدى هذا الامتحان مسبقاً
-function hasTakenExam(examId) {
-    const examKey = getExamAttemptKey(examId);
-    return localStorage.getItem(examKey) === 'true';
-}
-
-// تسجيل أن هذا المتصفح أدى هذا الامتحان
-function markExamAsTaken(examId) {
-    const examKey = getExamAttemptKey(examId);
-    localStorage.setItem(examKey, 'true');
-}
-
-// عرض شاشة "تم إكمال الامتحان مسبقاً"
-function showAlreadyTakenScreen(examTitle) {
-    // إخفاء كل محتوى الموقع الأصلي
-    const mainContainer = document.querySelector('.container');
-    const sidebar = document.getElementById('sidebar');
-    const header = document.querySelector('nav');
-    const footer = document.querySelector('.footer');
-    
-    if (mainContainer) mainContainer.style.display = 'none';
-    if (sidebar) sidebar.style.display = 'none';
-    if (header) header.style.display = 'none';
-    if (footer) footer.style.display = 'none';
-    
-    // إخفاء الامتحان إذا كان مفتوحاً
-    const examContainer = document.getElementById('studentExamContainer');
-    if (examContainer) examContainer.classList.add('hidden-page');
-    
-    // إنشاء شاشة "تم الإكمال مسبقاً"
-    const messageDiv = document.createElement('div');
-    messageDiv.id = 'alreadyTakenScreen';
-    messageDiv.className = 'fixed inset-0 bg-gradient-to-br from-amber-900 to-red-900 flex items-center justify-center z-50';
-    messageDiv.innerHTML = `
-        <div class="text-center p-8 max-w-md mx-auto">
-            <div class="w-24 h-24 mx-auto bg-amber-500 rounded-full flex items-center justify-center mb-6 animate-bounce">
-                <i class="fas fa-exclamation-triangle text-white text-5xl"></i>
-            </div>
-            <h2 class="text-3xl font-bold text-white mb-4">⛔ لا يمكن إعادة الامتحان!</h2>
-            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-6">
-                <p class="text-white text-lg mb-2">📝 ${examTitle}</p>
-                <p class="text-amber-200 text-md mb-2">لقد قمت بالفعل بإكمال هذا الامتحان من هذا المتصفح</p>
-                <p class="text-white/70 text-sm mt-4">⚠️ يرجى انتظار إجابتك لدى المعلم</p>
-            </div>
-            <div class="text-white/80 text-sm">
-                <i class="fas fa-envelope ml-1"></i> يمكنك التواصل مع المعلم لمتابعة نتيجتك
-            </div>
-            <button onclick="location.reload()" class="mt-6 bg-white text-amber-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-100 transition">
-                تحديث الصفحة
-            </button>
-        </div>
-    `;
-    
-    // إزالة أي شاشة سابقة
-    const oldScreen = document.getElementById('alreadyTakenScreen');
-    if (oldScreen) oldScreen.remove();
-    
-    document.body.appendChild(messageDiv);
-    document.body.style.overflow = 'hidden';
-}
-    // ==================== البحث ====================
-    
-    document.getElementById('searchBtn')?.addEventListener('click', () => {
-        document.getElementById('searchOverlay').classList.toggle('show');
-        if (document.getElementById('searchOverlay').classList.contains('show')) {
-            document.getElementById('searchInput').focus();
-        }
-    });
-    
-    document.addEventListener('click', (e) => {
-        const ov = document.getElementById('searchOverlay');
-        if (ov && !ov.contains(e.target) && e.target !== document.getElementById('searchBtn') && !document.getElementById('searchBtn')?.contains(e.target)) {
-            ov.classList.remove('show');
-        }
-    });
-    
-    document.getElementById('searchInput')?.addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        const resDiv = document.getElementById('searchResults');
-        
-        if (term === 'adminmohamed') {
-            document.getElementById('searchOverlay').classList.remove('show');
-            document.getElementById('searchInput').value = '';
-            showAdminLogin();
-            return;
-        }
-        
-        const matches = exams.filter(ex => ex.title.toLowerCase().includes(term));
-        if (matches.length) {
-            resDiv.innerHTML = matches.map(ex => `
-                <div class="search-result-item" onclick="searchGoToExam('${ex.id}')">
-                    📚 ${ex.title} <span class="text-xs text-gray-500">(${ex.className || 'بدون صف'})</span>
+    else if (currentStep === 'forgot') {
+        app.innerHTML = `
+            <div class="login-card">
+                <div class="logo">
+                    <div class="logo-content">
+                        <div class="main-letter">TS</div>
+                        <div class="small-text">TECNO SHARK</div>
+                    </div>
                 </div>
-            `).join('');
-            resDiv.classList.add('show');
-        } else if (term.length > 0) {
-            resDiv.innerHTML = '<div class="search-result-item">لا توجد نتائج</div>';
-            resDiv.classList.add('show');
-        } else {
-            resDiv.classList.remove('show');
+                <h1>${isAr ? 'استعادة كلمة المرور' : 'Reset Password'}</h1>
+                <p class="subtitle">${isAr ? 'أدخل رقم هاتفك المسجل' : 'Enter your phone number'}</p>
+                <div id="messageBox" class="message"></div>
+                <div class="input-group">
+                    <label>${isAr ? 'رقم الهاتف' : 'Phone Number'}</label>
+                    <input type="tel" id="forgotPhone">
+                </div>
+                <button class="next-btn" onclick="verifyPhone()">${isAr ? 'تحقق' : 'Verify'}</button>
+                <button class="back-btn" onclick="goToLogin()">${isAr ? 'العودة' : 'Back'}</button>
+            </div>
+        `;
+    }
+    else if (currentStep === 'reset') {
+        const maskedInfo = resetUserData ? maskUsername(resetUserData.username) : '';
+        app.innerHTML = `
+            <div class="login-card">
+                <div class="logo">
+                    <div class="logo-content">
+                        <div class="main-letter">TS</div>
+                        <div class="small-text">TECNO SHARK</div>
+                    </div>
+                </div>
+                <h1>${isAr ? 'إعادة تعيين كلمة المرور' : 'Reset Password'}</h1>
+                <p class="subtitle">${maskedInfo}</p>
+                <div id="messageBox" class="message"></div>
+                <div class="input-group">
+                    <label>${isAr ? 'كلمة المرور الجديدة' : 'New Password'}</label>
+                    <input type="password" id="newPassword">
+                </div>
+                <div class="input-group">
+                    <label>${isAr ? 'تأكيد كلمة المرور' : 'Confirm Password'}</label>
+                    <input type="password" id="confirmPassword">
+                </div>
+                <button class="next-btn" onclick="resetPassword()">${isAr ? 'إتمام' : 'Complete'}</button>
+                <button class="back-btn" onclick="goToLogin()">${isAr ? 'العودة' : 'Back'}</button>
+            </div>
+        `;
+    }
+    else if (currentStep === 'register-step1') {
+        app.innerHTML = `
+            <div class="login-card">
+                <div class="logo">
+                    <div class="logo-content">
+                        <div class="main-letter">TS</div>
+                        <div class="small-text">TECNO SHARK</div>
+                    </div>
+                </div>
+                <h1>${isAr ? 'إنشاء حساب' : 'Create Account'}</h1>
+                <p class="subtitle">${isAr ? 'الخطوة 1 من 4: الاسم' : 'Step 1 of 4: Name'}</p>
+                <div class="step-indicator">
+                    <div class="step-dot active"></div>
+                    <div class="step-dot"></div>
+                    <div class="step-dot"></div>
+                    <div class="step-dot"></div>
+                </div>
+                <div id="messageBox" class="message"></div>
+                <div class="input-group">
+                    <label>${isAr ? 'الاسم الأول' : 'First Name'}</label>
+                    <input type="text" id="firstName" value="${tempUserData.firstName}">
+                </div>
+                <div class="input-group">
+                    <label>${isAr ? 'الاسم الأخير' : 'Last Name'}</label>
+                    <input type="text" id="lastName" value="${tempUserData.lastName}">
+                </div>
+                <button class="next-btn" onclick="goToRegisterStep2()">${isAr ? 'التالي' : 'Next'}</button>
+                <button class="back-btn" onclick="goToLogin()">${isAr ? 'العودة' : 'Back'}</button>
+            </div>
+        `;
+    }
+    else if (currentStep === 'register-step2') {
+        app.innerHTML = `
+            <div class="login-card">
+                <div class="logo">
+                    <div class="logo-content">
+                        <div class="main-letter">TS</div>
+                        <div class="small-text">TECNO SHARK</div>
+                    </div>
+                </div>
+                <h1>${isAr ? 'إنشاء حساب' : 'Create Account'}</h1>
+                <p class="subtitle">${isAr ? 'الخطوة 2 من 4: رقم الهاتف' : 'Step 2 of 4: Phone'}</p>
+                <div class="step-indicator">
+                    <div class="step-dot completed"></div>
+                    <div class="step-dot active"></div>
+                    <div class="step-dot"></div>
+                    <div class="step-dot"></div>
+                </div>
+                <div id="messageBox" class="message"></div>
+                <div class="input-group">
+                    <label>${isAr ? 'رقم الهاتف' : 'Phone Number'}</label>
+                    <input type="tel" id="phone" value="${tempUserData.phone}">
+                </div>
+                <button class="next-btn" onclick="goToRegisterStep3()">${isAr ? 'التالي' : 'Next'}</button>
+                <button class="back-btn" onclick="goToRegisterStep1()">${isAr ? 'الرجوع' : 'Back'}</button>
+            </div>
+        `;
+    }
+    else if (currentStep === 'register-step3') {
+        app.innerHTML = `
+            <div class="login-card">
+                <div class="logo">
+                    <div class="logo-content">
+                        <div class="main-letter">TS</div>
+                        <div class="small-text">TECNO SHARK</div>
+                    </div>
+                </div>
+                <h1>${isAr ? 'إنشاء حساب' : 'Create Account'}</h1>
+                <p class="subtitle">${isAr ? 'الخطوة 3 من 4: اسم المستخدم' : 'Step 3 of 4: Username'}</p>
+                <div class="step-indicator">
+                    <div class="step-dot completed"></div>
+                    <div class="step-dot completed"></div>
+                    <div class="step-dot active"></div>
+                    <div class="step-dot"></div>
+                </div>
+                <div id="messageBox" class="message"></div>
+                <div class="input-group">
+                    <label>${isAr ? 'اسم المستخدم' : 'Username'}</label>
+                    <div class="username-wrapper">
+                        <input type="text" id="username" value="${tempUserData.username.replace('@tecno.shark', '')}">
+                        <span class="username-suffix">@tecno.shark</span>
+                    </div>
+                </div>
+                <div id="usernameError" style="color: #dc2626; font-size: 12px; margin-top: 5px; display: none;"></div>
+                <div id="suggestions" class="suggestions"></div>
+                <button class="next-btn" id="nextBtn3" onclick="goToRegisterStep4()" disabled>${isAr ? 'التالي' : 'Next'}</button>
+                <button class="back-btn" onclick="goToRegisterStep2()">${isAr ? 'الرجوع' : 'Back'}</button>
+            </div>
+        `;
+        
+        const usernameInput = document.getElementById('username');
+        if (usernameInput) {
+            usernameInput.removeEventListener('input', checkUsernameAvailability);
+            usernameInput.addEventListener('input', checkUsernameAvailability);
+            checkUsernameAvailability();
         }
-    });
-    
-    function searchGoToExam(id) {
-        document.getElementById('searchOverlay').classList.remove('show');
-        navigateTo('examsList');
-        setTimeout(() => startExam(id), 100);
+    }
+    else if (currentStep === 'register-step4') {
+        app.innerHTML = `
+            <div class="login-card">
+                <div class="logo">
+                    <div class="logo-content">
+                        <div class="main-letter">TS</div>
+                        <div class="small-text">TECNO SHARK</div>
+                    </div>
+                </div>
+                <h1>${isAr ? 'إنشاء حساب' : 'Create Account'}</h1>
+                <p class="subtitle">${isAr ? 'الخطوة 4 من 4: كلمة المرور' : 'Step 4 of 4: Password'}</p>
+                <div class="step-indicator">
+                    <div class="step-dot completed"></div>
+                    <div class="step-dot completed"></div>
+                    <div class="step-dot completed"></div>
+                    <div class="step-dot active"></div>
+                </div>
+                <div id="messageBox" class="message"></div>
+                <div class="input-group">
+                    <label>${isAr ? 'كلمة المرور' : 'Password'}</label>
+                    <input type="password" id="password">
+                </div>
+                <div class="input-group">
+                    <label>${isAr ? 'تأكيد كلمة المرور' : 'Confirm Password'}</label>
+                    <input type="password" id="confirmPassword">
+                </div>
+                <button class="next-btn" onclick="goToTerms()">${isAr ? 'التالي' : 'Next'}</button>
+                <button class="back-btn" onclick="goToRegisterStep3()">${isAr ? 'الرجوع' : 'Back'}</button>
+            </div>
+        `;
+    }
+    else if (currentStep === 'register-terms') {
+        app.innerHTML = `
+            <div class="login-card">
+                <div class="logo">
+                    <div class="logo-content">
+                        <div class="main-letter">TS</div>
+                        <div class="small-text">TECNO SHARK</div>
+                    </div>
+                </div>
+                <h1>${isAr ? 'الشروط والأحكام' : 'Terms & Conditions'}</h1>
+                <p class="subtitle">${isAr ? 'الخطوة الأخيرة' : 'Final Step'}</p>
+                <div class="step-indicator">
+                    <div class="step-dot completed"></div>
+                    <div class="step-dot completed"></div>
+                    <div class="step-dot completed"></div>
+                    <div class="step-dot active"></div>
+                </div>
+                <div class="terms-box">
+                    <h3>📋 ${isAr ? 'شروط استخدام منصة تكنو شرك' : 'Tecno Shark Terms'}</h3>
+                    <p>1. ${isAr ? 'أوافق على معالجة بياناتي الشخصية وفقاً لسياسة الخصوصية.' : 'I agree to the processing of my personal data.'}</p>
+                    <p>2. ${isAr ? 'أتعهد بأن جميع البيانات المدخلة صحيحة ودقيقة.' : 'I certify that all entered data is correct.'}</p>
+                    <p>3. ${isAr ? 'أوافق على استلام الإشعارات عبر البريد الإلكتروني.' : 'I agree to receive email notifications.'}</p>
+                    <p>4. ${isAr ? 'أتحمل المسؤولية الكاملة عن الحفاظ على سرية حسابي.' : 'I am responsible for my account confidentiality.'}</p>
+                    <p>5. ${isAr ? 'أوافق على عدم استخدام المنصة لأغراض غير قانونية.' : 'I agree not to use the platform illegally.'}</p>
+                    <p>6. ${isAr ? 'يحق للمنصة إنهاء الحساب في حال مخالفة الشروط.' : 'Platform may terminate account upon violation.'}</p>
+                </div>
+                <button class="agree-btn" onclick="completeRegistration()">${isAr ? 'أوافق وأنشئ حسابي' : 'Agree & Create Account'}</button>
+                <button class="back-btn" onclick="goToRegisterStep4()">${isAr ? 'الرجوع' : 'Back'}</button>
+            </div>
+        `;
     }
     
-    // ==================== ربط حدث إنشاء الامتحان ====================
-    
-    const examFormElement = document.getElementById('examForm');
-    if (examFormElement) {
-        const oldForm = examFormElement.cloneNode(true);
-        examFormElement.parentNode.replaceChild(oldForm, examFormElement);
-        oldForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await createNewExam();
-        });
+    // إضافة Font Awesome إذا لم يكن موجوداً
+    if (!document.querySelector('link[href*="font-awesome"]')) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';
+        document.head.appendChild(link);
     }
+}
     
     // ==================== بدء التشغيل ====================
-    
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            const snap = await db.ref(`users/${user.uid}`).once('value');
-            if (snap.val()) {
-                currentUser = { uid: user.uid, ...snap.val() };
-            } else {
-                currentUser = {
-                    uid: user.uid,
-                    name: user.displayName || user.email.split('@')[0],
-                    email: user.email,
-                    plan: 'free'
-                };
-                await db.ref(`users/${user.uid}`).set(currentUser);
-                await activateFreePlan(user.uid);
-            }
-        } else {
-            currentUser = null;
-        }
-        
-        updateUserUI();
-        await loadAllData();
-        
-        const urlParams = new URLSearchParams(window.location.search);
-        const examId = urlParams.get('exam');
-        if (examId) {
-            const exam = exams.find(e => e.id === examId);
-            if (exam) setTimeout(() => startExam(examId), 500);
-        }
-    });
-    
-    window.addEventListener('load', () => {
-        if (document.getElementById('questionsContainer')?.children.length === 0) {
-            addQuestion();
-        }
-    });
-    
-    document.getElementById('overlayBg')?.addEventListener('click', closeSidebar);
-    
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.user-avatar') && !e.target.closest('#userDropdown')) {
-            const dropdown = document.getElementById('userDropdown');
-            if (dropdown) dropdown.classList.add('hidden');
-        }
-    });
-    
-   function toggleUserDropdown() {
-    const dropdown = document.getElementById('userDropdown');
-    if (dropdown) {
-        dropdown.classList.toggle('hidden');
-    }
-}
-    function closeUserDropdown() {
-    const dropdown = document.getElementById('userDropdown');
-    if (dropdown) {
-        dropdown.classList.add('hidden');
-    }
-}
-// تفعيل وضع الامتحان (إخفاء كل شيء)
-function enableExamMode() {
-    document.body.classList.add('exam-mode');
-    
-    // إخفاء شريط التمرير
-    document.body.style.overflow = 'hidden';
-    
-    // إخفاء أي عناصر منبثقة
-    const overlays = document.querySelectorAll('.popup.show');
-    overlays.forEach(overlay => overlay.classList.remove('show'));
-}
-
-// إلغاء وضع الامتحان (إظهار كل شيء)
-function disableExamMode() {
-    document.body.classList.remove('exam-mode');
-    document.body.style.overflow = '';
-}
-
-// فتح الامتحان في وضع منفصل
-function showStudentExam(exam) {
-    // تفعيل وضع الامتحان أولاً
-    enableExamMode();
-    
-    document.getElementById('studentExamContainer').classList.remove('hidden-page');
-    const container = document.getElementById('studentExamContent');
-    container.innerHTML = `
-        <div class="text-center p-8">
-            <i class="fas fa-user-graduate text-6xl text-indigo-600 mb-4"></i>
-            <h2 class="text-2xl font-bold mb-2">${exam.title}</h2>
-            <p class="text-indigo-600 mb-4">📚 ${exam.className || 'بدون صف'}</p>
-            <p class="text-gray-600 mb-6">الرجاء إدخال بياناتك لبدء الامتحان</p>
-            <input type="text" id="studentName" placeholder="الاسم الكامل" class="w-full max-w-md p-3 border rounded-lg mb-3 mx-auto">
-            <input type="text" id="studentNumber" placeholder="كود الطالب" class="w-full max-w-md p-3 border rounded-lg mb-6 mx-auto">
-            <button onclick="renderExam('${exam.id}')" class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition">
-                بدء الامتحان
-            </button>
-        </div>
-    `;
-}
-
-// إغلاق الامتحان (لا يعود للموقع الرئيسي)
-function closeStudentExam() {
-    // إخفاء الامتحان
-    document.getElementById('studentExamContainer').classList.add('hidden-page');
-    
-    // إلغاء وضع الامتحان
-    disableExamMode();
-    
-    // تنظيف الـ sessionStorage
-    sessionStorage.clear();
-    
-    // إزالة الـ hash من الرابط
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('exam')) {
-        const newUrl = window.location.pathname;
-        window.history.pushState({}, '', newUrl);
-    }
-    
-    // لا ننتقل إلى أي صفحة، نبقى في الصفحة الرئيسية
-}
-// تسجيل عدد زوار الموقع
-function trackVisitor() {
-    const visitorsRef = db.ref('visitors');
-    visitorsRef.transaction(currentCount => {
-        return (currentCount || 0) + 1;
-    });
-    
-    // تسجيل الزوار الفريدين باستخدام sessionStorage
-    if (!sessionStorage.getItem('visited')) {
-        const uniqueVisitorsRef = db.ref('uniqueVisitors');
-        uniqueVisitorsRef.transaction(currentCount => {
-            return (currentCount || 0) + 1;
-        });
-        sessionStorage.setItem('visited', 'true');
-    }
-}
-
-// استدعاء الدالة عند تحميل الصفحة
-trackVisitor();
-// عرض رسالة بعد الإرسال (بدون العودة للموقع)
-function showSubmissionMessage(message, isSuccess = true) {
-    const container = document.getElementById('studentExamContent');
-    container.innerHTML = `
-        <div class="text-center p-8">
-            <i class="fas ${isSuccess ? 'fa-check-circle text-green-500' : 'fa-times-circle text-red-500'} text-6xl mb-4"></i>
-            <h2 class="text-2xl font-bold mb-4">${isSuccess ? '✅ تم الإرسال بنجاح' : '❌ حدث خطأ'}</h2>
-            <p class="text-gray-600 mb-6">${message}</p>
-            <button onclick="closeStudentExam()" class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition">
-                إغلاق
-            </button>
-        </div>
-    `;
-}
-    document.getElementById('userAvatar')?.addEventListener('click', toggleUserDropdown);
-    
+    getReturnUrl();
+    render();
 </script>
 </body>
 </html>
