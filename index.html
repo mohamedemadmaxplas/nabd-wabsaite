@@ -16,6 +16,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
     
     <style>
         * {
@@ -965,7 +967,8 @@ body.exam-mode {
     const db = firebase.database();
     
     // ==================== المتغيرات العامة ====================
-    
+    // منع تهيئة Google عدة مرات
+window.googleInitialized = false;
     let currentUser = null;
     let exams = [];
     let results = [];
@@ -1267,7 +1270,9 @@ function refreshAccountPage() {
             </div>
         `;
         
-        if (typeof google !== 'undefined') {
+        // ✅ منع التهيئة المتكررة لـ Google Sign-In
+        if (typeof google !== 'undefined' && !window.googleInitialized) {
+            window.googleInitialized = true;
             google.accounts.id.initialize({
                 client_id: "501314955450-r7tcdfbocl0vpa6f9s0clac43215tmuf.apps.googleusercontent.com",
                 callback: handleGoogleLogin
