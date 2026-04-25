@@ -2380,36 +2380,47 @@ function resetToNormalMode() {
     }
     
     async function loadAdminData() {
+    try {
+        const usersSnap = await db.ref('users').once('value');
+        allUsers = usersSnap.val() ? Object.entries(usersSnap.val()).map(([id, d]) => ({ id, ...d })) : [];
+        
+        // محاولة تحميل الأرباح مع معالجة الخطأ
         try {
-            const usersSnap = await db.ref('users').once('value');
-            allUsers = usersSnap.val() ? Object.entries(usersSnap.val()).map(([id, d]) => ({ id, ...d })) : [];
-            
             const profitsSnap = await db.ref('profits').once('value');
             profits = profitsSnap.val() ? Object.values(profitsSnap.val()) : [];
-            
+        } catch (profitError) {
+            console.log('لا توجد صلاحية لقراءة الأرباح');
+            profits = [];
+        }
+        
+        try {
             const subsSnap = await db.ref('subscriptions').once('value');
             subscriptions = subsSnap.val() ? Object.values(subsSnap.val()) : [];
-            
-            let visitors = parseInt(localStorage.getItem('visitors') || '0');
-            if (!sessionStorage.getItem('visited')) {
-                visitors++;
-                localStorage.setItem('visitors', visitors);
-                sessionStorage.setItem('visited', 'true');
-            }
-            
-            renderUsersTable();
-            renderAdminPlans();
-            renderSubscriptionsList();
-            
-            const reportsTab = document.getElementById('adminReportsTab');
-            if (reportsTab && reportsTab.style.display !== 'none') {
-                renderAdminReports(visitors);
-            }
-        } catch (error) {
-            console.error('خطأ في تحميل بيانات الإدارة:', error);
-            showToast('حدث خطأ في تحميل البيانات');
+        } catch (subError) {
+            console.log('لا توجد صلاحية لقراءة الاشتراكات');
+            subscriptions = [];
         }
+        
+        let visitors = parseInt(localStorage.getItem('visitors') || '0');
+        if (!sessionStorage.getItem('visited')) {
+            visitors++;
+            localStorage.setItem('visitors', visitors);
+            sessionStorage.setItem('visited', 'true');
+        }
+        
+        renderUsersTable();
+        renderAdminPlans();
+        renderSubscriptionsList();
+        
+        const reportsTab = document.getElementById('adminReportsTab');
+        if (reportsTab && reportsTab.style.display !== 'none') {
+            renderAdminReports(visitors);
+        }
+    } catch (error) {
+        console.error('خطأ في تحميل بيانات الإدارة:', error);
+        showToast('حدث خطأ في تحميل البيانات');
     }
+}
     
     function renderUsersTable() {
         const container = document.getElementById('usersTable');
